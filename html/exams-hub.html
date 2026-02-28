@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exams Hub | Gov Learn - Detailed Preparation</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 24px 0;
+            font-size: 0.95rem;
+            color: var(--text-muted);
+        }
+
+        .breadcrumb a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .exam-tabs {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+            border-bottom: 2px solid var(--primary-light);
+            padding-bottom: 20px;
+        }
+
+        .exam-tab {
+            padding: 12px 24px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-muted);
+            border-radius: 12px;
+            transition: all 0.3s;
+            font-size: 0.95rem;
+        }
+
+        .exam-tab.active {
+            background: var(--primary-light);
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .exam-tab:hover {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .exam-content {
+            animation: fadeIn 0.4s;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .info-card {
+            background: white;
+            padding: 32px;
+            border-radius: 20px;
+            border-left: 5px solid var(--primary);
+            box-shadow: var(--shadow-soft);
+            transition: all 0.3s;
+        }
+
+        .info-card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-4px);
+        }
+
+        .info-card h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--secondary);
+        }
+
+        .info-card p {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+
+        .timeline {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: var(--shadow-soft);
+            margin-bottom: 40px;
+        }
+
+        .timeline-item {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 32px;
+            padding-bottom: 32px;
+            border-bottom: 1px solid var(--primary-light);
+        }
+
+        .timeline-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .timeline-date {
+            flex-shrink: 0;
+            width: 120px;
+            background: var(--primary-light);
+            padding: 12px;
+            border-radius: 12px;
+            text-align: center;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .timeline-content h4 {
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--secondary);
+        }
+
+        .timeline-content p {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+        }
+
+        .syllabus-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: var(--shadow-soft);
+            margin-bottom: 40px;
+        }
+
+        .syllabus-table thead {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .syllabus-table th {
+            padding: 16px;
+            text-align: left;
+            font-weight: 700;
+            border-bottom: 2px solid var(--primary);
+        }
+
+        .syllabus-table td {
+            padding: 16px;
+            border-bottom: 1px solid var(--primary-light);
+            color: var(--text-muted);
+        }
+
+        .syllabus-table tr:hover {
+            background: var(--primary-light);
+        }
+
+        .cta-section {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            padding: 60px 40px;
+            border-radius: 24px;
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .cta-section h2 {
+            font-size: 2rem;
+            margin-bottom: 16px;
+        }
+
+        .cta-section p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 32px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .exam-selector-header {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 40px;
+        }
+
+        .exam-btn {
+            padding: 12px 24px;
+            background: white;
+            color: var(--text-muted);
+            border: 2px solid var(--primary-light);
+            border-radius: 16px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .exam-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .exam-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        @media (max-width: 900px) {
+            .exam-tabs {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .exam-tab {
+                width: 100%;
+                text-align: left;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <div class="container nav-content">
+            <a href="index.html" class="logo">Gov<span>Learn</span></a>
+            <button type="button" class="mobile-menu-toggle" onclick="toggleNav()">
+                <span></span><span></span><span></span>
+            </button>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="exams-hub.html" class="active">Exams Hub</a></li>
+                <li><a href="mock-tests.html">Mock Tests</a></li>
+                <li><a href="materials.html">Materials</a></li>
+                <li><a href="current-affairs.html">Current Affairs</a></li>
+                <li><a href="videos.html">Videos</a></li>
+                <li id="login-nav-item"><button type="button" class="btn-primary login-toggle-btn"
+                        onclick="toggleModal('login-modal')">Login</button></li>
+            </ul>
+        </div>
+    </nav>
+
+    <header class="hero" style="padding: 100px 0 60px;">
+        <div class="container">
+            <div class="breadcrumb">
+                <a href="index.html">Home</a>
+                <span>›</span>
+                <span>Exams Hub</span>
+            </div>
+            <h1 class="hero-title fade-in">Exams Hub</h1>
+            <p class="fade-in">Complete preparation modules for all major government exams</p>
+        </div>
+    </header>
+
+    <div class="container" style="padding: 60px 24px;">
+        <!-- Exam Selection Buttons -->
+        <div class="exam-selector-header" id="exam-selector">
+            <button class="exam-btn active" onclick="switchExam('TNPSC')">TNPSC</button>
+            <button class="exam-btn" onclick="switchExam('RRB')">RRB</button>
+            <button class="exam-btn" onclick="switchExam('SSC')">SSC</button>
+            <button class="exam-btn" onclick="switchExam('TNUSRB')">TNUSRB</button>
+            <button class="exam-btn" onclick="switchExam('TRB')">TRB</button>
+            <button class="exam-btn" onclick="switchExam('TET')">TET</button>
+            <button class="exam-btn" onclick="switchExam('BANK')">BANK</button>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="exam-tabs" id="exam-tabs">
+            <button class="exam-tab active" onclick="switchTab('notifications', event)">Latest Notifications</button>
+            <button class="exam-tab" onclick="switchTab('eligibility', event)">Eligibility</button>
+            <button class="exam-tab" onclick="switchTab('syllabus', event)">Syllabus</button>
+            <button class="exam-tab" onclick="switchTab('dates', event)">Important Dates</button>
+            <button class="exam-tab" onclick="switchTab('cutoff', event)">Previous Cutoff</button>
+        </div>
+
+        <!-- Exam Content -->
+        <div class="exam-content" id="exam-content">
+            <!-- This will be populated dynamically -->
+        </div>
+    </div>
+
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <div class="footer-logo">Gov<span>Learn</span></div>
+                    <p class="footer-tagline">Empowering aspirants to achieve their dreams of a government career
+                        through quality education.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Learning</h4>
+                    <ul>
+                        <li><a href="exams-hub.html">Exams Hub</a></li>
+                        <li><a href="mock-tests.html">Mock Tests</a></li>
+                        <li><a href="materials.html">Study Notes</a></li>
+                        <li><a href="videos.html">Video Lessons</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li><a href="current-affairs.html">Current Affairs</a></li>
+                        <li><a href="materials.html">Syllabus</a></li>
+                        <li><a href="#">Previous Year Papers</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Connect</h4>
+                    <div class="social-links">
+                        <a href="#" class="social-icon">FB</a>
+                        <a href="#" class="social-icon">TW</a>
+                        <a href="#" class="social-icon">IG</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Gov Learn. Premium Education.</p>
+                <div class="footer-bottom-links">
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Service</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Login Modal -->
+    <div id="login-modal" class="modal-overlay">
+        <div class="modal">
+            <button type="button" class="modal-close" onclick="toggleModal('login-modal')">&times;</button>
+            <h2 style="margin-bottom: 10px;">Welcome Back</h2>
+            <form id="login-form">
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="login-email" placeholder="name@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="login-password" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn-primary" style="width: 100%; margin-top: 10px;">Sign In</button>
+            </form>
+            <div class="social-divider">or</div>
+            <button type="button" class="google-btn">Sign in with Google</button>
+            <p style="margin-top: 24px; text-align: center; font-size: 0.9rem;">
+                Don't have an account? <a href="#" style="color: var(--primary-green); font-weight: 600;"
+                    onclick="toggleModal('login-modal'); toggleModal('signup-modal')">Sign Up</a>
+            </p>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="../js/firebase-config.js"></script>
+    <script src="../js/main.js"></script>
+
+    <script>
+        // Comprehensive Exam Data
+        const examData = {
+            TNPSC: {
+                fullName: "Tamil Nadu Public Service Commission",
+                description: "Comprehensive TNPSC preparation with latest notifications, eligibility criteria, and expert guidance",
+                notifications: [
+                    { title: "TNPSC Group 2 Hall Tickets Released", date: "Feb 24, 2026", status: "Important" },
+                    { title: "Answer Key Challenge Period Closed", date: "Feb 20, 2026", status: "Update" },
+                    { title: "Group 4 Results Announced", date: "Feb 15, 2026", status: "Alert" }
+                ],
+                eligibility: [
+                    "Indian National or OCI Card holder",
+                    "Age: 21-32 years (Age relaxation for SC/ST/OBC as per rules)",
+                    "Educational Qualification: 12th Pass or equivalent",
+                    "Physical Standard: Height 157 cm (Both Male & Female)"
+                ],
+                dates: [
+                    { event: "Group 2 Notification Released", date: "Jan 10, 2026" },
+                    { event: "Application Last Date", date: "Mar 30, 2026" },
+                    { event: "Admit Card Release", date: "May 15, 2026" },
+                    { event: "Exam Date", date: "Jun 14, 2026" },
+                    { event: "Results Declaration", date: "Aug 25, 2026" }
+                ],
+                syllabus: [
+                    { subject: "Tamil", marks: 300, topics: "Grammar, Comprehension, Literature" },
+                    { subject: "English", marks: 300, topics: "Grammar, Comprehension, Essay" },
+                    { subject: "History", marks: 150, topics: "Indian & World History" },
+                    { subject: "Geography", marks: 150, topics: "Indian & World Geography" },
+                    { subject: "Civics", marks: 100, topics: "Constitution, Polity" },
+                    { subject: "Current Affairs", marks: 100, topics: "National & International News" }
+                ],
+                cutoff: {
+                    "General": "1125 marks",
+                    "OBC": "1050 marks",
+                    "SC": "890 marks",
+                    "ST": "850 marks"
+                }
+            },
+            RRB: {
+                fullName: "Railway Recruitment Board",
+                description: "Complete RRB NTPC and Group C/D preparation with mock tests and previous papers",
+                notifications: [
+                    { title: "RRB NTPC CBT 1 Schedule Announced", date: "Feb 23, 2026", status: "Important" },
+                    { title: "Admit Cards Available for Download", date: "Feb 18, 2026", status: "Update" },
+                    { title: "Application Window Extended", date: "Feb 10, 2026", status: "Alert" }
+                ],
+                eligibility: [
+                    "Indian Citizen or OCI/PIO Card holder",
+                    "Age: 18-33 years for NTPC, 18-30 years for other posts",
+                    "Educational Qualification: 10th/12th Pass for Group D/C",
+                    "Must be physically fit as per railway standards"
+                ],
+                dates: [
+                    { event: "Notification Released", date: "Dec 15, 2025" },
+                    { event: "Online Application Opening", date: "Dec 20, 2025" },
+                    { event: "Application Closing", date: "Jan 20, 2026" },
+                    { event: "CBT 1 Exam", date: "Mar 10 - Apr 15, 2026" },
+                    { event: "CBT 2 Exam", date: "May 2026" }
+                ],
+                syllabus: [
+                    { subject: "Mathematics", marks: 600, topics: "Arithmetic, Geometry, Algebra" },
+                    { subject: "General Awareness", marks: 600, topics: "GK, Current Affairs" },
+                    { subject: "Reasoning", marks: 600, topics: "Logic, Puzzles, Series" }
+                ],
+                cutoff: {
+                    "General": "1300 marks",
+                    "OBC": "1200 marks",
+                    "SC": "1000 marks",
+                    "ST": "950 marks"
+                }
+            },
+            SSC: {
+                fullName: "Staff Selection Commission",
+                description: "SSC CGL, CHSL, and other exams complete preparation guide",
+                notifications: [
+                    { title: "SSC CGL 2025 Tier 1 Result Released", date: "Feb 25, 2026", status: "Important" },
+                    { title: "SSC CHSL Hall Tickets Available", date: "Feb 22, 2026", status: "Update" },
+                    { title: "SSC Stenographer Admit Card Out", date: "Feb 20, 2026", status: "Alert" }
+                ],
+                eligibility: [
+                    "Indian Citizen or OCI Card holder",
+                    "Age: 18-32 years (Upper age limit varies by post)",
+                    "Educational Qualification: 12th Pass for CGL, CHSL",
+                    "No Upper Age Limit for certain reserved categories"
+                ],
+                dates: [
+                    { event: "CGL 2026 Notification", date: "Jul 1, 2026" },
+                    { event: "Online Application", date: "Jul 15 - Aug 15, 2026" },
+                    { event: "Tier 1 Exam", date: "Dec 2026" },
+                    { event: "Tier 2 Exam", date: "Jan 2027" },
+                    { event: "Documents Verification", date: "Mar 2027" }
+                ],
+                syllabus: [
+                    { subject: "Reasoning", marks: 200, topics: "Logic, Coding-Decoding" },
+                    { subject: "Quantitative Aptitude", marks: 200, topics: "Arithmetic, Geometry" },
+                    { subject: "English", marks: 200, topics: "Vocabulary, Grammar" },
+                    { subject: "General Awareness", marks: 200, topics: "GK, Current Affairs" }
+                ],
+                cutoff: {
+                    "General": "652 marks",
+                    "OBC": "610 marks",
+                    "SC": "575 marks",
+                    "ST": "570 marks"
+                }
+            },
+            TNUSRB: {
+                fullName: "Tamil Nadu Uniformed Services Recruitment Board",
+                description: "Police and fire service recruitment with physical tests guidance",
+                notifications: [
+                    { title: "Police Constable Notification Out", date: "Feb 24, 2026", status: "Important" },
+                    { title: "Physical Test Schedule Released", date: "Feb 20, 2026", status: "Update" },
+                    { title: "Online Application Begins", date: "Ongoing", status: "Alert" }
+                ],
+                eligibility: [
+                    "Indian Citizen",
+                    "Age: 20-28 years for Police Constable",
+                    "Educational Qualification: HSC (10+2)",
+                    "Physical Standards: Height 168 cm (Male), 163 cm (Female)",
+                    "No criminal record"
+                ],
+                dates: [
+                    { event: "Online Application Opening", date: "Mar 1, 2026" },
+                    { event: "Application Closing", date: "Apr 15, 2026" },
+                    { event: "Written Test", date: "May 24, 2026" },
+                    { event: "Physical Test", date: "Jun 2026" },
+                    { event: "Interview", date: "Jul - Aug 2026" }
+                ],
+                syllabus: [
+                    { subject: "Reasoning", marks: 100, topics: "Logic, Pattern" },
+                    { subject: "Quantitative Aptitude", marks: 100, topics: "Arithmetic" },
+                    { subject: "Tamil", marks: 100, topics: "Grammar, Comprehension" },
+                    { subject: "English", marks: 100, topics: "Grammar, Vocabulary" },
+                    { subject: "General Awareness", marks: 100, topics: "GK, Current Affairs" }
+                ],
+                cutoff: {
+                    "General": "280 marks",
+                    "OBC": "270 marks",
+                    "SC": "250 marks",
+                    "ST": "240 marks"
+                }
+            },
+            TRB: {
+                fullName: "Tamil Nadu Teachers Recruitment Board",
+                description: "Teaching position preparation for schools and colleges",
+                notifications: [
+                    { title: "TRB PG Teacher Notification Released", date: "Feb 23, 2026", status: "Important" },
+                    { title: "Application Process Started", date: "Feb 20, 2026", status: "Update" },
+                    { title: "Previous Year Results Out", date: "Feb 15, 2026", status: "Alert" }
+                ],
+                eligibility: [
+                    "Indian Citizen",
+                    "Age: 21-40 years (Age relaxation for SC/ST/OBC)",
+                    "B.A./B.Sc./B.Com. with Teaching Qualification",
+                    "Must have passed NET/SLET or equivalent"
+                ],
+                dates: [
+                    { event: "Notification Released", date: "Feb 20, 2026" },
+                    { event: "Online Application", date: "Mar 1 - Mar 31, 2026" },
+                    { event: "Hall Tickets Release", date: "May 1, 2026" },
+                    { event: "Written Exam", date: "May 30, 2026" },
+                    { event: "Interview", date: "Jul 2026" }
+                ],
+                syllabus: [
+                    { subject: "Subject Matter Expertise", marks: 200, topics: "Subject Specific" },
+                    { subject: "Pedagogy", marks: 100, topics: "Teaching Methods" },
+                    { subject: "General Knowledge", marks: 50, topics: "Current Affairs" }
+                ],
+                cutoff: {
+                    "General": "250 marks",
+                    "OBC": "240 marks",
+                    "SC": "220 marks",
+                    "ST": "210 marks"
+                }
+            },
+            TET: {
+                fullName: "Teacher Eligibility Test",
+                description: "Primary and Upper Primary teaching eligibility certification",
+                notifications: [
+                    { title: "TET 2026 Notification Awaited", date: "Expected Mar 2026", status: "Important" },
+                    { title: "Previous Year Answer Keys Available", date: "Feb 18, 2025", status: "Update" },
+                    { title: "Certificate Issue Updates", date: "Feb 12, 2025", status: "Alert" }
+                ],
+                eligibility: [
+                    "Indian Citizen",
+                    "12th Pass for Primary TET",
+                    "Graduation for Upper Primary TET",
+                    "B.Ed. or equivalent teaching qualification required",
+                    "Age: No age limit"
+                ],
+                dates: [
+                    { event: "Notification Expected", date: "Mar 1, 2026" },
+                    { event: "Online Application", date: "Mar 15 - Apr 30, 2026" },
+                    { event: "Admit Card Release", date: "May 2026" },
+                    { event: "Exam Date", date: "Jun 2, 2026" },
+                    { event: "Results", date: "Jul 2026" }
+                ],
+                syllabus: [
+                    { subject: "Child Development", marks: 30, topics: "Development Theories" },
+                    { subject: "Language I", marks: 30, topics: "English/Tamil" },
+                    { subject: "Mathematics/Language II", marks: 30, topics: "Maths/Subject" },
+                    { subject: "Environmental/Social Studies", marks: 30, topics: "EVS/Social" },
+                    { subject: "Pedagogy", marks: 30, topics: "Teaching Methods" }
+                ],
+                cutoff: {
+                    "General": "90 marks",
+                    "OBC": "82 marks",
+                    "SC": "75 marks",
+                    "ST": "72 marks"
+                }
+            },
+            BANK: {
+                fullName: "Banking Exams (SBI, IBPS, RBI)",
+                description: "SBI, IBPS, RBI and other banking sector recruitment",
+                notifications: [
+                    { title: "SBI PO 2026 Notification Out", date: "Feb 24, 2026", status: "Important" },
+                    { title: "IBPS Clerk Results Declared", date: "Feb 20, 2026", status: "Update" },
+                    { title: "RBI Assistant Hall Tickets Released", date: "Feb 18, 2026", status: "Alert" }
+                ],
+                eligibility: [
+                    "Indian Citizen or OCI Card holder",
+                    "Age: 20-30 years for PO, 18-28 years for Clerk",
+                    "Educational Qualification: Graduation for PO, 12th for Clerk",
+                    "Post-Graduation for Specialist Officer roles"
+                ],
+                dates: [
+                    { event: "Application Opening", date: "Mar 1, 2026" },
+                    { event: "Application Closing", date: "Mar 31, 2026" },
+                    { event: "Prelims Exam", date: "Apr 15 - May 10, 2026" },
+                    { event: "Mains Exam", date: "Jun 14, 2026" },
+                    { event: "Interview", date: "Jul - Aug 2026" }
+                ],
+                syllabus: [
+                    { subject: "Reasoning Ability", marks: 100, topics: "Logic, Seating" },
+                    { subject: "Quantitative Aptitude", marks: 100, topics: "Arithmetic, DI" },
+                    { subject: "English Language", marks: 100, topics: "Reading, Grammar" },
+                    { subject: "General Awareness", marks: 100, topics: "Banking, GK" }
+                ],
+                cutoff: {
+                    "General": "305 marks",
+                    "OBC": "290 marks",
+                    "SC": "270 marks",
+                    "ST": "260 marks"
+                }
+            }
+        };
+
+        let currentExam = 'TNPSC';
+        let currentTab = 'notifications';
+
+        function switchExam(exam) {
+            currentExam = exam;
+
+            // Update active button
+            document.querySelectorAll('.exam-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Render content for first tab
+            renderExamContent(exam, 'notifications');
+        }
+
+        function switchTab(tab, evt) {
+            currentTab = tab;
+
+            // Update active tab
+            document.querySelectorAll('.exam-tab').forEach(t => t.classList.remove('active'));
+            evt.target.classList.add('active');
+
+            // Render content
+            renderExamContent(currentExam, tab);
+        }
+
+        function renderExamContent(exam, tab) {
+            const data = examData[exam];
+            const contentDiv = document.getElementById('exam-content');
+            let html = `<h2 style="font-size: 2rem; color: var(--secondary); margin-bottom: 32px; font-weight: 800;">${data.fullName}</h2>`;
+
+            if (tab === 'notifications') {
+                html += '<div class="info-grid">';
+                data.notifications.forEach(notif => {
+                    html += `<div class="info-card"><h3>${notif.title}</h3><p style="font-size: 0.9rem; color: var(--primary); font-weight: 600;">${notif.date}</p></div>`;
+                });
+                html += '</div>';
+            } else if (tab === 'eligibility') {
+                html += '<div class="info-card" style="border-left: 5px solid var(--primary);"><ul style="list-style: none; padding: 0;">';
+                data.eligibility.forEach(item => {
+                    html += `<li style="padding: 12px 0; display: flex; align-items: flex-start; gap: 12px;"><span style="color: var(--primary); font-weight: 700; flex-shrink: 0;">•</span><span>${item}</span></li>`;
+                });
+                html += '</ul></div>';
+            } else if (tab === 'dates') {
+                html += '<div class="timeline">';
+                data.dates.forEach(item => {
+                    html += `<div class="timeline-item"><div class="timeline-date">${item.date}</div><div class="timeline-content"><h4>${item.event}</h4></div></div>`;
+                });
+                html += '</div>';
+            } else if (tab === 'syllabus') {
+                html += '<table class="syllabus-table"><thead><tr><th>Subject</th><th>Marks</th><th>Topics</th></tr></thead><tbody>';
+                data.syllabus.forEach(item => {
+                    html += `<tr><td style="font-weight: 600;">${item.subject}</td><td>${item.marks}</td><td>${item.topics}</td></tr>`;
+                });
+                html += '</tbody></table>';
+            } else if (tab === 'cutoff') {
+                html += '<div class="info-grid">';
+                Object.entries(data.cutoff).forEach(([category, marks]) => {
+                    html += `<div class="info-card"><h3>${category} Category</h3><p style="font-size: 1.8rem; color: var(--primary); font-weight: 800; margin: 12px 0;">${marks}</p><p style="font-size: 0.9rem;">Previous Year Cut-off</p></div>`;
+                });
+                html += '</div>';
+            }
+
+            html += `<div class="cta-section" style="margin-top: 40px;"><h2>Ready to Start Preparation?</h2><p>Download syllabus PDF, access free mock tests, and get expert-guided study materials</p><div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;"><a href="mock-tests.html?exam=${exam}" class="btn-primary" style="background: white; color: var(--secondary);">Take Free Mock Test</a><a href="materials.html?exam=${exam}" class="btn-primary" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3);">Download Materials</a></div></div>`;
+
+            contentDiv.innerHTML = html;
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const exam = urlParams.get('cat') || 'TNPSC';
+            currentExam = exam;
+            renderExamContent(exam, 'notifications');
+
+            // Set active exam button
+            document.querySelectorAll('.exam-btn').forEach(btn => {
+                if (btn.textContent.trim() === exam) {
+                    btn.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

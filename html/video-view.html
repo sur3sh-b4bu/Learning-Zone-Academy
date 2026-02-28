@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Lesson | Gov Learn - Immersive Education</title>
+    <meta name="description"
+        content="Watch expert video lessons and master your subjects with Gov Learn's immersive video platform.">
+    <link rel="stylesheet" href="../css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            background: #f1f5f9;
+        }
+
+        .video-main-layout {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 32px;
+            margin-top: 100px;
+            padding-bottom: 60px;
+        }
+
+        .video-player-section {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .cinema-player {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: #000;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cinema-player:hover .video-controls {
+            opacity: 1;
+        }
+
+        .video-controls {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 30px;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            color: white;
+        }
+
+        .play-pause {
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .seek-bar {
+            flex: 1;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 2px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .seek-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 45%;
+            background: var(--primary-green);
+            border-radius: 2px;
+        }
+
+        .video-meta {
+            background: white;
+            padding: 32px;
+            border-radius: 24px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .course-sidebar {
+            background: white;
+            border-radius: 24px;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            height: fit-content;
+            position: sticky;
+            top: 100px;
+            overflow: hidden;
+        }
+
+        .sidebar-header {
+            padding: 24px;
+            background: var(--primary-dark);
+            color: white;
+        }
+
+        .lesson-list {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .lesson-card {
+            padding: 20px 24px;
+            border-bottom: 1px solid #f1f5f9;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            gap: 16px;
+        }
+
+        .lesson-card:hover {
+            background: #f8fafc;
+        }
+
+        .lesson-card.active {
+            background: var(--primary-light);
+            border-left: 4px solid var(--primary-green);
+        }
+
+        .lesson-thumb {
+            width: 80px;
+            aspect-ratio: 16/9;
+            background: #cbd5e1;
+            border-radius: 8px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+        }
+
+        .lesson-details h4 {
+            font-size: 0.95rem;
+            margin-bottom: 4px;
+            color: var(--primary-dark);
+            line-height: 1.4;
+        }
+
+        .lesson-details span {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 24px;
+            margin-top: 24px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .tab {
+            padding: 12px 0;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            position: relative;
+        }
+
+        .tab.active {
+            color: var(--primary-green);
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--primary-green);
+        }
+
+        @media (max-width: 1200px) {
+            .video-main-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .course-sidebar {
+                position: static;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <div class="container nav-content">
+            <a href="index.html" class="logo">Gov<span>Learn</span></a>
+            <button type="button" class="mobile-menu-toggle" onclick="toggleNav()">
+                <span></span><span></span><span></span>
+            </button>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="exams-hub.html">Exams Hub</a></li>
+                <li><a href="mock-tests.html">Mock Tests</a></li>
+                <li><a href="materials.html">Materials</a></li>
+                <li><a href="current-affairs.html">Current Affairs</a></li>
+                <li><a href="videos.html" class="active">Videos</a></li>
+                <li id="login-nav-item"><button type="button" class="btn-primary login-toggle-btn"
+                        onclick="toggleModal('login-modal')">Login</button></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="video-main-layout">
+            <div class="video-player-section fade-in">
+                <div class="cinema-player" id="cinema-player">
+                    <div style="text-align: center; color: rgba(255,255,255,0.5);">
+                        <div style="font-size: 3rem; margin-bottom: 16px; color: rgba(255,255,255,0.7);">PLAY</div>
+                        <p>Select a lesson from the course content to start watching...</p>
+                    </div>
+                </div>
+
+                <div class="video-meta">
+                    <h1 id="v-title" style="font-size: 1.8rem; color: var(--primary-dark);">Loading Course...</h1>
+                    <div class="tabs">
+                        <div class="tab active" onclick="switchTab(event, 'overview')">Overview</div>
+                        <div class="tab" onclick="switchTab(event, 'resources')">Resources</div>
+                        <div class="tab" onclick="switchTab(event, 'notes')">Lesson Notes</div>
+                        <div class="tab" onclick="switchTab(event, 'qa')">Q&A</div>
+                    </div>
+
+                    <div id="tab-content-overview" class="tab-pane active"
+                        style="padding: 24px 0; line-height: 1.6; color: #475569;">
+                        <p id="v-desc">Loading description...</p>
+                    </div>
+
+                    <div id="tab-content-resources" class="tab-pane" style="padding: 24px 0; display: none;">
+                        <h4 style="margin-bottom: 12px; color: var(--primary-dark);">Course Syllabus</h4>
+                        <div id="course-syllabus-container">
+                            <p style="color: var(--text-muted); font-size: 0.9rem;">No syllabus available.</p>
+                        </div>
+
+                        <h4 style="margin-top: 24px; margin-bottom: 12px; color: var(--primary-dark);">Current Lesson
+                            Resources</h4>
+                        <div id="lesson-resource-container">
+                            <p style="color: var(--text-muted); font-size: 0.9rem;">Select a lesson with resources
+                                attached.</p>
+                        </div>
+                    </div>
+
+                    <div id="tab-content-notes" class="tab-pane" style="padding: 24px 0; display: none;">
+                        <div id="lesson-notes-container"
+                            style="background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; color: #475569; line-height: 1.6;">
+                            <p style="color: var(--text-muted); font-style: italic;">Select a lesson to view its notes.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div id="tab-content-qa" class="tab-pane" style="padding: 24px 0; display: none;">
+                        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px;">
+                            <h4 style="margin-bottom: 16px; color: var(--primary-dark);">Ask a Question</h4>
+                            <textarea placeholder="Type your doubt here..."
+                                style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; margin-bottom: 12px; height: 80px;"></textarea>
+                            <button class="btn-primary" style="padding: 8px 16px;">Post Question</button>
+
+                            <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;">
+
+                            <div style="display: flex; gap: 12px; margin-bottom: 16px;">
+                                <div
+                                    style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary-light); color: var(--primary-green); display: flex; align-items: center; justify-content: center; font-weight: bold;">
+                                    AK</div>
+                                <div>
+                                    <p
+                                        style="font-weight: 600; font-size: 0.9rem; color: var(--primary-dark); margin-bottom: 4px;">
+                                        Ashok Kumar <span
+                                            style="font-weight: 400; color: var(--text-muted); font-size: 0.8rem; margin-left: 8px;">2
+                                            hours ago</span></p>
+                                    <p style="font-size: 0.9rem; color: #475569;">Can someone explain the shortcut used
+                                        at 12:45?</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="course-sidebar fade-in">
+                <div class="sidebar-header">
+                    <h3 style="font-size: 1.1rem; margin-bottom: 4px;">Course Content</h3>
+                    <p id="lesson-count" style="font-size: 0.85rem; opacity: 0.8;">Loading lessons...</p>
+                </div>
+                <div class="lesson-list" id="lesson-list-container">
+                    <!-- Lessons injected here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+    <script src="../js/firebase-config.js"></script>
+    <script src="../js/main.js"></script>
+    <script>
+        // Access Gate
+        auth.onAuthStateChanged(async (user) => {
+            if (!user) {
+                alert("Please login to watch videos!");
+                window.location.href = 'index.html';
+                return;
+            }
+
+            try {
+                const userDoc = await db.collection('students').doc(user.uid).get();
+                if (userDoc.exists) {
+                    const userData = userDoc.data();
+                    if (userData.plan !== 'pro' && userData.plan !== 'ultimate' && user.email !== ADMIN_EMAIL) {
+                        alert("Upgrade required!\n\nVideo lessons are only available for PRO or ULTIMATE plan members. Please upgrade to start watching.");
+                        window.location.href = 'index.html#pricing';
+                    }
+                }
+            } catch (e) {
+                console.error("Access verification failed:", e);
+            }
+        });
+
+        async function loadCourseData() {
+            const params = new URLSearchParams(window.location.search);
+            const courseId = params.get('course');
+            if (!courseId) {
+                document.getElementById('v-title').textContent = "Course not found.";
+                document.getElementById('lesson-list-container').innerHTML = "<div style='padding:20px; text-align:center;'>Invalid URL parameter. Please go back to the Videos page.</div>";
+                return;
+            }
+
+            try {
+                // Fetch Course Doc
+                const courseDoc = await db.collection('videos').doc(courseId).get();
+                if (!courseDoc.exists) {
+                    document.getElementById('v-title').textContent = "Course not found.";
+                    return;
+                }
+                const course = courseDoc.data();
+
+                document.getElementById('v-title').textContent = course.title || 'Untitled Course';
+                document.getElementById('v-desc').textContent = course.description || "Master " + (course.subject || 'this subject') + " with high-quality HD video content. Select a lesson to begin.";
+
+                if (course.syllabusUrl) {
+                    document.getElementById('course-syllabus-container').innerHTML = `
+                        <a href="${course.syllabusUrl}" target="_blank" class="btn-primary" style="display: inline-flex; align-items: center; gap: 8px; background: var(--primary-light); color: var(--primary-green); font-size: 0.9rem; padding: 10px 20px;">
+                            Download ${course.syllabusFileName || 'Syllabus PDF'}
+                        </a>
+                    `;
+                }
+
+                // Fetch Lessons
+                const snap = await db.collection('videos').doc(courseId).collection('lessons').orderBy('createdAt', 'asc').get();
+
+                const listContainer = document.getElementById('lesson-list-container');
+                listContainer.innerHTML = '';
+                document.getElementById('lesson-count').textContent = snap.size + (snap.size === 1 ? ' Lesson' : ' Lessons');
+
+                if (snap.empty) {
+                    listContainer.innerHTML = "<div style='padding:24px; text-align:center; color: var(--text-muted);'>No lessons available yet. Check back later!</div>";
+                    return;
+                }
+
+                let idx = 1;
+                snap.forEach(doc => {
+                    const lesson = doc.data();
+                    const lessonCard = document.createElement('div');
+                    lessonCard.className = 'lesson-card';
+                    lessonCard.onclick = () => playLesson(lesson, lessonCard);
+
+                    lessonCard.innerHTML = `
+                        <div class="lesson-thumb" style="font-size: 0.7rem;">PLAY</div>
+                        <div class="lesson-details">
+                            <h4>${idx < 10 ? '0' + idx : idx}. ${lesson.title}</h4>
+                            <span>Video Lesson</span>
+                        </div>
+                    `;
+                    listContainer.appendChild(lessonCard);
+                    idx++;
+                });
+
+            } catch (err) {
+                console.error("Error loading course:", err);
+                document.getElementById('v-title').textContent = "Error loading course.";
+            }
+        }
+
+        function playLesson(lesson, cardElement) {
+            // Update active state
+            document.querySelectorAll('.lesson-card').forEach(c => c.classList.remove('active'));
+            cardElement.classList.add('active');
+
+            const playerContainer = document.getElementById('cinema-player');
+            let videoHtml = '';
+
+            // Handling YouTube Links
+            if (lesson.url && (lesson.url.includes('youtube.com') || lesson.url.includes('youtu.be'))) {
+                let videoId = '';
+                if (lesson.url.includes('v=')) videoId = lesson.url.split('v=')[1].split('&')[0];
+                else if (lesson.url.includes('youtu.be/')) videoId = lesson.url.split('youtu.be/')[1].split('?')[0];
+
+                if (videoId) {
+                    videoHtml = `<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${videoId}?autoplay=1" title="${lesson.title}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="border-radius: 24px;"></iframe>`;
+                } else {
+                    videoHtml = `<div style="text-align:center; color:white;">Invalid YouTube URL</div>`;
+                }
+            } else if (lesson.url) {
+                videoHtml = `<video width="100%" height="100%" controls autoplay style="border-radius: 24px; background: black;">
+                               <source src="${lesson.url}" type="video/mp4">
+                               <source src="${lesson.url}" type="video/webm">
+                               Your browser does not support the video tag.
+                             </video>`;
+            } else {
+                videoHtml = `<div style="text-align:center; color:white;">No video file available</div>`;
+            }
+
+            playerContainer.innerHTML = videoHtml;
+
+            // Load Lesson Specific Metadata into Tabs
+            const notesContainer = document.getElementById('lesson-notes-container');
+            if (lesson.notes) {
+                // simple linebreak formatting
+                notesContainer.innerHTML = lesson.notes.replace(/\n/g, '<br>');
+            } else {
+                notesContainer.innerHTML = `<p style="color: var(--text-muted); font-style: italic;">No specific notes provided for this lesson.</p>`;
+            }
+
+            const resourceContainer = document.getElementById('lesson-resource-container');
+            if (lesson.resourcePdfUrl) {
+                resourceContainer.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 12px; background: white; border: 1px solid #e2e8f0; padding: 16px; border-radius: 12px;">
+                        <div style="font-size: 1.5rem; color: var(--primary-green);">#</div>
+                        <div style="flex: 1;">
+                            <h5 style="margin: 0 0 4px 0; color: var(--primary-dark); font-size: 0.95rem;">${lesson.resourcePdfName || 'Additional Material.pdf'}</h5>
+                            <p style="margin: 0; color: var(--text-muted); font-size: 0.8rem;">PDF Document</p>
+                        </div>
+                        <a href="${lesson.resourcePdfUrl}" target="_blank" class="btn-primary" style="padding: 8px 16px; font-size: 0.85rem;">Download</a>
+                    </div>
+                `;
+            } else {
+                resourceContainer.innerHTML = `<p style="color: var(--text-muted); font-size: 0.9rem;">No resources attached to this lesson.</p>`;
+            }
+        }
+
+        function switchTab(event, tabId) {
+            // Update Tab UI
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Update Tab Content
+            document.querySelectorAll('.tab-pane').forEach(p => p.style.display = 'none');
+            const targetPane = document.getElementById('tab-content-' + tabId);
+            if (targetPane) {
+                targetPane.style.display = 'block';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadCourseData);
+    </script>
+
+
+</body>
+
+</html>

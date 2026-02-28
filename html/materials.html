@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Materials | Gov Learn - Expert Notes & PDFs</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        .mat-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .mat-tab {
+            padding: 10px 20px;
+            background: white;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 700;
+            color: var(--text-muted);
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .mat-tab.active {
+            background: var(--primary-green);
+            color: white;
+            border-color: var(--primary-green);
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <div class="container nav-content">
+            <a href="index.html" class="logo">Gov<span>Learn</span></a>
+            <button type="button" class="mobile-menu-toggle" onclick="toggleNav()">
+                <span></span><span></span><span></span>
+            </button>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="exams-hub.html">Exams Hub</a></li>
+                <li><a href="mock-tests.html">Mock Tests</a></li>
+                <li><a href="materials.html" class="active">Materials</a></li>
+                <li><a href="current-affairs.html">Current Affairs</a></li>
+                <li><a href="videos.html">Videos</a></li>
+                <li id="login-nav-item"><button type="button" class="btn-primary login-toggle-btn"
+                        onclick="toggleModal('login-modal')">Login</button></li>
+            </ul>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <div class="container text-center">
+            <h1>Expert <span>Study Materials</span></h1>
+            <p>Download premium PDFs and access interactive web notes curated by experts.</p>
+        </div>
+    </header>
+
+    <section class="subjects-section" style="min-height: 600px; padding: 60px 0;">
+        <div class="container">
+            <!-- Subject Filters -->
+            <div class="mat-tabs">
+                <div class="mat-tab active" onclick="filterMats('all')">All Subjects</div>
+                <div class="mat-tab" onclick="filterMats('Tamil')">Tamil</div>
+                <div class="mat-tab" onclick="filterMats('English')">English</div>
+                <div class="mat-tab" onclick="filterMats('Maths')">Maths</div>
+                <div class="mat-tab" onclick="filterMats('Reasoning')">Reasoning</div>
+                <div class="mat-tab" onclick="filterMats('History')">History</div>
+                <div class="mat-tab" onclick="filterMats('Polity')">Polity</div>
+                <div class="mat-tab" onclick="filterMats('Science')">Science</div>
+            </div>
+
+            <div style="margin-bottom: 48px; position:relative; z-index:10;">
+                <div class="search-container" style="max-width: 600px; margin: 0 auto;">
+                    <input type="text" id="materials-search" placeholder="Search for notes (e.g. Fundamental Rights)..."
+                        style="width: 100%; padding: 18px 30px; border-radius: 99px; border: 2px solid rgba(5, 150, 105, 0.1); 
+                        background: white; box-shadow: var(--shadow-md); font-size: 1.1rem; outline: none; transition: all 0.3s;">
+                </div>
+            </div>
+
+            <div id="materials-container" class="grid-3">
+                <div id="materials-loading" style="grid-column: 1 / -1; text-align: center; padding: 60px 20px;">
+                    <div
+                        style="display: inline-block; width: 40px; height: 40px; border: 4px solid rgba(16, 185, 129, 0.2); border-top-color: var(--primary-green); border-radius: 50%; animation: spin 1s linear infinite;">
+                    </div>
+                    <p style="color: var(--text-muted); margin-top: 16px; font-weight: 600;">Fetching study materials...
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <div class="footer-logo">Gov<span>Learn</span></div>
+                    <p class="footer-tagline">Empowering aspirants to achieve their dreams of a government career
+                        through quality education.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Learning</h4>
+                    <ul>
+                        <li><a href="exams-hub.html">Exams Hub</a></li>
+                        <li><a href="mock-tests.html">Mock Tests</a></li>
+                        <li><a href="materials.html">Study Notes</a></li>
+                        <li><a href="videos.html">Video Lessons</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>More</h4>
+                    <ul>
+                        <li><a href="current-affairs.html">Current Affairs</a></li>
+                        <li><a href="materials.html">Syllabus</a></li>
+
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Connect</h4>
+                    <div class="social-links">
+                        <a href="#" class="social-icon">FB</a>
+                        <a href="#" class="social-icon">TW</a>
+                        <a href="#" class="social-icon">IG</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Gov Learn. Premium Education.</p>
+                <div class="footer-bottom-links">
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Service</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modals same as before... -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="../js/firebase-config.js"></script>
+    <script src="../js/mock-data.js"></script>
+    <script src="../js/main.js"></script>
+
+    <script>
+        let currentMatFilter = 'all';
+
+        function filterMats(cat) {
+            currentMatFilter = cat;
+            document.querySelectorAll('.mat-tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            fetchAndRenderMaterials(document.getElementById('materials-search').value, currentMatFilter);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const searchInput = document.getElementById('materials-search');
+            if (searchInput) {
+                searchInput.addEventListener('input', (e) => {
+                    fetchAndRenderMaterials(e.target.value, currentMatFilter);
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

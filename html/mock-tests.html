@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mock Tests | Gov Learn - Real Exam Preparation</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        .test-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .test-tab {
+            padding: 12px 24px;
+            background: white;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 700;
+            color: var(--text-muted);
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .test-tab.active {
+            border-color: var(--primary-green);
+            color: white;
+            background: var(--primary-green);
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <div class="container nav-content">
+            <a href="index.html" class="logo">Gov<span>Learn</span></a>
+            <button type="button" class="mobile-menu-toggle" onclick="toggleNav()">
+                <span></span><span></span><span></span>
+            </button>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="exams-hub.html">Exams Hub</a></li>
+                <li><a href="mock-tests.html" class="active">Mock Tests</a></li>
+                <li><a href="materials.html">Materials</a></li>
+                <li><a href="current-affairs.html">Current Affairs</a></li>
+                <li><a href="videos.html">Videos</a></li>
+                <li id="login-nav-item"><button type="button" class="btn-primary login-toggle-btn"
+                        onclick="toggleModal('login-modal')">Login</button></li>
+            </ul>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <div class="container text-center">
+            <h1>Premium <span>Mock Tests</span></h1>
+            <p>Challenge yourself with sectional and full-length tests matching the latest patterns.</p>
+        </div>
+    </header>
+
+    <section class="subjects-section" style="min-height: 600px; padding: 60px 0;">
+        <div class="container">
+            <!-- Tabs for Sectional/Full/Topic -->
+            <div class="test-tabs">
+                <div class="test-tab active" onclick="filterTests('all')">All Tests</div>
+                <div class="test-tab" onclick="filterTests('sectional')">Sectional</div>
+                <div class="test-tab" onclick="filterTests('full')">Full-Length</div>
+                <div class="test-tab" onclick="filterTests('topic')">Topic-wise</div>
+            </div>
+
+            <div style="margin-bottom: 48px; position:relative; z-index:10;">
+                <div class="search-container" style="max-width: 600px; margin: 0 auto;">
+                    <input type="text" id="mock-search" placeholder="Search for subjects or exam names..."
+                        style="width: 100%; padding: 18px 30px; border-radius: 99px; border: 2px solid rgba(5, 150, 105, 0.1); 
+                        background: white; box-shadow: var(--shadow-md); font-size: 1.1rem; outline: none; transition: all 0.3s;">
+                </div>
+            </div>
+
+            <div id="mock-test-container">
+                <!-- Subjects will be injected here -->
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <div class="footer-logo">Gov<span>Learn</span></div>
+                    <p class="footer-tagline">Empowering aspirants to achieve their dreams of a government career
+                        through quality education.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Learning</h4>
+                    <ul>
+                        <li><a href="exams-hub.html">Exams Hub</a></li>
+                        <li><a href="mock-tests.html">Mock Tests</a></li>
+                        <li><a href="materials.html">Study Notes</a></li>
+                        <li><a href="videos.html">Video Lessons</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>More</h4>
+                    <ul>
+                        <li><a href="current-affairs.html">Current Affairs</a></li>
+                        <li><a href="materials.html">Syllabus</a></li>
+
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Connect</h4>
+                    <div class="social-links">
+                        <a href="#" class="social-icon">FB</a>
+                        <a href="#" class="social-icon">TW</a>
+                        <a href="#" class="social-icon">IG</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Gov Learn. Premium Education.</p>
+                <div class="footer-bottom-links">
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Service</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modals same as before... -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="../js/firebase-config.js"></script>
+    <script src="../js/mock-data.js"></script>
+    <script src="../js/main.js"></script>
+
+    <script>
+        let currentCategoryFilter = 'all';
+
+        function filterTests(cat) {
+            currentCategoryFilter = cat;
+            document.querySelectorAll('.test-tab').forEach(t => {
+                if (t) t.classList.remove('active');
+            });
+            if (event && event.target) {
+                event.target.classList.add('active');
+            }
+            renderMocks(document.getElementById('mock-search').value);
+        }
+
+        async function fetchTestsFromDB() {
+            try {
+                const snap = await db.collection('tests').orderBy('createdAt', 'desc').get();
+                let results = [];
+                snap.forEach(doc => {
+                    results.push({ id: doc.id, ...doc.data() });
+                });
+                return results;
+            } catch (e) {
+                console.error("Error fetching tests", e);
+                return [];
+            }
+        }
+
+        async function renderMocks(filterText = '') {
+            const container = document.getElementById('mock-test-container');
+            if (!container) return;
+
+            let currentTests = window.allMockTests;
+            if (!currentTests || currentTests.length === 0) {
+                currentTests = await fetchTestsFromDB();
+                window.allMockTests = currentTests;
+            }
+
+            // Filter logic
+            const filtered = currentTests.filter(t => {
+                const name = t.title || '';
+                const matchesSearch = name.toLowerCase().includes(filterText.toLowerCase());
+
+                if (!matchesSearch) return false;
+
+                if (currentCategoryFilter === 'all') return true;
+                return t.category === currentCategoryFilter;
+            });
+
+            if (filtered.length === 0) {
+                container.innerHTML = `<div style="text-align:center; padding: 60px 20px;"><h3>No tests found that match criteria. You can create tests in Admin.</h3></div>`;
+                return;
+            }
+
+            container.innerHTML = '';
+            const grid = document.createElement('div');
+            grid.className = 'grid-3';
+
+            filtered.forEach(t => {
+                const name = t.title || 'Mock Test';
+                const typeLabel = (t.category || 'Test').toUpperCase();
+                const qCount = t.questions || 0;
+                const duration = t.duration || 0;
+
+                const card = document.createElement('div');
+                card.className = 'card glass hover-3d fade-in';
+                card.innerHTML = `
+                    <div style="position: absolute; top: 20px; right: 20px; background: var(--primary-light); color: var(--primary-green); padding: 4px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 800; border: 1px solid rgba(16, 185, 129, 0.2);">${typeLabel}</div>
+                    <div class="card-icon" style="font-size: 1.8rem; color: var(--primary-green); margin-bottom: 16px;"><i class="fas fa-file-signature"></i></div>
+                    <h3>${name}</h3>
+                    <p style="color: var(--text-muted); margin-bottom: 16px;">${t.examType || 'General'} Exam Prep • ${qCount} Questions • ${duration} Mins</p>
+                    <a href="test-view.html?testId=${t.id}" class="btn-primary" style="display: block; text-align: center;">Start Practice</a>
+                `;
+                grid.appendChild(card);
+            });
+            container.appendChild(grid);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderMocks();
+            document.getElementById('mock-search').addEventListener('input', (e) => renderMocks(e.target.value));
+        });
+    </script>
+</body>
+
+</html>

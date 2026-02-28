@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Current Affairs | Gov Learn - Prep Hub</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        .ca-header {
+            padding: 120px 0 80px;
+            background: radial-gradient(circle at top right, var(--primary), var(--secondary));
+            color: white;
+            text-align: center;
+        }
+
+        .ca-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 12px;
+            font-weight: 800;
+        }
+
+        .ca-header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .ca-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: -30px;
+            position: relative;
+            z-index: 10;
+            flex-wrap: wrap;
+        }
+
+        .ca-tab {
+            padding: 16px 32px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: var(--shadow-md);
+            cursor: pointer;
+            font-weight: 700;
+            color: var(--text-muted);
+            transition: all 0.3s;
+            border: none;
+            font-size: 0.95rem;
+            white-space: nowrap;
+        }
+
+        .ca-tab.active {
+            background: var(--primary-green);
+            color: white;
+            transform: translateY(-5px);
+        }
+
+        .ca-tab:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        .ca-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 24px;
+            margin-top: 60px;
+            padding-bottom: 60px;
+        }
+
+        .pdf-card {
+            padding: 30px;
+            border-radius: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            background: white;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: all 0.3s;
+        }
+
+        .pdf-card h3 {
+            font-weight: 700;
+            color: var(--secondary);
+            margin-bottom: 12px;
+            font-size: 1.1rem;
+        }
+
+        .pdf-card p {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+
+        .pdf-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary-green);
+        }
+
+        .pdf-icon {
+            font-size: 2.5rem;
+            margin-bottom: 16px;
+        }
+
+        .quiz-container {
+            max-width: 800px;
+            margin: 60px auto;
+            padding: 40px;
+            border-radius: 32px;
+            display: none;
+            background: white;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .quiz-q {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 24px;
+            color: var(--primary-dark);
+            line-height: 1.6;
+        }
+
+        .quiz-opt {
+            padding: 16px 24px;
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+            text-align: left;
+            font-size: 0.95rem;
+        }
+
+        .quiz-opt:hover {
+            border-color: var(--primary-green);
+            background: var(--primary-light);
+        }
+
+        .quiz-opt.correct {
+            border-color: #22c55e;
+            background: #f0fdf4;
+            color: #15803d;
+        }
+
+        .quiz-opt.wrong {
+            border-color: var(--primary);
+            background: #fef2f2;
+            color: #991b1b;
+        }
+
+        /* Tablet Responsiveness */
+        @media (max-width: 900px) {
+            .ca-header {
+                padding: 80px 0 60px;
+            }
+
+            .ca-header h1 {
+                font-size: 2rem;
+            }
+
+            .ca-header p {
+                font-size: 1rem;
+            }
+
+            .ca-tabs {
+                gap: 12px;
+                margin-top: -20px;
+            }
+
+            .ca-tab {
+                padding: 14px 24px;
+                font-size: 0.9rem;
+            }
+
+            .ca-grid {
+                margin-top: 40px;
+                padding-bottom: 40px;
+            }
+
+            .pdf-card {
+                padding: 24px;
+            }
+
+            .quiz-container {
+                margin: 40px auto;
+                padding: 30px;
+            }
+
+            .quiz-q {
+                font-size: 1.15rem;
+                margin-bottom: 20px;
+            }
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 650px) {
+            .ca-header {
+                padding: 60px 0 40px;
+            }
+
+            .ca-header h1 {
+                font-size: 1.6rem;
+                margin-bottom: 8px;
+            }
+
+            .ca-header p {
+                font-size: 0.9rem;
+            }
+
+            .ca-tabs {
+                gap: 8px;
+                margin-top: -15px;
+                padding: 0 16px;
+                justify-content: flex-start;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .ca-tab {
+                padding: 12px 18px;
+                font-size: 0.85rem;
+                flex-shrink: 0;
+            }
+
+            .ca-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+                margin-top: 30px;
+                padding: 0 16px;
+                padding-bottom: 30px;
+            }
+
+            .pdf-card {
+                padding: 20px;
+            }
+
+            .pdf-card h3 {
+                font-size: 1rem;
+            }
+
+            .pdf-card p {
+                font-size: 0.9rem;
+            }
+
+            .quiz-container {
+                max-width: 100%;
+                margin: 30px 16px;
+                padding: 20px;
+                border-radius: 20px;
+            }
+
+            .quiz-q {
+                font-size: 1rem;
+                margin-bottom: 16px;
+            }
+
+            .quiz-opt {
+                padding: 14px 16px;
+                margin-bottom: 10px;
+                font-size: 0.9rem;
+                border-radius: 12px;
+            }
+
+            #quiz-screen>div:last-child {
+                flex-direction: column !important;
+                gap: 16px !important;
+            }
+
+            .quiz-container .btn-primary {
+                width: 100%;
+            }
+        }
+
+        /* Extra Small Devices */
+        @media (max-width: 480px) {
+            .ca-header {
+                padding: 50px 0 35px;
+            }
+
+            .ca-header h1 {
+                font-size: 1.4rem;
+            }
+
+            .ca-header p {
+                font-size: 0.85rem;
+            }
+
+            .ca-tab {
+                padding: 10px 14px;
+                font-size: 0.8rem;
+            }
+
+            .quiz-container {
+                padding: 16px;
+                margin: 20px 12px;
+            }
+
+            .badge {
+                font-size: 0.75rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <div class="container nav-content">
+            <a href="index.html" class="logo">Gov<span>Learn</span></a>
+            <button type="button" class="mobile-menu-toggle" onclick="toggleNav()">
+                <span></span><span></span><span></span>
+            </button>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="exams-hub.html">Exams Hub</a></li>
+                <li><a href="mock-tests.html">Mock Tests</a></li>
+                <li><a href="materials.html">Materials</a></li>
+                <li><a href="current-affairs.html" class="active">Current Affairs</a></li>
+                <li><a href="videos.html">Videos</a></li>
+                <li id="login-nav-item"><button type="button" class="btn-primary login-toggle-btn"
+                        onclick="toggleModal('login-modal')">Login</button></li>
+            </ul>
+        </div>
+    </nav>
+
+    <header class="ca-header">
+        <h1>Current Affairs Prep Portal</h1>
+        <p>Daily, Weekly, and Monthly highlights for all competitive exams</p>
+    </header>
+
+    <div class="container">
+        <div class="ca-tabs">
+            <div class="ca-tab active" onclick="switchCATab('all', this)">All</div>
+            <div class="ca-tab" onclick="switchCATab('daily', this)">Daily PDF</div>
+            <div class="ca-tab" onclick="switchCATab('weekly', this)">Weekly/Monthly</div>
+            <div class="ca-tab" onclick="switchCATab('quiz', this)">Interactive Quiz</div>
+        </div>
+
+        <div id="ca-content">
+            <!-- Dynamic PDF Cards -->
+            <div id="ca-pdf-container" class="ca-grid"></div>
+
+            <!-- QUIZ MODE -->
+            <div id="catab-quiz" class="quiz-container glass">
+                <div id="quiz-screen">
+                    <div class="badge badge-pro" style="margin-bottom: 20px;">QUESTION 1/5</div>
+                    <div class="quiz-q" id="q-text">Which Indian state has recently launched the Education for All
+                        scheme to improve rural literacy?</div>
+                    <div id="q-options">
+                        <div class="quiz-opt" onclick="checkAns(this, false)">Tamil Nadu</div>
+                        <div class="quiz-opt" onclick="checkAns(this, true)">Madhya Pradesh</div>
+                        <div class="quiz-opt" onclick="checkAns(this, false)">Kerala</div>
+                        <div class="quiz-opt" onclick="checkAns(this, false)">Maharashtra</div>
+                    </div>
+                    <div
+                        style="margin-top: 32px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;">
+                        <span style="color: var(--text-muted); font-weight: 600;">Time: 24s</span>
+                        <button class="btn-primary" onclick="nextQ()" style="flex: 1; min-width: 150px;">Next
+                            Question</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <div class="footer-logo">Gov<span>Learn</span></div>
+                    <p class="footer-tagline">Empowering aspirants to achieve their dreams of a government career
+                        through quality education.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Learning</h4>
+                    <ul>
+                        <li><a href="exams-hub.html">Exams Hub</a></li>
+                        <li><a href="mock-tests.html">Mock Tests</a></li>
+                        <li><a href="materials.html">Study Notes</a></li>
+                        <li><a href="videos.html">Video Lessons</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>More</h4>
+                    <ul>
+                        <li><a href="current-affairs.html">Current Affairs</a></li>
+                        <li><a href="materials.html">Syllabus</a></li>
+
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Connect</h4>
+                    <div class="social-links">
+                        <a href="#" class="social-icon">FB</a>
+                        <a href="#" class="social-icon">TW</a>
+                        <a href="#" class="social-icon">IG</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Gov Learn. Premium Education.</p>
+                <div class="footer-bottom-links">
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Service</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="../js/firebase-config.js"></script>
+    <script src="../js/mock-data.js"></script>
+    <script src="../js/main.js"></script>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const startMode = params.get('mode');
+
+        function switchCATab(tab, el) {
+            document.querySelectorAll('.ca-tab').forEach(t => t.classList.remove('active'));
+            if (el) el.classList.add('active');
+
+            const pdfContainer = document.getElementById('ca-pdf-container');
+            const quizContainer = document.getElementById('catab-quiz');
+
+            if (tab === 'quiz') {
+                pdfContainer.style.display = 'none';
+                quizContainer.style.display = 'block';
+            } else {
+                pdfContainer.style.display = 'grid';
+                quizContainer.style.display = 'none';
+                fetchAndRenderCAPDFs(tab);
+            }
+        }
+
+        function checkAns(el, isCorrect) {
+            if (isCorrect) el.classList.add('correct');
+            else el.classList.add('wrong');
+            const opts = el.parentElement.children;
+            for (let opt of opts) opt.style.pointerEvents = 'none';
+        }
+
+        function nextQ() {
+            alert("This is a demo question. Register for PRO to access 500+ Daily Quizzes!");
+        }
+
+        window.onload = () => {
+            if (startMode === 'quiz') {
+                document.querySelectorAll('.ca-tab')[3].click();
+            } else {
+                switchCATab('all', document.querySelector('.ca-tab'));
+            }
+        };
+    </script>
+</body>
+
+</html>

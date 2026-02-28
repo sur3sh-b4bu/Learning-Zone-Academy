@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mock Test Session | Gov Learn</title>
+    <meta name="description"
+        content="Interactive mock test session. Take the challenge and track your progress in real-time.">
+    <link rel="stylesheet" href="../css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8fafc;
+        }
+
+        .test-layout {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 24px;
+            margin-top: 100px;
+            height: calc(100vh - 100px);
+        }
+
+        .question-area {
+            background: white;
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: var(--shadow-sm);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-area {
+            background: white;
+            padding: 24px;
+            border-radius: 24px;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .progress-container {
+            padding-bottom: 24px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: #f1f5f9;
+            border-radius: 4px;
+            margin-top: 12px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary-green);
+            width: 4%;
+            transition: width 0.3s ease;
+        }
+
+        .question-nav {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+        }
+
+        .nav-btn {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+        }
+
+        .nav-btn.active {
+            background: var(--primary-green);
+            color: white;
+            border-color: var(--primary-green);
+        }
+
+        .nav-btn.answered {
+            background: var(--primary-light);
+            color: var(--primary-green);
+            border-color: var(--primary-green);
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+
+        .question-text {
+            font-size: 1.5rem;
+            line-height: 1.5;
+            color: var(--primary-dark);
+            font-weight: 600;
+            margin-bottom: 32px;
+        }
+
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .option-item {
+            padding: 20px 24px;
+            border: 2px solid #f1f5f9;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-weight: 500;
+            font-size: 1.1rem;
+        }
+
+        .option-item:hover {
+            border-color: var(--primary-green);
+            background: var(--primary-light);
+        }
+
+        .option-item.selected {
+            border-color: var(--primary-green);
+            background: #ecfdf5;
+        }
+
+        .option-marker {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .option-item.selected .option-marker {
+            background: var(--primary-green);
+            color: white;
+        }
+
+        .action-footer {
+            margin-top: auto;
+            padding-top: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .timer-display {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--primary-dark);
+            text-align: center;
+        }
+
+        @media (max-width: 1024px) {
+            .test-layout {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+
+            .sidebar-area {
+                order: -1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav style="height: 64px;">
+        <div class="container nav-content" style="height: 100%;">
+            <a href="index.html" class="logo">Gov<span>Learn</span></a>
+            <div style="display: flex; align-items: center; gap: 24px;">
+                <span id="subject-label" style="font-weight: 600; color: var(--text-muted);">Indian History</span>
+                <button type="button" class="btn-primary" style="background: #ef4444; padding: 8px 20px;"
+                    onclick="location.href='mock-tests.html'">End Test</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="test-layout">
+            <div class="question-area fade-in">
+                <div class="question-header">
+                    <span id="q-header-text"
+                        style="font-weight: 700; color: var(--primary-green); text-transform: uppercase; letter-spacing: 1px;">Loading...</span>
+                    <span style="color: var(--text-muted);">Points: 1.0</span>
+                </div>
+
+                <div class="question-text" id="q-text">
+                    Fetching questions, please wait...
+                </div>
+
+                <div class="options-list" id="options-container">
+                    <!-- Options injected via JS -->
+                </div>
+
+                <div class="action-footer">
+                    <button class="btn-primary" style="background: #e2e8f0; color: #64748b;"
+                        onclick="prevQuestion()">Previous</button>
+                    <div style="display: flex; gap: 12px;">
+                        <button class="btn-primary" style="background: #f59e0b;" onclick="markForReview()">Mark for
+                            Review</button>
+                        <button class="btn-primary" onclick="nextQuestion()">Save & Next</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-area fade-in">
+                <div class="progress-container">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                        <span style="font-weight: 700; color: var(--primary-dark);">Test Progress</span>
+                        <span id="progress-text" style="font-size: 0.9rem; color: var(--text-muted);">0 Answered</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill" style="width: 0%;"></div>
+                    </div>
+                </div>
+
+                <div class="timer-display" id="clock">
+                    --:--
+                </div>
+
+                <div>
+                    <h4 style="margin-bottom: 16px; color: var(--primary-dark);">Question Navigator</h4>
+                    <div class="question-nav" id="q-nav-container">
+                        <!-- Navigator injected via JS -->
+                    </div>
+                </div>
+
+                <button type="button" class="btn-primary" style="width: 100%; margin-top: auto; padding: 16px;"
+                    onclick="submitTest()">Submit Mock Test</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+    <script src="../js/firebase-config.js"></script>
+    <script src="../js/main.js"></script>
+    <script>
+        // Access Gate
+        auth.onAuthStateChanged(async (user) => {
+            if (!user) {
+                alert("Please login to access mock tests!");
+                window.location.href = 'index.html';
+                return;
+            }
+
+            try {
+                const userDoc = await db.collection('students').doc(user.uid).get();
+                if (userDoc.exists) {
+                    const userData = userDoc.data();
+                    if (userData.plan !== 'pro' && userData.plan !== 'ultimate' && user.email !== ADMIN_EMAIL) {
+                        alert("Upgrade required!\n\nThis premium content requires a PRO or ULTIMATE plan. Please upgrade to continue.");
+                        window.location.href = 'index.html#pricing';
+                    }
+                }
+            } catch (e) {
+                console.error("Access verification failed:", e);
+            }
+        });
+
+        // State
+        let questions = [];
+        let currentQuestionIndex = 0;
+        let userAnswers = {}; // index -> option (A, B, C, D)
+        let reviewMarks = new Set();
+        let timeRemaining = 3600;
+        let timerInterval;
+
+        // Parse test details
+        const params = new URLSearchParams(window.location.search);
+        const testId = params.get('testId');
+
+        async function loadTest() {
+            if (!testId) {
+                alert("No test selected!");
+                window.location.href = 'mock-tests.html';
+                return;
+            }
+
+            try {
+                // Fetch test metadata
+                const testDoc = await db.collection('tests').doc(testId).get();
+                if (!testDoc.exists) {
+                    alert("Test not found!");
+                    window.location.href = 'mock-tests.html';
+                    return;
+                }
+                const testData = testDoc.data();
+                document.getElementById('subject-label').textContent = testData.title || 'Mock Test';
+                timeRemaining = (testData.duration || 60) * 60;
+                startTimer();
+
+                // Fetch questions
+                const qSnap = await db.collection('tests').doc(testId).collection('questions').orderBy('createdAt', 'asc').get();
+                qSnap.forEach(doc => {
+                    questions.push({ id: doc.id, ...doc.data() });
+                });
+
+                if (questions.length === 0) {
+                    document.getElementById('q-text').textContent = "This test currently has no questions. Please contact the administrator.";
+                    document.getElementById('q-header-text').textContent = "Empty Test";
+                    return;
+                }
+
+                initNavGrid();
+                renderQuestion(0);
+                updateProgress();
+
+            } catch (e) {
+                console.error("Error loading test:", e);
+                document.getElementById('q-text').textContent = "Error loading test data. Please check your connection.";
+            }
+        }
+
+        function initNavGrid() {
+            const container = document.getElementById('q-nav-container');
+            container.innerHTML = '';
+            for (let i = 0; i < questions.length; i++) {
+                const btn = document.createElement('div');
+                btn.className = 'nav-btn';
+                btn.id = `nav-btn-${i}`;
+                btn.textContent = i + 1;
+                btn.onclick = () => renderQuestion(i);
+                container.appendChild(btn);
+            }
+        }
+
+        function renderQuestion(index) {
+            if (index < 0 || index >= questions.length) return;
+            currentQuestionIndex = index;
+            const q = questions[index];
+
+            document.getElementById('q-header-text').textContent = `Question ${index + 1} of ${questions.length}`;
+            document.getElementById('q-text').textContent = q.text;
+
+            const optsContainer = document.getElementById('options-container');
+            optsContainer.innerHTML = '';
+
+            const optionKeys = ['A', 'B', 'C', 'D'];
+            optionKeys.forEach(opt => {
+                if (!q.options[opt]) return;
+                const div = document.createElement('div');
+                div.className = `option-item ${userAnswers[index] === opt ? 'selected' : ''}`;
+                div.onclick = () => selectOption(index, opt, div);
+                div.innerHTML = `
+                    <span class="option-marker">${opt}</span>
+                    ${q.options[opt]}
+                `;
+                optsContainer.appendChild(div);
+            });
+
+            updateNavHighlight();
+        }
+
+        window.selectOption = function (qIndex, opt, el) {
+            userAnswers[qIndex] = opt;
+            // Update UI for current options
+            document.querySelectorAll('.option-item').forEach(item => item.classList.remove('selected'));
+            el.classList.add('selected');
+
+            // Mark nav button as answered
+            const navBtn = document.getElementById(`nav-btn-${qIndex}`);
+            if (navBtn) navBtn.classList.add('answered');
+            if (reviewMarks.has(qIndex)) {
+                reviewMarks.delete(qIndex);
+                navBtn.style.border = '';
+            }
+
+            updateProgress();
+        }
+
+        window.nextQuestion = function () {
+            if (currentQuestionIndex < questions.length - 1) {
+                renderQuestion(currentQuestionIndex + 1);
+            } else {
+                alert('You have reached the last question. Review your answers or submit the test.');
+            }
+        }
+
+        window.prevQuestion = function () {
+            if (currentQuestionIndex > 0) {
+                renderQuestion(currentQuestionIndex - 1);
+            }
+        }
+
+        window.markForReview = function () {
+            reviewMarks.add(currentQuestionIndex);
+            const navBtn = document.getElementById(`nav-btn-${currentQuestionIndex}`);
+            if (navBtn) navBtn.style.border = '2px solid #f59e0b';
+
+            nextQuestion();
+        }
+
+        function updateNavHighlight() {
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            const currentBtn = document.getElementById(`nav-btn-${currentQuestionIndex}`);
+            if (currentBtn) currentBtn.classList.add('active');
+        }
+
+        function updateProgress() {
+            const answeredCount = Object.keys(userAnswers).length;
+            const total = questions.length;
+            document.getElementById('progress-text').textContent = `${answeredCount} / ${total} Answered`;
+            document.getElementById('progress-fill').style.width = total > 0 ? `${(answeredCount / total) * 100}%` : '0%';
+        }
+
+        window.submitTest = function () {
+            if (confirm('Are you sure you want to finalize and submit your test?')) {
+                clearInterval(timerInterval);
+
+                // Calculate score
+                let score = 0;
+                let correctCount = 0;
+                let wrongCount = 0;
+                let unattempted = 0;
+
+                questions.forEach((q, idx) => {
+                    const ans = userAnswers[idx];
+                    if (!ans) {
+                        unattempted++;
+                    } else if (ans === q.correct) {
+                        correctCount++;
+                        score += 1; // Assuming 1 pt per correct
+                    } else {
+                        wrongCount++;
+                        score -= 0.25; // Simple negative marking
+                    }
+                });
+
+                const msg = `Submit successful!\n\nScore: ${score}\nCorrect: ${correctCount}\nWrong: ${wrongCount}\nUnattempted: ${unattempted}`;
+                alert(msg);
+                location.href = 'mock-tests.html';
+            }
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                if (timeRemaining <= 0) {
+                    clearInterval(timerInterval);
+                    alert("Time is up! Submitting test automatically.");
+                    submitTest();
+                    return;
+                }
+                timeRemaining--;
+                const m = Math.floor(timeRemaining / 60);
+                const s = timeRemaining % 60;
+                document.getElementById('clock').textContent = `${m}:${s < 10 ? '0' : ''}${s}`;
+            }, 1000);
+        }
+
+        // Wait for auth before starting
+        auth.onAuthStateChanged(async (user) => {
+            if (!user) {
+                alert("Please login to access mock tests!");
+                window.location.href = 'index.html';
+                return;
+            }
+
+            try {
+                const userDoc = await db.collection('students').doc(user.uid).get();
+                if (userDoc.exists) {
+                    const userData = userDoc.data();
+                    if (userData.plan !== 'pro' && userData.plan !== 'ultimate' && user.email !== ADMIN_EMAIL) {
+                        alert("Upgrade required!\n\nThis premium content requires a PRO or ULTIMATE plan. Please upgrade to continue.");
+                        window.location.href = 'index.html#pricing';
+                        return;
+                    }
+                }
+
+                // User approved, load the test
+                loadTest();
+
+            } catch (e) {
+                console.error("Access verification failed:", e);
+                alert("Error verifying access. Please login again.");
+                window.location.href = 'index.html';
+            }
+        });
+    </script>
+
+</body>
+
+</html>

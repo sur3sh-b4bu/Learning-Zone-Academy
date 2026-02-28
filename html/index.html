@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gov Learn - Premium Preparation for Government Exams</title>
+    <meta name="description"
+        content="Master your government exams with Gov Learn. Premium mock tests, study materials, and video lessons for Tamil, History, Maths, and more.">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <nav>
+        <div class="container nav-content">
+            <a href="index.html" class="logo">Gov<span>Learn</span></a>
+            <button type="button" class="mobile-menu-toggle" onclick="toggleNav()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <ul class="nav-links">
+                <li><a href="index.html" class="active">Home</a></li>
+                <li><a href="exams-hub.html">Exams Hub</a></li>
+                <li><a href="mock-tests.html">Mock Tests</a></li>
+                <li><a href="materials.html">Materials</a></li>
+                <li><a href="current-affairs.html">Current Affairs</a></li>
+                <li><a href="videos.html">Videos</a></li>
+                <!-- Login/Profile dynamic buttons are appended here -->
+                <li id="login-nav-item"><button type="button" class="btn-primary login-toggle-btn"
+                        onclick="toggleModal('login-modal')">Login</button></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Live Updates Ticker (Dynamic from Firebase) -->
+    <div class="ticker-wrap">
+        <div class="ticker-title">LIVE UPDATES</div>
+        <div class="ticker" id="alert-ticker"></div>
+    </div>
+
+    <header class="hero">
+        <div class="container">
+            <div class="fade-in" style="margin-bottom: 32px;">
+                <span class="badge"
+                    style="background: var(--primary-light); color: var(--primary); font-weight: 800; padding: 8px 20px; border-radius: 99px;">LATEST
+                    NOTIFICATION</span>
+                <p id="hero-notification-text"
+                    style="margin-top: 16px; font-weight: 800; color: var(--secondary); font-size: 1.1rem;">Loading...
+                </p>
+            </div>
+
+            <!-- Phase 10: Premium Countdown Timers -->
+            <div class="countdown-box fade-in">
+                <div class="count-item glass">
+                    <span class="count-num" id="days">12</span>
+                    <span class="count-label">Days</span>
+                </div>
+                <div class="count-item glass">
+                    <span class="count-num" id="hours">08</span>
+                    <span class="count-label">Hours</span>
+                </div>
+                <div class="count-item glass">
+                    <span class="count-num" id="mins">45</span>
+                    <span class="count-label">Mins</span>
+                </div>
+                <div class="count-item glass">
+                    <span class="count-num" id="secs">22</span>
+                    <span class="count-label">Secs</span>
+                </div>
+            </div>
+
+            <h1 class="hero-title fade-in" style="margin-top: 60px;">Master Your Future with<br><span>Government
+                    Learning</span></h1>
+            <p class="fade-in">Comprehensive study materials, high-quality mock tests, and expert video lectures for all
+                government exams.</p>
+
+            <div class="fade-in action-btns" style="margin-top: 20px;">
+                <a href="#exams-hub" class="btn-primary">Explore Exams Hub</a>
+                <a href="mock-tests.html" class="btn-primary btn-secondary">Take Free Mock Test</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Exams Hub (Dynamic from Firebase) -->
+    <section id="exams-hub" class="categories">
+        <div class="container">
+            <div class="section-header">
+                <h2>Exams Hub</h2>
+                <p>Prepare for specific government exam categories</p>
+            </div>
+            <div id="exam-categories-container"
+                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 24px; margin-top: 40px;">
+            </div>
+        </div>
+    </section>
+
+    <!-- Current Affairs Highlights (Dynamic from Firebase) -->
+    <section class="subjects-section" style="background: var(--bg-gray);">
+        <div class="container">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center;">
+                <div>
+                    <span class="badge"
+                        style="background: white; color: var(--primary); border: 1px solid var(--primary-light); font-weight: 800; padding: 6px 16px; border-radius: 99px;">DAILY
+                        HIGHLIGHTS</span>
+                    <h2
+                        style="font-size: 2.5rem; margin: 24px 0; color: var(--secondary); font-weight: 800; letter-spacing: -1px;">
+                        Today's Current Affairs</h2>
+                    <p style="color: var(--secondary); opacity: 0.7; margin-bottom: 32px; font-size: 1.1rem;">Stay
+                        updated with the latest national and international news curated specifically for government exam
+                        preparation.</p>
+                    <ul id="ca-highlights-container" class="features-list" style="list-style: none; padding: 0;"></ul>
+                    <a href="current-affairs.html" class="btn-primary" style="margin-top: 32px;">Read Full PDF</a>
+                </div>
+                <div class="card glass"
+                    style="padding: 40px; text-align: center; border: 2px dashed var(--primary-light);">
+                    <div class="card-icon"
+                        style="margin: 0 auto 24px; background: var(--primary); color: white; width: 72px; height: 72px; border-radius: 20px;">
+                        QUIZ</div>
+                    <h3 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 12px;">Daily CA Quiz</h3>
+                    <p style="opacity: 0.7; margin-bottom: 24px;">Test your knowledge of today's events in just 5
+                        minutes.</p>
+                    <a href="current-affairs.html?mode=quiz" class="btn-primary">Start Quiz</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Free Mock Tests (Dynamic from Firebase) -->
+    <section class="featured-mock">
+        <div class="container">
+            <div class="section-header">
+                <h2>Free Mock Tests</h2>
+                <p>Try our premium quality tests without any cost</p>
+            </div>
+            <div id="free-mocks-container" class="grid-3"></div>
+            <div style="text-align: center; margin-top: 48px;">
+                <a href="mock-tests.html" class="btn-primary">View All Free Tests</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Popular Courses (Dynamic from Firebase) -->
+    <section class="popular-courses">
+        <div class="container">
+            <div class="section-header">
+                <h2>Popular Courses</h2>
+                <p>Curated masterclasses and comprehensive test series</p>
+            </div>
+            <div id="courses-container" class="grid-3"></div>
+        </div>
+    </section>
+
+    <!-- Success Stories (Dynamic from Firebase) -->
+    <section class="categories">
+        <div class="container">
+            <div class="section-header">
+                <h2>Success Stories</h2>
+                <p>Join thousands of students who achieved their dreams with us</p>
+            </div>
+            <div id="testimonials-container" class="grid-3"></div>
+        </div>
+    </section>
+
+
+    <section id="pricing" class="pricing">
+        <div class="container">
+            <div class="section-header">
+                <h2>Subscription Plans</h2>
+                <p>Unlock premium courses and test series</p>
+            </div>
+            <div id="plans-container" class="pricing-grid">
+                <!-- Subscription plans will be dynamically injected here -->
+                <div style="text-align: center; grid-column: 1 / -1; padding: 40px; color: var(--text-muted);">
+                    <p>Loading plans...</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <div class="footer-logo">Gov<span>Learn</span></div>
+                    <p class="footer-tagline">Empowering aspirants to achieve their dreams of a government career
+                        through quality education.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Learning</h4>
+                    <ul>
+                        <li><a href="exams-hub.html">Exams Hub</a></li>
+                        <li><a href="mock-tests.html">Mock Tests</a></li>
+                        <li><a href="materials.html">Study Notes</a></li>
+                        <li><a href="videos.html">Video Lessons</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>More</h4>
+                    <ul>
+                        <li><a href="current-affairs.html">Current Affairs</a></li>
+                        <li><a href="materials.html">Syllabus</a></li>
+
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Connect</h4>
+                    <div class="social-links">
+                        <a href="#" class="social-icon">FB</a>
+                        <a href="#" class="social-icon">TW</a>
+                        <a href="#" class="social-icon">IG</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Gov Learn. Premium Education.</p>
+                <div class="footer-bottom-links">
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Service</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modals (Login/Signup) same as before -->
+    <div id="login-modal" class="modal-overlay">
+        <div class="modal">
+            <button type="button" class="modal-close" onclick="toggleModal('login-modal')">&times;</button>
+            <h2 style="margin-bottom: 10px;">Welcome Back</h2>
+            <form id="login-form">
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="login-email" placeholder="name@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="login-password" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn-primary" style="width: 100%; margin-top: 10px;">Sign In</button>
+            </form>
+            <div class="social-divider">or</div>
+            <button type="button" class="google-btn">Sign in with Google</button>
+            <p style="margin-top: 24px; text-align: center; font-size: 0.9rem;">
+                Don't have an account? <a href="#" style="color: var(--primary-green); font-weight: 600;"
+                    onclick="toggleModal('login-modal'); toggleModal('signup-modal'); return false;">Sign Up</a>
+            </p>
+        </div>
+    </div>
+
+    <div id="signup-modal" class="modal-overlay">
+        <div class="modal">
+            <button type="button" class="modal-close" onclick="toggleModal('signup-modal')">&times;</button>
+            <h2 style="margin-bottom: 10px;">Create Account</h2>
+            <form id="signup-form">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="signup-name" placeholder="John Doe" required>
+                </div>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="signup-email" placeholder="name@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="signup-password" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn-primary" style="width: 100%; margin-top: 10px;">Create Account</button>
+            </form>
+            <div class="social-divider">or</div>
+            <button type="button" class="google-btn">Sign up with Google</button>
+            <p style="margin-top: 24px; text-align: center; font-size: 0.9rem;">
+                Already have an account? <a href="#" style="color: var(--primary-green); font-weight: 600;"
+                    onclick="toggleModal('signup-modal'); toggleModal('login-modal'); return false;">Sign In</a>
+            </p>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="../js/firebase-config.js"></script>
+    <script src="../js/mock-data.js"></script>
+    <script src="../js/main.js"></script>
+
+    <script>
+        // Hero Countdown Logic — fetches target from Firebase siteConfig
+        let countdownTarget = new Date("March 15, 2026 09:00:00").getTime();
+        let countdownInterval;
+
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const gap = countdownTarget - now;
+            if (gap <= 0) {
+                document.getElementById('days').innerText = '00';
+                document.getElementById('hours').innerText = '00';
+                document.getElementById('mins').innerText = '00';
+                document.getElementById('secs').innerText = '00';
+                return;
+            }
+            const d = Math.floor(gap / 86400000);
+            const h = Math.floor((gap % 86400000) / 3600000);
+            const m = Math.floor((gap % 3600000) / 60000);
+            const s = Math.floor((gap % 60000) / 1000);
+            document.getElementById('days').innerText = d < 10 ? '0' + d : d;
+            document.getElementById('hours').innerText = h < 10 ? '0' + h : h;
+            document.getElementById('mins').innerText = m < 10 ? '0' + m : m;
+            document.getElementById('secs').innerText = s < 10 ? '0' + s : s;
+        }
+
+        // Fetch hero notification & countdown from Firebase
+        async function loadHeroConfig() {
+            try {
+                const doc = await db.collection('siteConfig').doc('hero').get();
+                if (doc.exists) {
+                    const data = doc.data();
+                    if (data.notificationText) {
+                        document.getElementById('hero-notification-text').textContent = data.notificationText;
+                    }
+                    if (data.countdownDate) {
+                        countdownTarget = new Date(data.countdownDate).getTime();
+                    }
+                } else if (window.MOCK_DATA && MOCK_DATA.heroConfig) {
+                    document.getElementById('hero-notification-text').textContent = MOCK_DATA.heroConfig.notificationText;
+                    countdownTarget = new Date(MOCK_DATA.heroConfig.countdownDate).getTime();
+                } else {
+                    document.getElementById('hero-notification-text').textContent = 'SSC CGL 2026 Exam Starts in:';
+                }
+            } catch (e) {
+                console.warn('Hero config fetch error:', e);
+                document.getElementById('hero-notification-text').textContent = 'SSC CGL 2026 Exam Starts in:';
+            }
+            updateCountdown();
+            countdownInterval = setInterval(updateCountdown, 1000);
+        }
+        loadHeroConfig();
+
+        async function processMockPayment(plan) {
+            const user = auth.currentUser;
+            if (!user) {
+                alert("Please login first to upgrade your plan!");
+                toggleModal('login-modal');
+                return;
+            }
+            if (plan === 'free') {
+                alert("You are already on the Free Plan!");
+                return;
+            }
+            if (confirm(`Proceed to pay for the ${plan.toUpperCase()} Plan?`)) {
+                await db.collection('students').doc(user.uid).set({ plan: plan }, { merge: true });
+                alert("Upgraded successfully!");
+                location.reload();
+            }
+        }
+    </script>
+</body>
+
+</html>
