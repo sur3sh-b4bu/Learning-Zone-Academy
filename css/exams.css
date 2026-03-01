@@ -1,0 +1,95 @@
+/* ===== BREADCRUMB ===== */
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 24px 0;
+    font-size: 0.95rem;
+    color: var(--text-muted);
+}
+
+.breadcrumb a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+/* ===== EXAM TABS ===== */
+.exam-tabs {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+    border-bottom: 2px solid var(--primary-light);
+    padding-bottom: 20px;
+}
+
+.exam-tab {
+    padding: 12px 24px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--text-muted);
+    border-radius: 12px;
+    transition: all 0.3s;
+    font-size: 0.95rem;
+}
+
+.exam-tab.active {
+    background: var(--primary-light);
+    color: var(--primary);
+    font-weight: 700;
+}
+
+/* ===== INFO CARDS ===== */
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+    margin-bottom: 40px;
+}
+
+.info-card {
+    background: white;
+    padding: 32px;
+    border-radius: 20px;
+    border-left: 5px solid var(--primary);
+    box-shadow: var(--shadow-soft);
+}
+
+/* ===== SYLLABUS TABLE ===== */
+.syllabus-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: var(--shadow-soft);
+    margin-bottom: 40px;
+}
+
+.syllabus-table thead {
+    background: var(--primary-light);
+    color: var(--primary);
+}
+
+.syllabus-table th,
+.syllabus-table td {
+    padding: 16px;
+    text-align: left;
+}
+
+.syllabus-table tr:hover {
+    background: var(--primary-light);
+}
+
+/* ===== CTA SECTION ===== */
+.cta-section {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+    padding: 60px 40px;
+    border-radius: 24px;
+    text-align: center;
+    color: white;
+    margin-bottom: 40px;
+}
