@@ -6,44 +6,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Exams Hub | Gov Learn - Detailed Preparation</title>
     <link rel="stylesheet" href="../css/common.css">
+    <link rel="stylesheet" href="../css/navigation.css">
+    <link rel="stylesheet" href="../css/footer.css">
     <link rel="stylesheet" href="../css/exams.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
 </head>
 
 <body>
-    <nav>
-        <div class="container nav-content">
-            <a href="index.html" class="logo">Gov<span>Learn</span></a>
-            <button type="button" class="mobile-menu-toggle" onclick="toggleNav()">
-                <span></span><span></span><span></span>
-            </button>
-            <ul class="nav-links">
-                <li><a href="index.html">Home</a></li>
-                <li><a href="exams-hub.html" class="active">Exams Hub</a></li>
-                <li><a href="mock-tests.html">Mock Tests</a></li>
-                <li><a href="materials.html">Materials</a></li>
-                <li><a href="current-affairs.html">Current Affairs</a></li>
-                <li><a href="videos.html">Videos</a></li>
-                <li id="login-nav-item"><button type="button" class="btn-primary login-toggle-btn"
-                        onclick="toggleModal('login-modal')">Login</button></li>
-            </ul>
-        </div>
-    </nav>
+    <nav id="main-nav"></nav>
 
-    <header class="hero" style="padding: 100px 0 60px;">
-        <div class="container">
-            <div class="breadcrumb">
-                <a href="index.html">Home</a>
-                <span>›</span>
-                <span>Exams Hub</span>
-            </div>
+    <header class="hero" style="padding: 140px 0 60px;">
+        <div class="container text-center">
             <h1 class="hero-title fade-in">Exams Hub</h1>
             <p class="fade-in">Complete preparation modules for all major government exams</p>
         </div>
     </header>
 
-    <div class="container" style="padding: 60px 24px;">
+    <div class="container" style="padding: 24px 24px;">
         <!-- Exam Selection Buttons -->
         <div class="exam-selector-header" id="exam-selector">
             <button class="exam-btn active" onclick="switchExam('TNPSC')">TNPSC</button>
@@ -71,79 +52,15 @@
     </div>
 
 
-    <footer>
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-info">
-                    <div class="footer-logo">Gov<span>Learn</span></div>
-                    <p class="footer-tagline">Empowering aspirants to achieve their dreams of a government career
-                        through quality education.</p>
-                </div>
-                <div class="footer-links">
-                    <h4>Learning</h4>
-                    <ul>
-                        <li><a href="exams-hub.html">Exams Hub</a></li>
-                        <li><a href="mock-tests.html">Mock Tests</a></li>
-                        <li><a href="materials.html">Study Notes</a></li>
-                        <li><a href="videos.html">Video Lessons</a></li>
-                    </ul>
-                </div>
-                <div class="footer-links">
-                    <h4>Resources</h4>
-                    <ul>
-                        <li><a href="current-affairs.html">Current Affairs</a></li>
-                        <li><a href="materials.html">Syllabus</a></li>
-                        <li><a href="#">Previous Year Papers</a></li>
-                    </ul>
-                </div>
-                <div class="footer-links">
-                    <h4>Connect</h4>
-                    <div class="social-links">
-                        <a href="#" class="social-icon">FB</a>
-                        <a href="#" class="social-icon">TW</a>
-                        <a href="#" class="social-icon">IG</a>
-                    </div>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2026 Gov Learn. Premium Education.</p>
-                <div class="footer-bottom-links">
-                    <a href="#">Privacy Policy</a>
-                    <a href="#">Terms of Service</a>
-                </div>
-            </div>
-        </div>
-    </footer>
+    <footer id="main-footer"></footer>
 
-    <!-- Login Modal -->
-    <div id="login-modal" class="modal-overlay">
-        <div class="modal">
-            <button type="button" class="modal-close" onclick="toggleModal('login-modal')">&times;</button>
-            <h2 style="margin-bottom: 10px;">Welcome Back</h2>
-            <form id="login-form">
-                <div class="form-group">
-                    <label>Email Address</label>
-                    <input type="email" id="login-email" placeholder="name@example.com" required>
-                </div>
-                <div class="form-group">
-                    <label>Password</label>
-                    <input type="password" id="login-password" placeholder="••••••••" required>
-                </div>
-                <button type="submit" class="btn-primary" style="width: 100%; margin-top: 10px;">Sign In</button>
-            </form>
-            <div class="social-divider">or</div>
-            <button type="button" class="google-btn">Sign in with Google</button>
-            <p style="margin-top: 24px; text-align: center; font-size: 0.9rem;">
-                Don't have an account? <a href="#" style="color: var(--primary-green); font-weight: 600;"
-                    onclick="toggleModal('login-modal'); toggleModal('signup-modal')">Sign Up</a>
-            </p>
-        </div>
-    </div>
+
 
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <script src="../js/firebase-config.js"></script>
+    <script src="../js/components-loader.js"></script>
     <script src="../js/main.js"></script>
 
     <script>
@@ -421,7 +338,7 @@
         function renderExamContent(exam, tab) {
             const data = examData[exam];
             const contentDiv = document.getElementById('exam-content');
-            let html = `<h2 style="font-size: 2rem; color: var(--secondary); margin-bottom: 32px; font-weight: 800;">${data.fullName}</h2>`;
+            let html = `<h2 class="mb-32" style="font-size: 2.2rem; color: var(--secondary); font-weight: 700; letter-spacing: -1px;">${data.fullName}</h2>`;
 
             if (tab === 'notifications') {
                 html += '<div class="info-grid">';
@@ -450,12 +367,24 @@
             } else if (tab === 'cutoff') {
                 html += '<div class="info-grid">';
                 Object.entries(data.cutoff).forEach(([category, marks]) => {
-                    html += `<div class="info-card"><h3>${category} Category</h3><p style="font-size: 1.8rem; color: var(--primary); font-weight: 800; margin: 12px 0;">${marks}</p><p style="font-size: 0.9rem;">Previous Year Cut-off</p></div>`;
+                    html += `<div class="info-card"><h3>${category} Category</h3><p style="font-size: 1.8rem; color: var(--primary); font-weight: 700; margin: 12px 0;">${marks}</p><p style="font-size: 0.9rem;">Previous Year Cut-off</p></div>`;
                 });
                 html += '</div>';
             }
 
-            html += `<div class="cta-section" style="margin-top: 40px;"><h2>Ready to Start Preparation?</h2><p>Download syllabus PDF, access free mock tests, and get expert-guided study materials</p><div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;"><a href="mock-tests.html?exam=${exam}" class="btn-primary" style="background: white; color: var(--secondary);">Take Free Mock Test</a><a href="materials.html?exam=${exam}" class="btn-primary" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3);">Download Materials</a></div></div>`;
+            html += `
+            <div class="cta-section" style="margin-top: 60px;">
+                <h2>Start Your Success Journey</h2>
+                <p>Download syllabus PDF, access 50+ free mock tests, and get expert-guided materials for ${data.fullName}</p>
+                <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+                    <a href="mock-tests.html?exam=${exam}" class="btn-glass">
+                        <i class="fas fa-file-alt"></i> <span>Free Mock Tests</span>
+                    </a>
+                    <a href="materials.html?exam=${exam}" class="btn-glass">
+                        <i class="fas fa-download"></i> <span>Study Materials</span>
+                    </a>
+                </div>
+            </div>`;
 
             contentDiv.innerHTML = html;
         }

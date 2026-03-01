@@ -1,6 +1,11 @@
 let subjects = [];
 window.subjects = subjects;
 
+function getPath(filename) {
+    const isSubDir = window.location.pathname.includes('/html/');
+    return (isSubDir ? '' : 'html/') + filename;
+}
+
 async function fetchSubjects() {
     try {
         const snapshot = await db.collection('subjects').orderBy('name').get();
@@ -54,22 +59,29 @@ function toggleModal(id) {
         document.body.style.overflow = 'hidden';
 
         // Close mobile menu when opening modal
+        const nav = document.querySelector('nav');
         const navLinks = document.querySelector('.nav-links');
         const toggleBtn = document.querySelector('.mobile-menu-toggle');
-        if (navLinks && toggleBtn) {
-            navLinks.classList.remove('active');
-            toggleBtn.classList.remove('active');
-        }
+        const mobilePanel = document.querySelector('.mobile-nav-panel');
+        if (nav) nav.classList.remove('mobile-active');
+        if (navLinks) navLinks.classList.remove('active');
+        if (toggleBtn) toggleBtn.classList.remove('active');
+        if (mobilePanel) mobilePanel.classList.remove('active');
     }
 }
 
 function toggleNav() {
+    const nav = document.querySelector('nav');
     const navLinks = document.querySelector('.nav-links');
     const toggleBtn = document.querySelector('.mobile-menu-toggle');
-    if (navLinks && toggleBtn) {
-        navLinks.classList.toggle('active');
-        toggleBtn.classList.toggle('active');
-    }
+    const mobilePanel = document.querySelector('.mobile-nav-panel');
+
+    const isActive = mobilePanel && mobilePanel.classList.toggle('active');
+    if (nav) nav.classList.toggle('mobile-active', isActive);
+    if (toggleBtn) toggleBtn.classList.toggle('active', isActive);
+    if (navLinks) navLinks.classList.toggle('active', isActive);
+
+    document.body.style.overflow = isActive ? 'hidden' : '';
 }
 
 function toggleMoreNav() {
@@ -97,10 +109,16 @@ window.addEventListener('load', () => {
     document.addEventListener('click', (e) => {
         const navLinks = document.querySelector('.nav-links');
         const toggleBtn = document.querySelector('.mobile-menu-toggle');
-        const clickedLink = e.target.closest('.nav-links a') || e.target.closest('.nav-links button');
-        if (clickedLink && navLinks && navLinks.classList.contains('active')) {
-            navLinks.classList.remove('active');
-            toggleBtn.classList.remove('active');
+        const mobilePanel = document.querySelector('.mobile-nav-panel');
+        const clickedLink = e.target.closest('.nav-links a') || e.target.closest('.nav-links button') || e.target.closest('.mobile-nav-content a');
+
+        if (clickedLink) {
+            const nav = document.querySelector('nav');
+            if (nav) nav.classList.remove('mobile-active');
+            if (navLinks) navLinks.classList.remove('active');
+            if (toggleBtn) toggleBtn.classList.remove('active');
+            if (mobilePanel) mobilePanel.classList.remove('active');
+            document.body.style.overflow = '';
         }
     });
 });
@@ -127,53 +145,58 @@ window.addEventListener('scroll', () => {
 });
 
 
+// ==========================================
+// THEME MANAGEMENT (Spectrum Sync)
+// ==========================================
+window.toggleTheme = function () {
+    const isLight = document.documentElement.classList.toggle('light-mode');
+    localStorage.setItem('theme', isLight ? 'light' : 'dark');
+    updateThemeIcon(isLight);
+};
+
+function updateThemeIcon(isLight) {
+    const icons = document.querySelectorAll('.theme-toggle i');
+    icons.forEach(icon => {
+        icon.className = isLight ? 'fas fa-sun' : 'fas fa-moon';
+    });
+}
+
+// Initial Theme Application (Runs immediately to prevent flash)
+(function () {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'light') {
+        document.documentElement.classList.add('light-mode');
+    }
+})();
+
 document.addEventListener('DOMContentLoaded', () => {
     injectSubjects();
+    const isLight = document.documentElement.classList.contains('light-mode');
+    updateThemeIcon(isLight);
+});
+
+// Re-sync icon after nav loads
+window.addEventListener('navLoaded', () => {
+    const isLight = document.documentElement.classList.contains('light-mode');
+    updateThemeIcon(isLight);
 });
 
 // Admin Configuration
 const ADMIN_EMAIL = 'admin@gmail.com'; // Change this to your actual email
 
 // Auth State Handling
-auth.onAuthStateChanged(async (user) => {
+// Auth State UI Synchronization
+function updateNavUI(user) {
     const loginBtns = document.querySelectorAll('.login-toggle-btn');
+    const isProfilePage = window.location.pathname.includes('profile.html');
+
     if (user) {
-        // Save/Update user in Firestore
-        try {
-            const userRef = db.collection('students').doc(user.uid);
-            const userSnap = await userRef.get();
-
-            if (!userSnap.exists) {
-                // Wait a bit to see if displayName appears (from signup)
-                const finalName = user.displayName || 'Learner';
-                await userRef.set({
-                    name: finalName,
-                    email: user.email,
-                    plan: 'free',
-                    enrolled: firebase.firestore.FieldValue.serverTimestamp(),
-                    lastLogin: firebase.firestore.FieldValue.serverTimestamp()
-                });
-            } else {
-                await userRef.set({ lastLogin: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
-            }
-        } catch (e) {
-            console.error("Error saving user:", e);
-        }
-
-        // Check if we're on profile.html
-        const isProfilePage = window.location.pathname.includes('profile.html');
-
-        // Update login buttons based on current page
+        // Update login buttons
         loginBtns.forEach(btn => {
             if (isProfilePage) {
-                // On profile page, button shows Logout
-                btn.textContent = 'Logout';
-                btn.onclick = (e) => {
-                    e.preventDefault();
-                    logout();
-                }
+                btn.innerHTML = '<i class="fas fa-sign-out-alt"></i> <span>Logout</span>';
+                btn.onclick = (e) => { e.preventDefault(); logout(); }
             } else {
-                // On other pages, hide login button and add Profile + Logout
                 btn.style.display = 'none';
                 if (btn.parentElement && btn.parentElement.id === 'login-nav-item') {
                     btn.parentElement.style.display = 'none';
@@ -183,60 +206,139 @@ auth.onAuthStateChanged(async (user) => {
 
         // Add Profile and Logout to nav if not already there
         const navLinks = document.querySelector('.nav-links');
-        if (navLinks && !isProfilePage) {
-            // Find the login button to insert before it
-            const loginNavItem = document.getElementById('login-nav-item');
+        const navActions = document.querySelector('.nav-actions');
 
+        if (navLinks && !isProfilePage) {
             if (!document.getElementById('profile-nav-link')) {
                 const profileLi = document.createElement('li');
                 profileLi.id = 'profile-nav-link';
-                profileLi.innerHTML = `<a href="profile.html">Profile</a>`;
-                if (loginNavItem) {
-                    navLinks.insertBefore(profileLi, loginNavItem);
+                profileLi.innerHTML = `<a href="${getPath('profile.html')}" class="nav-item"><i class="fas fa-user-circle"></i> Profile</a>`;
+                navLinks.appendChild(profileLi);
+            }
+        }
+
+        if (navActions && !isProfilePage) {
+            if (!document.getElementById('logout-btn')) {
+                const logoutBtn = document.createElement('button');
+                logoutBtn.id = 'logout-btn';
+                logoutBtn.className = 'btn-primary btn-logout';
+                logoutBtn.type = 'button';
+                logoutBtn.onclick = logout;
+                logoutBtn.innerHTML = `<i class="fas fa-sign-out-alt"></i> <span>Logout</span>`;
+
+                const hamburger = navActions.querySelector('.mobile-menu-toggle');
+                if (hamburger) {
+                    navActions.insertBefore(logoutBtn, hamburger);
                 } else {
-                    navLinks.appendChild(profileLi);
+                    navActions.appendChild(logoutBtn);
                 }
             }
+        }
 
-            if (!document.getElementById('logout-btn')) {
-                const logoutLi = document.createElement('li');
-                logoutLi.id = 'logout-btn';
-                logoutLi.innerHTML = `<button type="button" class="btn-primary" onclick="logout()" style="background: #ef4444;">Logout</button>`;
-                navLinks.appendChild(logoutLi);
+        // Also add Profile and Logout to mobile panel
+        const mobileContent = document.querySelector('.mobile-nav-content');
+        const mobileFooter = document.querySelector('.mobile-nav-footer');
+
+        if (mobileContent && !isProfilePage) {
+            if (!document.getElementById('mobile-profile-link')) {
+                const profileA = document.createElement('a');
+                profileA.id = 'mobile-profile-link';
+                profileA.href = getPath('profile.html');
+                profileA.innerHTML = '<i class="fas fa-user-circle"></i> Profile';
+                profileA.style.order = "98"; // Ensure it stays near the end of links
+
+                if (mobileFooter) {
+                    mobileContent.insertBefore(profileA, mobileFooter);
+                } else {
+                    mobileContent.appendChild(profileA);
+                }
             }
         }
 
-        // Check if user is admin to show admin features in profile
+        if (mobileFooter && !isProfilePage) {
+            if (!document.getElementById('mobile-logout-btn')) {
+                const logoutBtn = document.createElement('button');
+                logoutBtn.id = 'mobile-logout-btn';
+                logoutBtn.type = 'button';
+                logoutBtn.className = 'btn-primary login-toggle-btn w-full btn-logout';
+                logoutBtn.onclick = () => { logout(); toggleNav(); };
+                logoutBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> Logout';
+                mobileFooter.appendChild(logoutBtn);
+            }
+        }
+
+        // Check for admin
         if (user.email === ADMIN_EMAIL) {
             const adminDashboardLink = document.getElementById('admin-dashboard-link');
-            if (adminDashboardLink) {
-                adminDashboardLink.style.display = 'block';
-            }
+            if (adminDashboardLink) adminDashboardLink.style.display = 'block';
         }
-        console.log("User is logged in:", user.email);
     } else {
-        // Remove Profile & Logout links if present
+        // Cleanup UI
         const profileLink = document.getElementById('profile-nav-link');
-        const logoutLink = document.getElementById('logout-btn');
-        if (profileLink) profileLink.remove();
-        if (logoutLink) logoutLink.remove();
+        const logoutBtn = document.getElementById('logout-btn');
+        const mobileProfileLink = document.getElementById('mobile-profile-link');
+        const mobileLogoutBtn = document.getElementById('mobile-logout-btn');
 
-        // Show login button again
+        if (profileLink) profileLink.remove();
+        if (logoutBtn) logoutBtn.remove();
+        if (mobileProfileLink) mobileProfileLink.remove();
+        if (mobileLogoutBtn) mobileLogoutBtn.remove();
         loginBtns.forEach(btn => {
-            btn.style.display = 'inline-block';
+            btn.style.display = 'inline-flex';
             if (btn.parentElement && btn.parentElement.id === 'login-nav-item') {
                 btn.parentElement.style.display = '';
             }
-            btn.textContent = 'Login';
-            btn.onclick = (e) => {
-                e.preventDefault();
-                toggleModal('login-modal');
-            }
+            btn.innerHTML = '<i class="fas fa-user"></i> <span>Sign In</span>';
+            btn.onclick = (e) => { e.preventDefault(); toggleModal('login-modal'); }
         });
-
-        // Allow public access to all pages - login only required for premium features
     }
+}
+
+// Global state to track current user for nav sync
+window.currentUser = null;
+
+auth.onAuthStateChanged(async (user) => {
+    window.currentUser = user;
+
+    if (user) {
+        try {
+            const userRef = db.collection('students').doc(user.uid);
+            const userSnap = await userRef.get();
+
+            if (!userSnap.exists) {
+                const finalName = user.displayName || 'Learner';
+                await userRef.set({
+                    name: finalName, email: user.email, plan: 'free',
+                    enrolled: firebase.firestore.FieldValue.serverTimestamp(),
+                    lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            } else {
+                await userRef.set({ lastLogin: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
+            }
+        } catch (e) { console.error("Error saving user:", e); }
+    }
+
+    updateNavUI(user);
 });
+
+// Sync UI when navigation finishes loading
+window.addEventListener('navLoaded', () => {
+    updateNavUI(window.currentUser);
+    attachFormListeners();
+});
+
+function attachFormListeners() {
+    const loginForm = document.getElementById('login-form');
+    if (loginForm) loginForm.onsubmit = emailSignIn;
+
+    const signupForm = document.getElementById('signup-form');
+    if (signupForm) signupForm.onsubmit = emailSignUp;
+
+    document.querySelectorAll('.google-btn').forEach(btn => {
+        btn.onclick = googleSignIn;
+    });
+}
+
 
 window.googleSignIn = async () => {
     try {
@@ -320,7 +422,7 @@ async function fetchAndRenderVideos() {
         const snapshot = await db.collection('videos').orderBy('createdAt', 'desc').get();
 
         if (snapshot.empty) {
-            container.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: var(--text-muted);">No videos currently available.</div>';
+            container.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: rgba(255, 255, 255, 0.8);">No videos currently available.</div>';
             return;
         }
 
@@ -332,8 +434,8 @@ async function fetchAndRenderVideos() {
 
             // Premium vs Free specific styling
             const externalStyles = isPremium ? 'border: 2px solid transparent; background: linear-gradient(white, white) padding-box, linear-gradient(135deg, var(--primary-light), var(--accent-teal)) border-box;' : '';
-            const badgeType = isPremium ? '<span class="badge" style="background: linear-gradient(135deg, var(--primary-light), var(--accent-teal)); color: var(--primary-dark);">Premium</span>' : '<span class="badge" style="background: #f1f5f9; color: #64748b;">Free</span>';
-            const actionBtn = isPremium ? `<a href="#" class="btn-primary" style="display: block; text-align: center; margin-top: 16px; background: linear-gradient(135deg, var(--primary-green), var(--accent-teal));" onclick="alert('Unlock with GovLearn Premium');">Unlock Video</a>` : `<a href="video-view.html" class="btn-primary" style="display: block; text-align: center; margin-top: 16px;">Watch Now</a>`;
+            const badgeType = isPremium ? '<span class="badge" style="background: linear-gradient(135deg, var(--primary-light), var(--accent-teal)); color: var(--primary-dark);">Premium</span>' : '<span class="badge" style="background: rgba(255, 255, 255, 0.05); color: rgba(255, 255, 255, 0.8);">Free</span>';
+            const actionBtn = isPremium ? `<a href="#" class="btn-primary" style="display: block; text-align: center; margin-top: 16px; background: linear-gradient(135deg, var(--primary-green), var(--accent-teal));" onclick="alert('Unlock with GovLearn Premium');">Unlock Video</a>` : `<a href="${getPath('video-view.html')}" class="btn-primary" style="display: block; text-align: center; margin-top: 16px;">Watch Now</a>`;
             const premiumOverlay = isPremium ? `<div style="position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); padding: 4px 12px; border-radius: 20px; color: gold; font-weight: 800; font-size: 0.8rem; display: flex; align-items: center; gap: 4px;">⭐ PRO</div>` : '';
 
             const fallbackImg = "https://images.unsplash.com/photo-1577493340887-b7bfff550145?auto=format&fit=crop&q=80";
@@ -367,7 +469,7 @@ async function fetchAndRenderVideos() {
         });
     } catch (error) {
         console.error("Error fetching videos:", error);
-        container.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: #ef4444;">Failed to load videos. Please try again later.</div>';
+        container.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: rgba(255, 255, 255, 0.8);">Failed to load videos. Please try again later.</div>';
     }
 }
 
@@ -376,7 +478,7 @@ async function fetchAndRenderMaterials(filterText = '', filterCat = 'all') {
     if (!container) return; // Only run on materials.html
 
     function getColorForSubject(subject) {
-        const colors = { 'Tamil': '#059669', 'English': '#3b82f6', 'Maths': '#f59e0b', 'Reasoning': '#8b5cf6', 'History': '#ec4899', 'Polity': '#06b6d4', 'Science': '#10b981', 'Geography': '#6366f1', 'Current Affairs': '#ef4444' };
+        const colors = { 'Tamil': '#059669', 'English': '#3b82f6', 'Maths': '#f59e0b', 'Reasoning': '#8b5cf6', 'History': '#ec4899', 'Polity': '#06b6d4', 'Science': '#10b981', 'Geography': '#6366f1', 'Current Affairs': '#f97316' };
         return colors[subject] || '#059669';
     }
 
@@ -403,7 +505,7 @@ async function fetchAndRenderMaterials(filterText = '', filterCat = 'all') {
         });
 
         if (materials.length === 0) {
-            container.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: var(--text-muted);">No materials found for this filter.</div>';
+            container.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: rgba(255, 255, 255, 0.8);">No materials found for this filter.</div>';
             return;
         }
 
@@ -413,32 +515,35 @@ async function fetchAndRenderMaterials(filterText = '', filterCat = 'all') {
         const grid = document.createElement('div');
         grid.className = 'grid-3';
 
-        materials.forEach(material => {
+        materials.forEach((material, index) => {
             const isPremium = false;
 
             const card = document.createElement('div');
-            card.className = 'card glass hover-3d fade-in';
-            card.style.position = 'relative';
+            card.className = 'mock-card';
+            card.style.animationDelay = `${0.1 + (index * 0.1)}s`;
 
-            const premiumTag = isPremium ? '<div style="position: absolute; top: 16px; right: 16px; background: #fef08a; color: #a16207; padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 800; border: 1px solid rgba(161, 98, 7, 0.2);">PREMIUM</div>' : '';
+            const premiumTag = isPremium ? '<div class="mock-category-tag" style="background: #fef08a; color: #a16207; border: 1px solid rgba(161, 98, 7, 0.2);">PREMIUM</div>' : '';
 
             card.innerHTML = `
                 ${premiumTag}
-                <div class="card-icon" style="background: ${getColorForSubject(material.subject)}; color: white; font-size: 1.8rem; display: flex; align-items: center; justify-content: center; width:64px; height:64px; border-radius:16px; margin-bottom:20px;">
+                <div class="mock-icon-wrap" style="background: ${getColorForSubject(material.subject)}; color: white;">
                     <i class="fas fa-file-pdf"></i>
                 </div>
-                <h3 style="font-size: 1.1rem; margin-bottom: 8px;">${material.title}</h3>
-                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px; font-size: 0.9rem;">
-                    <span style="background: var(--primary-light); color: var(--primary-green); padding: 4px 10px; border-radius: 6px; font-weight: 600;">${material.subject || 'General'}</span>
-                    <span style="color: var(--text-muted); font-weight: 600;">${material.category || 'Notes'}</span>
+                <h3 class="mock-title">${material.title}</h3>
+                <div class="mock-meta" style="margin-bottom: 8px;">
+                    <div class="meta-item"><i class="fas fa-bookmark"></i> <span>${material.subject || 'General'}</span></div>
+                    <div class="meta-item"><i class="fas fa-layer-group"></i> <span>${material.category || 'Notes'}</span></div>
                 </div>
-                <div style="display: flex; align-items: center; gap: 16px; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;">
-                    <span><i class="fas fa-star" style="color: #f59e0b; margin-right: 4px;"></i> 5.0</span>
-                    <span><i class="fas fa-clock" style="margin-right: 4px;"></i> Recent</span>
+                <div style="display: flex; align-items: center; gap: 16px; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px; font-weight: 600;">
+                    <span><i class="fas fa-star" style="color: #f59e0b; margin-right: 4px;"></i> 5.0 Rating</span>
                 </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                    <a href="${material.pdfUrl || '#'}" target="_blank" class="btn-primary" style="padding: 12px; font-size: 0.85rem; text-align: center;"><i class="fas fa-download"></i> PDF</a>
-                    <a href="${material.pdfUrl || '#'}" target="_blank" class="btn-primary" style="padding: 12px; font-size: 0.85rem; text-align: center; background: white; color: var(--primary-green); border: 2px solid var(--primary-light);"><i class="fas fa-eye"></i> View</a>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: auto;">
+                    <a href="${material.pdfUrl || '#'}" target="_blank" class="mock-start-btn" style="padding: 12px; font-size: 0.9rem;">
+                        <i class="fas fa-eye"></i> <span>View</span>
+                    </a>
+                    <a href="${material.pdfUrl || '#'}" target="_blank" class="mock-start-btn" style="padding: 12px; font-size: 0.9rem;">
+                        <i class="fas fa-download"></i> <span>PDF</span>
+                    </a>
                 </div>
             `;
             grid.appendChild(card);
@@ -448,7 +553,7 @@ async function fetchAndRenderMaterials(filterText = '', filterCat = 'all') {
 
     } catch (error) {
         console.error("Error fetching materials:", error);
-        container.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: #ef4444;">Failed to load materials. Please try again later.</div>';
+        container.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: rgba(255, 255, 255, 0.8);">Failed to load materials. Please try again later.</div>';
     }
 }
 
@@ -469,7 +574,7 @@ async function fetchAndRenderExamCategories() {
                 shortCode: (d.name || 'XX').substring(0, 2).toUpperCase(),
                 color: d.color || '#059669',
                 bg: d.bg || 'var(--primary-light)',
-                link: `exams-hub.html?cat=${encodeURIComponent(d.name || d.category || '')}`
+                link: `${getPath('exams-hub.html')}?cat=${encodeURIComponent(d.name || d.category || '')}`
             });
         });
     } catch (e) { console.warn('ExamCategories fetch error:', e); }
@@ -478,9 +583,9 @@ async function fetchAndRenderExamCategories() {
 
     container.innerHTML = categories.map((cat, i) => `
         <a href="${cat.link}" class="exam-cat-card glass hover-3d fade-in"
-            style="background: white; padding: 32px 20px; border-radius: 24px; text-align: center; border: 1px solid rgba(0,0,0,0.05); text-decoration: none; transition: all 0.4s; animation-delay: ${i * 0.1}s;">
-            <div style="background: ${cat.bg}; color: ${cat.color}; width: 56px; height: 56px; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-weight: 800; font-size: 0.8rem;">${cat.shortCode}</div>
-            <span style="font-weight: 800; color: var(--secondary);">${cat.name}</span>
+            style="animation-delay: ${i * 0.1}s;">
+            <div class="cat-icon-sm" style="background: ${cat.bg}; color: ${cat.color};">${cat.shortCode}</div>
+            <span class="cat-name">${cat.name}</span>
         </a>
     `).join('');
 }
@@ -501,8 +606,8 @@ async function fetchAndRenderCurrentAffairs() {
     if (items.length === 0 && window.MOCK_DATA) items = MOCK_DATA.currentAffairs;
 
     container.innerHTML = items.map(item => `
-        <li style="margin-bottom: 12px; display: flex; align-items: center; gap: 12px; font-weight: 500;">
-            <i class="fas fa-check-circle" style="color: var(--primary-green);"></i> ${item}
+        <li class="ca-list-item">
+            <span>${item}</span>
         </li>
     `).join('');
 }
@@ -542,12 +647,12 @@ async function fetchAndRenderFreeMocks() {
     container.innerHTML = tests.map((t, i) => {
         const c = colors[i % colors.length];
         return `
-        <a href="mock-tests.html" class="mock-card fade-in" style="animation-delay: ${i * 0.1}s;">
+        <a href="${getPath('mock-tests.html')}" class="mock-card fade-in" style="animation-delay: ${i * 0.1}s;">
             <div class="card-icon" style="background: ${c.bg}; color: ${c.color};"><i class="fas fa-edit"></i></div>
-            <div style="flex-grow: 1;">
+            <div class="card-body">
                 <span class="mock-badge" style="background: ${c.bg}; color: ${c.color};">${t.category}</span>
-                <h4 style="margin: 8px 0; font-weight: 800;">${t.title}</h4>
-                <p style="font-size: 0.85rem; opacity: 0.6; margin: 0;">${t.questions} Questions &bull; ${t.duration} Mins</p>
+                <h4 class="mock-card-title">${t.title}</h4>
+                <p class="mock-card-meta">${t.questions} Questions &bull; ${t.duration} Mins</p>
             </div>
         </a>`;
     }).join('');
@@ -582,11 +687,11 @@ async function fetchAndRenderCourses() {
         <div class="course-card fade-in" style="animation-delay: ${i * 0.1}s;">
             <div class="course-img">
                 <img src="${c.image}" alt="${c.title}" loading="lazy">
+                <span class="course-tag">${c.tag}</span>
             </div>
             <div class="course-content">
-                <span class="course-tag">${c.tag}</span>
-                <h3 style="margin-bottom: 12px; font-weight: 800;">${c.title}</h3>
-                <p style="font-size: 0.95rem; opacity: 0.7; margin-bottom: 24px;">${c.description}</p>
+                <h3 class="course-card-title">${c.title}</h3>
+                <p class="course-card-desc">${c.description}</p>
             </div>
         </div>
     `).join('');
@@ -620,7 +725,7 @@ async function fetchAndRenderTestimonials() {
 
     container.innerHTML = testimonials.map((t, i) => `
         <div class="testimonial-card fade-in"
-            style="animation-delay: ${i * 0.1}s; background: white; padding: 40px; border-radius: 32px; border-left: 8px solid ${t.borderColor}; box-shadow: var(--shadow-soft);">
+            style="animation-delay: ${i * 0.1}s; background: rgba(255, 255, 255, 0.05); padding: 40px; border-radius: 32px; border-left: 8px solid ${t.borderColor}; box-shadow: var(--shadow-soft);">
             <p style="font-style: italic; color: var(--secondary); opacity: 0.8; font-size: 1.1rem; line-height: 1.7; margin-bottom: 24px;">"${t.text}"</p>
             <div style="display: flex; align-items: center; gap: 16px;">
                 <div style="width: 50px; height: 50px; background: ${t.bg}; color: ${t.color}; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800;">${t.initial}</div>
@@ -650,13 +755,13 @@ async function fetchAndRenderCAPDFs(filterCategory = 'all') {
         } else {
             query = db.collection('materials').where('assetType', 'in', ['daily_ca', 'weekly_ca', 'monthly_ca', 'gk_static']).orderBy('createdAt', 'desc');
         }
-        const snap = await query.limit(12).get();
+        const snap = await query.limit(9).get();
         snap.forEach(doc => {
             const d = doc.data();
             pdfs.push({
                 title: d.title || 'Document',
                 description: d.subject || 'Current Affairs',
-                category: d.assetType || 'daily',
+                category: (d.assetType || 'daily').replace('_ca', ''),
                 url: d.pdfUrl || '#'
             });
         });
@@ -669,29 +774,42 @@ async function fetchAndRenderCAPDFs(filterCategory = 'all') {
     }
 
     if (pdfs.length === 0) {
-        container.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px;"><h3 style="color: var(--text-muted);">No documents found for this category.</h3></div>';
+        container.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px;"><h3 style="color: rgba(255, 255, 255, 0.8);">No documents found for this category.</h3></div>';
         return;
     }
 
     const iconMap = {
-        'daily_ca': 'fas fa-newspaper',
-        'weekly_ca': 'fas fa-book-open',
-        'monthly_ca': 'fas fa-book',
-        'gk_static': 'fas fa-university',
         'daily': 'fas fa-newspaper',
         'weekly': 'fas fa-book-open',
         'monthly': 'fas fa-book',
-        'yearly': 'fas fa-university'
+        'gk_static': 'fas fa-university',
+        'gk': 'fas fa-university'
     };
 
-    container.innerHTML = pdfs.map(p => `
-        <div class="pdf-card glass hover-3d">
-            <div class="pdf-icon"><i class="${iconMap[p.category] || 'fas fa-file-alt'}"></i></div>
-            <h3>${p.title}</h3>
-            <p>${p.description}</p>
-            <a href="${p.url}" class="btn-primary" ${p.url.startsWith('http') ? 'target="_blank"' : ''}>Download PDF</a>
-        </div>
-    `).join('');
+    container.innerHTML = '';
+
+    pdfs.forEach((p, index) => {
+        const iconClass = iconMap[p.category] || 'fas fa-file-alt';
+        const card = document.createElement('div');
+        card.className = 'ca-card';
+        card.style.animationDelay = `${0.1 + (index * 0.1)}s`;
+
+        card.innerHTML = `
+            <div class="ca-icon-box">
+                <i class="${iconClass}"></i>
+            </div>
+            <h3 class="ca-title">${p.title}</h3>
+            <div class="ca-meta">
+                <span class="ca-tag">${p.category.toUpperCase()} UPDATE</span>
+                <span><i class="fas fa-clock"></i> New</span>
+            </div>
+            <a href="${p.url}" class="ca-download-btn" ${p.url.startsWith('http') ? 'target="_blank"' : ''}>
+                <span>Download PDF</span>
+                <i class="fas fa-arrow-right"></i>
+            </a>
+        `;
+        container.appendChild(card);
+    });
 }
 
 window.fetchAndRenderCAPDFs = fetchAndRenderCAPDFs;
@@ -718,6 +836,8 @@ async function fetchAndRenderTicker() {
     const html = items.map(i => `<div class="ticker-item"><span>${i.badge}</span> ${i.text}</div>`).join('');
     container.innerHTML = html + html; // duplicate for seamless CSS marquee
 }
+
+window.fetchAndRenderTicker = fetchAndRenderTicker;
 
 // Function to fetch and render subscription plans
 async function fetchAndRenderPlans() {

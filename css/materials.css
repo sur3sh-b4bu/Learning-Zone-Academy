@@ -1,27 +1,52 @@
-/* ===== MATERIALS TABS ===== */
-.mat-tabs {
-    display: flex;
-    justify-content: center;
-    gap: 16px;
-    margin-bottom: 40px;
-    flex-wrap: wrap;
+/* Page specific styles remain, tabs are globalized */
+
+/* Material Search (Glass Search Bar) */
+.search-wrapper {
+    position: relative;
+    max-width: 800px;
+    margin: 0 auto 64px;
+    z-index: 10;
 }
 
-.mat-tab {
-    padding: 10px 20px;
-    background: white;
-    border-radius: 50px;
-    cursor: pointer;
-    font-weight: 700;
-    color: var(--text-muted);
-    border: 1px solid #e2e8f0;
+.search-wrapper i {
+    position: absolute;
+    left: 28px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--primary);
+    font-size: 1.25rem;
     transition: all 0.3s;
-    font-size: 0.9rem;
 }
 
-.mat-tab.active {
-    background: var(--primary-green);
-    color: white;
-    border-color: var(--primary-green);
-    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+.search-wrapper input {
+    width: 100%;
+    padding: 24px 30px 24px 72px;
+    border-radius: 20px;
+    border: 1px solid var(--border-glass);
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(24px);
+    box-shadow: var(--shadow-lg);
+    font-size: 1.15rem;
+    color: var(--secondary);
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    outline: none;
+}
+
+.search-wrapper input::placeholder {
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.search-wrapper input:focus {
+    box-shadow: 0 20px 50px -15px rgba(16, 185, 129, 0.25), 0 0 0 1px rgba(16, 185, 129, 0.4);
+    background: rgba(16, 185, 129, 0.05);
+    border-color: var(--primary);
+}
+
+@media (max-width: 768px) {
+    .search-wrapper input {
+        padding: 20px 24px 20px 60px;
+        font-size: 1rem;
+        border-radius: 16px;
+    }
 }

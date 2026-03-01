@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Profile | Gov Learn</title>
     <link rel="stylesheet" href="../css/common.css">
+    <link rel="stylesheet" href="../css/navigation.css">
+    <link rel="stylesheet" href="../css/footer.css">
     <link rel="stylesheet" href="../css/profile.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
@@ -13,25 +15,8 @@
 </head>
 
 <body>
-    <nav>
-        <div class="container nav-content">
-            <a href="index.html" class="logo">Gov<span>Learn</span></a>
-            <button type="button" class="mobile-menu-toggle" onclick="toggleNav()">
-                <span></span><span></span><span></span>
-            </button>
-            <ul class="nav-links">
-                <li><a href="index.html">Home</a></li>
-                <li><a href="exams-hub.html">Exams Hub</a></li>
-                <li><a href="mock-tests.html">Mock Tests</a></li>
-                <li><a href="materials.html">Materials</a></li>
-                <li><a href="current-affairs.html">Current Affairs</a></li>
-                <li><a href="videos.html">Videos</a></li>
-                <li id="profile-nav-link"><a href="profile.html" class="active">Profile</a></li>
-                <li id="logout-btn"><button type="button" class="btn-primary" onclick="logout()"
-                        style="background: #ef4444;">Logout</button></li>
-            </ul>
-        </div>
-    </nav>
+    <nav id="main-nav"></nav>
+
 
     <div class="profile-hero">
         <div class="container profile-container">
@@ -58,141 +43,130 @@
                     <div style="margin-top: 40px; display: flex; gap: 20px;">
                         <a href="mock-tests.html" class="btn-primary" style="flex: 1; text-align: center;">Start
                             Learning</a>
-                        <button type="button" class="btn-primary"
-                            style="flex: 1; background: white; border: 2px solid var(--primary-green); color: var(--primary-green); box-shadow: none;"
-                            onclick="toggleModal('edit-modal')">Edit Profile</button>
+                        <button type="button" class="btn-primary" onclick="toggleModal('edit-modal')"
+                            style="flex: 1; background: rgba(255, 255, 255, 0.05); border: 2px solid var(--primary); color: var(--primary); box-shadow: none;">
+                            Edit Profile
+                        </button>
                     </div>
                 </div>
             </div>
 
-            <!-- Dashboard sections -->
-            <div class="grid-2 fade-in"
-                style="margin-top: 40px; gap: 24px; grid-template-columns: 2fr 1fr; align-items: start;">
-
-                <!-- Main Content Area -->
-                <div style="display: flex; flex-direction: column; gap: 40px;">
-
+            <div class="profile-grid fade-in">
+                <!-- Activity Section -->
+                <div class="activity-column">
                     <!-- Activity Tracking -->
-                    <div class="card glass hover-3d" style="padding: 40px; border-radius: 24px;">
+                    <div class="card glass hover-3d" style="padding: 40px; border-radius: 32px;">
                         <div
-                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-                            <h3 style="margin: 0; font-size: 1.5rem; color: var(--primary-dark); font-weight: 800;">My
-                                Recent Activity</h3>
-                            <span
-                                style="font-size: 0.85rem; font-weight: 700; color: var(--primary-green); background: var(--primary-light); padding: 4px 12px; border-radius: 20px;">Live
-                                Updates</span>
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+                            <h3 style="margin: 0; font-size: 1.6rem; color: var(--secondary); font-weight: 700;">Recent
+                                Performance</h3>
+                            <span class="video-tag-pill analytics-badge">LIVE
+                                ANALYTICS</span>
                         </div>
                         <div id="activity-list" style="display: flex; flex-direction: column; gap: 16px;">
+                            <!-- Mock Test Item -->
                             <div class="stat-box"
-                                style="display: flex; justify-content: space-between; align-items: center; padding: 20px; background: rgba(255,255,255,0.6); border: 1px solid rgba(16, 185, 129, 0.1); border-radius: 16px; transition: all 0.3s ease;">
-                                <div style="display: flex; align-items: center; gap: 16px;">
+                                style="display: flex; justify-content: space-between; align-items: center; padding: 24px;">
+                                <div style="display: flex; align-items: center; gap: 20px;">
                                     <div
-                                        style="width: 48px; height: 48px; border-radius: 12px; background: #e0f2fe; color: #0284c7; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: bold;">
-                                        T</div>
+                                        style="width: 52px; height: 52px; border-radius: 16px; background: rgba(56, 189, 248, 0.1); color: #38bdf8; display: flex; align-items: center; justify-content: center; font-size: 1.4rem;">
+                                        <i class="fas fa-scroll"></i>
+                                    </div>
                                     <div>
-                                        <span
-                                            style="font-size: 0.75rem; font-weight: 700; color: #64748b; letter-spacing: 1px;">MOCK
-                                            TEST</span>
+                                        <span style="font-size: 0.7rem; color: var(--text-muted);">MOCK TEST</span>
                                         <p
-                                            style="font-weight: 800; color: var(--primary-dark); margin: 4px 0 0 0; font-size: 1.1rem;">
+                                            style="font-weight: 700; color: var(--secondary); margin: 4px 0 0; font-size: 1.1rem;">
                                             History - Sectional 1</p>
                                     </div>
                                 </div>
                                 <div style="text-align: right;">
-                                    <strong
-                                        style="color: var(--primary-green); font-size: 1.4rem; font-weight: 800;">88%</strong>
+                                    <div style="color: var(--primary); font-size: 1.6rem; font-weight: 700;">88%</div>
                                     <span
-                                        style="display: block; font-size: 0.75rem; color: #64748b; margin-top: 4px;">Score</span>
+                                        style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Accuracy</span>
                                 </div>
                             </div>
+                            <!-- Video Item -->
                             <div class="stat-box"
-                                style="display: flex; justify-content: space-between; align-items: center; padding: 20px; background: rgba(255,255,255,0.6); border: 1px solid rgba(16, 185, 129, 0.1); border-radius: 16px; transition: all 0.3s ease;">
-                                <div style="display: flex; align-items: center; gap: 16px;">
+                                style="display: flex; justify-content: space-between; align-items: center; padding: 24px;">
+                                <div style="display: flex; align-items: center; gap: 20px;">
                                     <div
-                                        style="width: 48px; height: 48px; border-radius: 12px; background: #fef3c7; color: #d97706; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: bold;">
-                                        V</div>
+                                        style="width: 52px; height: 52px; border-radius: 16px; background: rgba(16, 185, 129, 0.1); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.4rem;">
+                                        <i class="fas fa-play-circle"></i>
+                                    </div>
                                     <div>
-                                        <span
-                                            style="font-size: 0.75rem; font-weight: 700; color: #64748b; letter-spacing: 1px;">VIDEO
-                                            COURSE</span>
+                                        <span style="font-size: 0.7rem; color: var(--text-muted);">VIDEO LESSON</span>
                                         <p
-                                            style="font-weight: 800; color: var(--primary-dark); margin: 4px 0 0 0; font-size: 1.1rem;">
-                                            Indian Polity - Chapter 4</p>
+                                            style="font-weight: 700; color: var(--secondary); margin: 4px 0 0; font-size: 1.1rem;">
+                                            Indian Polity - Article 370</p>
                                     </div>
                                 </div>
                                 <div style="text-align: right;">
-                                    <strong
-                                        style="color: var(--text-muted); font-size: 1rem; font-weight: 700; background: #f1f5f9; padding: 6px 12px; border-radius: 20px;">Watched</strong>
+                                    <span class="video-tag-pill" style="font-size: 0.6rem; opacity: 0.8;">WATCHED</span>
                                 </div>
                             </div>
                         </div>
                     </div>
-
-
-
                 </div>
 
-                <!-- Sidebar Area -->
-                <div style="display: flex; flex-direction: column; gap: 40px;">
-
-
-
-                    <!-- Admin Portal Link (Hidden by default) -->
+                <!-- Sidebar Section -->
+                <div class="sidebar-column">
+                    <!-- Admin Portal Link -->
                     <div id="admin-dashboard-link" class="card glass hover-3d"
-                        style="display: none; padding: 40px; background: linear-gradient(135deg, white, #fef2f2); border: 2px dashed #fca5a5; text-align: center; border-radius: 24px;">
-                        <div
-                            style="width: 64px; height: 64px; background: #fee2e2; color: #ef4444; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; margin: 0 auto 20px; font-weight: 900;">
-                            A
+                        style="display: none; padding: 40px; text-align: center; border-radius: 32px;">
+                        <div class="admin-hub-icon">
+                            <i class="fas fa-user-shield"></i>
                         </div>
-                        <h3 style="margin-bottom: 12px; color: #ef4444; font-size: 1.4rem; font-weight: 800;">Admin
-                            Panel</h3>
-                        <p style="font-size: 0.95rem; color: #64748b; margin-bottom: 24px; line-height: 1.5;">Manage
-                            tests, students, and platform settings.</p>
-                        <a href="admin.html" class="btn-primary"
-                            style="background: #ef4444; width: 100%; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);">Go
-                            to Dashboard</a>
+                        <h3 style="margin-bottom: 12px; color: var(--secondary); font-size: 1.5rem; font-weight: 700;">
+                            Admin Hub</h3>
+                        <p style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 28px; line-height: 1.6;">
+                            Manage platform systems, users, and educational content.</p>
+                        <a href="admin.html" class="btn-primary" style="width: 100%; border-radius: 12px;">Access
+                            Console</a>
                     </div>
                 </div>
             </div>
 
-            <!-- Bookmarks Section -->
-            <div class="card glass hover-3d fade-in" style="margin-top: 40px; padding: 40px; border-radius: 24px;">
-                <h3 style="margin-bottom: 24px; font-size: 1.5rem; color: var(--primary-dark); font-weight: 800;">My
-                    Bookmarks</h3>
-                <div class="exam-grid" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px;">
-                    <div class="info-card"
-                        style="margin: 0; padding: 24px; background: white; border: 1px solid #e2e8f0; border-radius: 16px; transition: transform 0.3s, box-shadow 0.3s;">
-                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
-                            <span
-                                style="display: inline-block; width: 8px; height: 8px; background: #ef4444; border-radius: 50%;"></span>
-                            <h4
-                                style="font-size: 0.75rem; font-weight: 700; color: #64748b; margin: 0; letter-spacing: 1px;">
-                                PDF MATERIAL</h4>
-                        </div>
-                        <p
-                            style="font-weight: 800; font-size: 1.1rem; color: var(--primary-dark); margin-bottom: 16px; line-height: 1.4;">
-                            Modern History Short Notes</p>
-                        <a href="#"
-                            style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.9rem; color: var(--primary-green); font-weight: 700; text-decoration: none;">
-                            Open Now <span style="font-size: 1.2rem;">→</span>
-                        </a>
+            <!-- Learning Vault (Bookmarks) -->
+            <div class="card glass hover-3d fade-in"
+                style="margin-top: 40px; padding: 40px; border-radius: 32px; border: 1px solid rgba(255,255,255,0.06);">
+                <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 32px;">
+                    <div
+                        style="width: 48px; height: 48px; border-radius: 12px; background: var(--grad-primary); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+                        <i class="fas fa-bookmark"></i>
                     </div>
-                    <div class="info-card"
-                        style="margin: 0; padding: 24px; background: white; border: 1px solid #e2e8f0; border-radius: 16px; transition: transform 0.3s, box-shadow 0.3s;">
-                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
-                            <span
-                                style="display: inline-block; width: 8px; height: 8px; background: #8b5cf6; border-radius: 50%;"></span>
+                    <h3 style="margin: 0; font-size: 1.6rem; color: var(--secondary); font-weight: 700;">Learning Vault
+                    </h3>
+                </div>
+                <div class="exam-grid" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px;">
+                    <!-- Bookmark Item 1 -->
+                    <div class="stat-box" style="padding: 28px; transition: 0.4s;">
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
+                            <i class="fas fa-file-pdf" style="color: var(--primary); font-size: 0.9rem;"></i>
                             <h4
-                                style="font-size: 0.75rem; font-weight: 700; color: #64748b; margin: 0; letter-spacing: 1px;">
-                                QUESTION</h4>
+                                style="font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">
+                                STUDY MATERIAL</h4>
                         </div>
                         <p
-                            style="font-weight: 800; font-size: 1.1rem; color: var(--primary-dark); margin-bottom: 16px; line-height: 1.4;">
-                            Article 370 Explanation</p>
-                        <a href="#"
-                            style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.9rem; color: var(--primary-green); font-weight: 700; text-decoration: none;">
-                            Review Info <span style="font-size: 1.2rem;">→</span>
-                        </a>
+                            style="font-weight: 700; font-size: 1.15rem; color: var(--secondary); margin-bottom: 20px; line-height: 1.4;">
+                            Modern History Short Notes</p>
+                        <a href="#" class="btn-primary"
+                            style="padding: 10px 20px; font-size: 0.8rem; border-radius: 10px; width: 100%; text-align: center;">Open
+                            PDF</a>
+                    </div>
+                    <!-- Bookmark Item 2 -->
+                    <div class="stat-box" style="padding: 28px; transition: 0.4s;">
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
+                            <i class="fas fa-question-circle" style="color: #8b5cf6; font-size: 0.9rem;"></i>
+                            <h4
+                                style="font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">
+                                SAVED QUESTION</h4>
+                        </div>
+                        <p
+                            style="font-weight: 700; font-size: 1.15rem; color: var(--secondary); margin-bottom: 20px; line-height: 1.4;">
+                            Article 370 Detailed Explanation</p>
+                        <a href="#" class="btn-primary"
+                            style="padding: 10px 20px; font-size: 0.8rem; border-radius: 10px; width: 100%; text-align: center;">Review
+                            Now</a>
                     </div>
                 </div>
             </div>
@@ -200,63 +174,14 @@
         </div>
     </div>
 
-    <footer>
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-info">
-                    <div class="footer-logo">Gov<span>Learn</span></div>
-                    <p class="footer-tagline">Empowering aspirants to achieve their dreams of a government career
-                        through quality education.</p>
-                </div>
-                <div class="footer-links">
-                    <h4>Quick Links</h4>
-                    <ul>
-                        <li><a href="index.html">Home</a></li>
-                        <li><a href="mock-tests.html">Mock Tests</a></li>
-                        <li><a href="materials.html">Materials</a></li>
-                        <li><a href="videos.html">Videos</a></li>
-                    </ul>
-                </div>
-                <div class="footer-links">
-                    <h4>Resources</h4>
-                    <ul>
-                        <li><a href="#">Current Affairs</a></li>
-                        <li><a href="#">Syllabus Guide</a></li>
-                        <li><a href="#">Exam Notifications</a></li>
-                        <li><a href="#">Help Center</a></li>
-                    </ul>
-                </div>
-                <div class="footer-links">
-                    <h4>Follow Us</h4>
-                    <div class="social-links">
-                        <a href="#" class="social-icon">FB</a>
-                        <a href="#" class="social-icon">TW</a>
-                        <a href="#" class="social-icon">IG</a>
-                        <a href="#" class="social-icon">YT</a>
-                    </div>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2026 Gov Learn. All rights reserved.</p>
-                <div class="footer-bottom-links">
-                    <a href="#"
-                        style="color: rgba(255,255,255,0.5); text-decoration: none; font-size: 0.9rem; margin-left: 20px;">Privacy
-                        Policy</a>
-                    <a href="#"
-                        style="color: rgba(255,255,255,0.5); text-decoration: none; font-size: 0.9rem; margin-left: 20px;">Terms
-                        of Service</a>
-                </div>
-            </div>
-        </div>
-    </footer>
 
 
     <!-- Modals (Re-using system-consistent modal HTML) -->
     <div id="login-modal" class="modal-overlay">
         <div class="modal">
             <button type="button" class="modal-close" onclick="toggleModal('login-modal')">&times;</button>
-            <h2 style="margin-bottom: 10px; font-weight:800; color:var(--primary-dark);">Welcome Back</h2>
-            <p style="color: var(--text-muted); margin-bottom: 32px;">Please enter your details to sign in.</p>
+            <h2 style="margin-bottom: 10px; font-weight:700; color:var(--primary-dark);">Welcome Back</h2>
+            <p style="color: rgba(255, 255, 255, 0.8); margin-bottom: 32px;">Please enter your details to sign in.</p>
             <form id="login-form">
                 <div class="form-group">
                     <label>Email Address</label>
@@ -273,7 +198,7 @@
                 <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
                 Sign in with Google
             </button>
-            <p style="margin-top: 32px; text-align: center; font-size: 0.95rem; color: var(--text-muted);">
+            <p style="margin-top: 32px; text-align: center; font-size: 0.95rem; color: rgba(255, 255, 255, 0.8);">
                 Don't have an account? <a href="#"
                     style="color: var(--primary-green); font-weight: 700; text-decoration:none;"
                     onclick="toggleModal('login-modal'); toggleModal('signup-modal')">Sign Up</a>
@@ -284,8 +209,9 @@
     <div id="signup-modal" class="modal-overlay">
         <div class="modal">
             <button type="button" class="modal-close" onclick="toggleModal('signup-modal')">&times;</button>
-            <h2 style="margin-bottom: 10px; font-weight:800; color:var(--primary-dark);">Create Account</h2>
-            <p style="color: var(--text-muted); margin-bottom: 32px;">Join thousands of successful aspirants today.</p>
+            <h2 style="margin-bottom: 10px; font-weight:700; color:var(--primary-dark);">Create Account</h2>
+            <p style="color: rgba(255, 255, 255, 0.8); margin-bottom: 32px;">Join thousands of successful aspirants
+                today.</p>
             <form id="signup-form">
                 <div class="form-group">
                     <label>Full Name</label>
@@ -306,7 +232,7 @@
                 <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
                 Sign up with Google
             </button>
-            <p style="margin-top: 32px; text-align: center; font-size: 0.95rem; color: var(--text-muted);">
+            <p style="margin-top: 32px; text-align: center; font-size: 0.95rem; color: rgba(255, 255, 255, 0.8);">
                 Already have an account? <a href="#"
                     style="color: var(--primary-green); font-weight: 700; text-decoration:none;"
                     onclick="toggleModal('signup-modal'); toggleModal('login-modal')">Sign In</a>
@@ -314,17 +240,22 @@
         </div>
     </div>
 
+    <footer id="main-footer"></footer>
+
     <div id="edit-modal" class="modal-overlay">
         <div class="modal">
             <button type="button" class="modal-close" onclick="toggleModal('edit-modal')">&times;</button>
-            <h2 style="margin-bottom: 10px; font-weight:800; color:var(--primary-dark);">Edit Profile</h2>
-            <p style="color: var(--text-muted); margin-bottom: 32px;">Update your personal information.</p>
+            <h2 style="margin-bottom: 10px; font-weight:700; color:var(--secondary);">Settings Hub</h2>
+            <p style="color: var(--text-muted); margin-bottom: 32px;">Fine-tune your personal identity.</p>
             <form id="edit-profile-form">
                 <div class="form-group">
-                    <label>Full Name</label>
-                    <input type="text" id="edit-name" placeholder="John Doe" required>
+                    <label style="color: var(--secondary);">Display Name</label>
+                    <input type="text" id="edit-name" placeholder="E.g. Alexander Pierce"
+                        style="background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 14px; border-radius: 12px;"
+                        required>
                 </div>
-                <button type="submit" class="btn-primary" style="width: 100%; margin-top: 10px;">Save Changes</button>
+                <button type="submit" class="btn-primary"
+                    style="width: 100%; margin-top: 20px; border-radius: 12px; padding: 14px;">Sync Profile</button>
             </form>
         </div>
     </div>
@@ -334,6 +265,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
     <script src="../js/firebase-config.js"></script>
+    <script src="../js/components-loader.js"></script>
     <script src="../js/main.js"></script>
     <script>
         console.log("Profile script initialized...");

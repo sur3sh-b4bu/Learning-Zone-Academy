@@ -8,98 +8,115 @@
     <meta name="description"
         content="Watch expert video lessons and master your subjects with Gov Learn's immersive video platform.">
     <link rel="stylesheet" href="../css/common.css">
+    <link rel="stylesheet" href="../css/navigation.css">
+    <link rel="stylesheet" href="../css/footer.css">
     <link rel="stylesheet" href="../css/video-view.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
 </head>
 
 <body>
-    <nav>
-        <div class="container nav-content">
-            <a href="index.html" class="logo">Gov<span>Learn</span></a>
-            <button type="button" class="mobile-menu-toggle" onclick="toggleNav()">
-                <span></span><span></span><span></span>
-            </button>
-            <ul class="nav-links">
-                <li><a href="index.html">Home</a></li>
-                <li><a href="exams-hub.html">Exams Hub</a></li>
-                <li><a href="mock-tests.html">Mock Tests</a></li>
-                <li><a href="materials.html">Materials</a></li>
-                <li><a href="current-affairs.html">Current Affairs</a></li>
-                <li><a href="videos.html" class="active">Videos</a></li>
-                <li id="login-nav-item"><button type="button" class="btn-primary login-toggle-btn"
-                        onclick="toggleModal('login-modal')">Login</button></li>
-            </ul>
-        </div>
-    </nav>
+    <nav id="main-nav"></nav>
 
-    <div class="container">
+    <div class="video-view-container">
         <div class="video-main-layout">
             <div class="video-player-section fade-in">
-                <div class="cinema-player" id="cinema-player">
-                    <div style="text-align: center; color: rgba(255,255,255,0.5);">
-                        <div style="font-size: 3rem; margin-bottom: 16px; color: rgba(255,255,255,0.7);">PLAY</div>
-                        <p>Select a lesson from the course content to start watching...</p>
+                <div class="cinema-wrapper">
+                    <div class="cinema-glow"></div>
+                    <div class="cinema-player" id="cinema-player">
+                        <div style="text-align: center; color: rgba(255,255,255,0.3);">
+                            <div style="font-size: 5rem; margin-bottom: 24px; color: var(--primary); opacity: 0.2;"><i
+                                    class="fas fa-play"></i></div>
+                            <p style="font-weight: 500; letter-spacing: 1px;">PREPARING YOUR LESSON...</p>
+                        </div>
+                    </div>
+                    <div class="cinema-controls">
+                        <button id="prev-lesson" onclick="navigateLesson(-1)"><i class="fas fa-chevron-left"></i>
+                            Previous</button>
+                        <button id="next-lesson" onclick="navigateLesson(1)">Next <i
+                                class="fas fa-chevron-right"></i></button>
                     </div>
                 </div>
 
                 <div class="video-meta">
-                    <h1 id="v-title" style="font-size: 1.8rem; color: var(--primary-dark);">Loading Course...</h1>
-                    <div class="tabs">
-                        <div class="tab active" onclick="switchTab(event, 'overview')">Overview</div>
-                        <div class="tab" onclick="switchTab(event, 'resources')">Resources</div>
-                        <div class="tab" onclick="switchTab(event, 'notes')">Lesson Notes</div>
-                        <div class="tab" onclick="switchTab(event, 'qa')">Q&A</div>
+                    <h1 id="v-title">Loading Course...</h1>
+
+                    <div class="mat-tabs" style="margin-bottom: 24px; margin-left: 0; width: fit-content;">
+                        <div class="mat-tab active" onclick="switchTab(event, 'overview')">Overview</div>
+                        <div class="mat-tab" onclick="switchTab(event, 'resources')">Resources</div>
+                        <div class="mat-tab" onclick="switchTab(event, 'notes')">Lesson Notes</div>
+                        <div class="mat-tab" onclick="switchTab(event, 'qa')">Q&A</div>
                     </div>
 
                     <div id="tab-content-overview" class="tab-pane active"
-                        style="padding: 24px 0; line-height: 1.6; color: #475569;">
-                        <p id="v-desc">Loading description...</p>
+                        style="color: rgba(255, 255, 255, 0.7); font-size: 1.05rem; line-height: 1.8;">
+                        <p id="v-desc">Initialising course details...</p>
                     </div>
 
-                    <div id="tab-content-resources" class="tab-pane" style="padding: 24px 0; display: none;">
-                        <h4 style="margin-bottom: 12px; color: var(--primary-dark);">Course Syllabus</h4>
-                        <div id="course-syllabus-container">
-                            <p style="color: var(--text-muted); font-size: 0.9rem;">No syllabus available.</p>
-                        </div>
-
-                        <h4 style="margin-top: 24px; margin-bottom: 12px; color: var(--primary-dark);">Current Lesson
-                            Resources</h4>
-                        <div id="lesson-resource-container">
-                            <p style="color: var(--text-muted); font-size: 0.9rem;">Select a lesson with resources
-                                attached.</p>
+                    <div id="tab-content-resources" class="tab-pane" style="display: none;">
+                        <div class="resource-grid" style="display: grid; gap: 20px;">
+                            <div class="glass-section"
+                                style="padding: 24px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.06);">
+                                <h4 style="margin-bottom: 16px; color: var(--primary);"><i class="fas fa-file-pdf"></i>
+                                    Course Syllabus</h4>
+                                <div id="course-syllabus-container">
+                                    <p style="color: var(--text-muted);">No syllabus available.</p>
+                                </div>
+                            </div>
+                            <div class="glass-section"
+                                style="padding: 24px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.06);">
+                                <h4 style="margin-bottom: 16px; color: var(--primary);"><i class="fas fa-link"></i>
+                                    Lesson Assets</h4>
+                                <div id="lesson-resource-container">
+                                    <p style="color: var(--text-muted);">Select a lesson with assets attached.</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <div id="tab-content-notes" class="tab-pane" style="padding: 24px 0; display: none;">
-                        <div id="lesson-notes-container"
-                            style="background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; color: #475569; line-height: 1.6;">
-                            <p style="color: var(--text-muted); font-style: italic;">Select a lesson to view its notes.
+                    <div id="tab-content-notes" class="tab-pane" style="display: none;">
+                        <div id="lesson-notes-container">
+                            <p style="font-style: italic; opacity: 0.6;">Select a lesson to reveal expert study notes.
                             </p>
                         </div>
                     </div>
 
-                    <div id="tab-content-qa" class="tab-pane" style="padding: 24px 0; display: none;">
-                        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px;">
-                            <h4 style="margin-bottom: 16px; color: var(--primary-dark);">Ask a Question</h4>
+                    <div id="tab-content-qa" class="tab-pane" style="display: none;">
+                        <div
+                            style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 20px; padding: 32px;">
+                            <h4 style="margin-bottom: 20px; color: var(--primary); font-size: 1.2rem;">Have a Doubt?
+                            </h4>
                             <textarea placeholder="Type your doubt here..."
-                                style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; margin-bottom: 12px; height: 80px;"></textarea>
-                            <button class="btn-primary" style="padding: 8px 16px;">Post Question</button>
+                                style="width: 100%; padding: 16px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color:white; border-radius: 12px; margin-bottom: 16px; height: 100px; outline: none; transition: 0.3s;"></textarea>
+                            <button class="btn-primary" style="padding: 12px 24px; border-radius: 12px;">Post
+                                Question</button>
 
-                            <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;">
+                            <div class="qa-chat-container">
+                                <!-- Example Message 1 -->
+                                <div class="qa-message">
+                                    <div class="user-avatar">AK</div>
+                                    <div class="message-content">
+                                        <h5>Ashok Kumar <span
+                                                style="font-weight: 400; color: var(--text-muted); font-size: 0.8rem; margin-left: 8px;">2
+                                                hours ago</span></h5>
+                                        <div class="msg-text">Can someone explain the shortcut used at 12:45 for the
+                                            integration problem? It was really fast.</div>
+                                    </div>
+                                </div>
 
-                            <div style="display: flex; gap: 12px; margin-bottom: 16px;">
-                                <div
-                                    style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary-light); color: var(--primary-green); display: flex; align-items: center; justify-content: center; font-weight: bold;">
-                                    AK</div>
-                                <div>
-                                    <p
-                                        style="font-weight: 600; font-size: 0.9rem; color: var(--primary-dark); margin-bottom: 4px;">
-                                        Ashok Kumar <span
-                                            style="font-weight: 400; color: var(--text-muted); font-size: 0.8rem; margin-left: 8px;">2
-                                            hours ago</span></p>
-                                    <p style="font-size: 0.9rem; color: #475569;">Can someone explain the shortcut used
-                                        at 12:45?</p>
+                                <!-- Example Message 2 (Instructor Reply) -->
+                                <div class="qa-message"
+                                    style="margin-left: 40px; border-left: 2px solid var(--primary);">
+                                    <div class="user-avatar"
+                                        style="background: var(--grad-dark); border: 1px solid var(--primary);">IN</div>
+                                    <div class="message-content">
+                                        <h5 style="color: var(--primary);">Instructor Team <span class="video-tag-pill"
+                                                style="padding: 2px 8px; font-size: 0.6rem; vertical-align: middle;">OFFICIAL</span>
+                                        </h5>
+                                        <div class="msg-text">Hey Ashok! We used the 'Substitution Method' shortcut
+                                            here. Check the resources tab for the detailed formula sheet!</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -109,9 +126,34 @@
 
             <div class="course-sidebar fade-in">
                 <div class="sidebar-header">
-                    <h3 style="font-size: 1.1rem; margin-bottom: 4px;">Course Content</h3>
-                    <p id="lesson-count" style="font-size: 0.85rem; opacity: 0.8;">Loading lessons...</p>
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px;">
+                        <div>
+                            <h3 style="font-size: 1.25rem; margin: 0; color: var(--secondary);"><i
+                                    class="fas fa-list-ul"
+                                    style="font-size: 0.9rem; margin-right: 8px; opacity: 0.6;"></i> Course Playlist
+                            </h3>
+                            <p id="lesson-count" style="font-size: 0.8rem; margin: 4px 0 0; color: var(--text-muted);">
+                                Loading
+                                lessons...</p>
+                        </div>
+                        <div id="progress-percent" style="font-size: 1.25rem; font-weight: 700; color: var(--primary);">
+                            0%</div>
+                    </div>
+                    <div class="course-progress-bar">
+                        <div class="progress-fill" id="course-progress-fill" style="width: 0%;"></div>
+                    </div>
                 </div>
+
+                <div class="sidebar-search-container">
+                    <div style="position: relative;">
+                        <i class="fas fa-search"
+                            style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.9rem;"></i>
+                        <input type="text" class="sidebar-search" id="lesson-search" placeholder="Search lessons..."
+                            oninput="filterSidebarLessons()">
+                    </div>
+                </div>
+
                 <div class="lesson-list" id="lesson-list-container">
                     <!-- Lessons injected here -->
                 </div>
@@ -119,11 +161,15 @@
         </div>
     </div>
 
+    <footer id="main-footer"></footer>
+
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
     <script src="../js/firebase-config.js"></script>
+    <script src="../js/mock-data.js"></script>
+    <script src="../js/components-loader.js"></script>
     <script src="../js/main.js"></script>
     <script>
         // Access Gate
@@ -171,8 +217,8 @@
 
                 if (course.syllabusUrl) {
                     document.getElementById('course-syllabus-container').innerHTML = `
-                        <a href="${course.syllabusUrl}" target="_blank" class="btn-primary" style="display: inline-flex; align-items: center; gap: 8px; background: var(--primary-light); color: var(--primary-green); font-size: 0.9rem; padding: 10px 20px;">
-                            Download ${course.syllabusFileName || 'Syllabus PDF'}
+                        <a href="${course.syllabusUrl}" target="_blank" class="btn-primary" style="display: inline-flex; align-items: center; gap: 8px; font-size: 0.85rem; padding: 12px 24px; border-radius: 12px;">
+                            <i class="fas fa-download"></i> Download Syllabus PDF
                         </a>
                     `;
                 }
@@ -184,28 +230,45 @@
                 listContainer.innerHTML = '';
                 document.getElementById('lesson-count').textContent = snap.size + (snap.size === 1 ? ' Lesson' : ' Lessons');
 
+                lessonDataCache = [];
                 if (snap.empty) {
-                    listContainer.innerHTML = "<div style='padding:24px; text-align:center; color: var(--text-muted);'>No lessons available yet. Check back later!</div>";
+                    listContainer.innerHTML = "<div style='padding:24px; text-align:center; color: rgba(255, 255, 255, 0.4);'>No lessons available.</div>";
                     return;
                 }
 
                 let idx = 1;
                 snap.forEach(doc => {
-                    const lesson = doc.data();
+                    const l = { id: doc.id, ...doc.data(), index: idx };
+                    lessonDataCache.push(l);
+
                     const lessonCard = document.createElement('div');
-                    lessonCard.className = 'lesson-card';
-                    lessonCard.onclick = () => playLesson(lesson, lessonCard);
+                    lessonCard.className = 'lesson-card fade-in';
+                    lessonCard.style.animationDelay = `${idx * 0.08}s`;
+                    lessonCard.setAttribute('data-title', l.title.toLowerCase());
+                    lessonCard.onclick = () => playLesson(l, lessonCard);
 
                     lessonCard.innerHTML = `
-                        <div class="lesson-thumb" style="font-size: 0.7rem;">PLAY</div>
+                        <div class="lesson-thumb">
+                            <span class="l-number">${idx < 10 ? '0' + idx : idx}</span>
+                            <i class="fas fa-play l-play-icon"></i>
+                        </div>
                         <div class="lesson-details">
-                            <h4>${idx < 10 ? '0' + idx : idx}. ${lesson.title}</h4>
-                            <span>Video Lesson</span>
+                            <h4>${l.title}</h4>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span class="now-playing-tag">Now Playing</span>
+                                <span><i class="fas fa-clock" style="font-size: 0.7rem;"></i> 12:45</span>
+                            </div>
                         </div>
                     `;
                     listContainer.appendChild(lessonCard);
                     idx++;
                 });
+
+                // Auto-play first lesson
+                if (lessonDataCache.length > 0) {
+                    const firstCard = listContainer.querySelector('.lesson-card');
+                    playLesson(lessonDataCache[0], firstCard);
+                }
 
             } catch (err) {
                 console.error("Error loading course:", err);
@@ -213,73 +276,94 @@
             }
         }
 
+        let lessonDataCache = [];
+        let currentLessonIndex = -1;
+
         function playLesson(lesson, cardElement) {
+            currentLessonIndex = lessonDataCache.findIndex(l => l.id === lesson.id);
+
+            // Update Progress Bar
+            const percent = Math.round(((currentLessonIndex + 1) / lessonDataCache.length) * 100);
+            document.getElementById('course-progress-fill').style.width = percent + '%';
+            document.getElementById('progress-percent').innerText = percent + '%';
+
             // Update active state
             document.querySelectorAll('.lesson-card').forEach(c => c.classList.remove('active'));
-            cardElement.classList.add('active');
+            if (cardElement) cardElement.classList.add('active');
+            else {
+                // Find card by title filter if navigating via buttons
+                const cards = document.querySelectorAll('.lesson-card');
+                if (cards[currentLessonIndex]) cards[currentLessonIndex].classList.add('active');
+            }
 
             const playerContainer = document.getElementById('cinema-player');
             let videoHtml = '';
 
-            // Handling YouTube Links
+            // Handling Video Content
             if (lesson.url && (lesson.url.includes('youtube.com') || lesson.url.includes('youtu.be'))) {
                 let videoId = '';
                 if (lesson.url.includes('v=')) videoId = lesson.url.split('v=')[1].split('&')[0];
                 else if (lesson.url.includes('youtu.be/')) videoId = lesson.url.split('youtu.be/')[1].split('?')[0];
 
                 if (videoId) {
-                    videoHtml = `<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${videoId}?autoplay=1" title="${lesson.title}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="border-radius: 24px;"></iframe>`;
-                } else {
-                    videoHtml = `<div style="text-align:center; color:white;">Invalid YouTube URL</div>`;
+                    videoHtml = `<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${videoId}?autoplay=1" title="${lesson.title}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="border-radius: 20px;"></iframe>`;
                 }
             } else if (lesson.url) {
-                videoHtml = `<video width="100%" height="100%" controls autoplay style="border-radius: 24px; background: black;">
+                videoHtml = `<video width="100%" height="100%" controls autoplay style="border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.5);">
                                <source src="${lesson.url}" type="video/mp4">
-                               <source src="${lesson.url}" type="video/webm">
                                Your browser does not support the video tag.
                              </video>`;
-            } else {
-                videoHtml = `<div style="text-align:center; color:white;">No video file available</div>`;
             }
 
-            playerContainer.innerHTML = videoHtml;
+            playerContainer.innerHTML = videoHtml || '<div style="color:white; opacity:0.5;">Video URL not found</div>';
 
-            // Load Lesson Specific Metadata into Tabs
-            const notesContainer = document.getElementById('lesson-notes-container');
-            if (lesson.notes) {
-                // simple linebreak formatting
-                notesContainer.innerHTML = lesson.notes.replace(/\n/g, '<br>');
-            } else {
-                notesContainer.innerHTML = `<p style="color: var(--text-muted); font-style: italic;">No specific notes provided for this lesson.</p>`;
-            }
+            // Tab Updates
+            document.getElementById('lesson-notes-container').innerHTML = lesson.notes ? lesson.notes.replace(/\n/g, '<br>') : '<p style="opacity:0.5;">No notes for this session.</p>';
 
-            const resourceContainer = document.getElementById('lesson-resource-container');
+            const resContainer = document.getElementById('lesson-resource-container');
             if (lesson.resourcePdfUrl) {
-                resourceContainer.innerHTML = `
-                    <div style="display: flex; align-items: center; gap: 12px; background: white; border: 1px solid #e2e8f0; padding: 16px; border-radius: 12px;">
-                        <div style="font-size: 1.5rem; color: var(--primary-green);">#</div>
-                        <div style="flex: 1;">
-                            <h5 style="margin: 0 0 4px 0; color: var(--primary-dark); font-size: 0.95rem;">${lesson.resourcePdfName || 'Additional Material.pdf'}</h5>
-                            <p style="margin: 0; color: var(--text-muted); font-size: 0.8rem;">PDF Document</p>
-                        </div>
-                        <a href="${lesson.resourcePdfUrl}" target="_blank" class="btn-primary" style="padding: 8px 16px; font-size: 0.85rem;">Download</a>
-                    </div>
-                `;
+                resContainer.innerHTML = `<div style="display: flex; align-items: center; gap: 16px; background: rgba(16, 185, 129, 0.05); border: 1px solid rgba(16, 185, 129, 0.2); padding: 20px; border-radius: 16px;">
+                    <div style="width: 48px; height: 48px; border-radius: 12px; background: var(--grad-primary); display: flex; align-items: center; justify-content: center; color: white;"><i class="fas fa-file-download"></i></div>
+                    <div style="flex: 1;"><h5 style="margin: 0; color: white;">${lesson.resourcePdfName || 'Resource.pdf'}</h5></div>
+                    <a href="${lesson.resourcePdfUrl}" target="_blank" class="btn-primary" style="padding: 10px 20px; font-size: 0.8rem;">Download</a>
+                </div>`;
             } else {
-                resourceContainer.innerHTML = `<p style="color: var(--text-muted); font-size: 0.9rem;">No resources attached to this lesson.</p>`;
+                resContainer.innerHTML = `<p style="opacity: 0.5;">No session assets.</p>`;
             }
+        }
+
+        function navigateLesson(dir) {
+            const nextIdx = currentLessonIndex + dir;
+            if (nextIdx >= 0 && nextIdx < lessonDataCache.length) {
+                playLesson(lessonDataCache[nextIdx]);
+                // Scroll into view if needed
+                const activeCard = document.querySelector('.lesson-card.active');
+                if (activeCard) activeCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+
+        function filterSidebarLessons() {
+            const q = document.getElementById('lesson-search').value.toLowerCase();
+            document.querySelectorAll('.lesson-card').forEach(card => {
+                const title = card.getAttribute('data-title');
+                card.style.display = title.includes(q) ? 'flex' : 'none';
+            });
         }
 
         function switchTab(event, tabId) {
             // Update Tab UI
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.mat-tab').forEach(t => t.classList.remove('active'));
             event.target.classList.add('active');
 
             // Update Tab Content
-            document.querySelectorAll('.tab-pane').forEach(p => p.style.display = 'none');
+            document.querySelectorAll('.tab-pane').forEach(p => {
+                p.style.display = 'none';
+                p.classList.remove('active');
+            });
             const targetPane = document.getElementById('tab-content-' + tabId);
             if (targetPane) {
                 targetPane.style.display = 'block';
+                targetPane.classList.add('active');
             }
         }
 

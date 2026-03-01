@@ -124,7 +124,8 @@
                     <div class="user-profile" id="user-profile-menu" onclick="toggleProfileDropdown(event)">
                         <div class="user-info" style="text-align: right;">
                             <div class="name" style="font-size: 0.85rem; font-weight: 700;">Admin Panel</div>
-                            <div style="font-size: 0.65rem; color: var(--text-muted); font-weight: 600;">Super Admin
+                            <div style="font-size: 0.65rem; color: rgba(255, 255, 255, 0.8); font-weight: 600;">Super
+                                Admin
                             </div>
                         </div>
                         <div class="user-avatar">AD</div>
@@ -138,6 +139,13 @@
                             <a href="#" onclick="switchSection('settings', null); return false;"><i
                                     class="fas fa-user-circle"></i>
                                 My Profile</a>
+                            <div class="dropdown-divider"
+                                style="height: 1px; background: rgba(255, 255, 255, 0.05); margin: 8px 0;">
+                            </div>
+                            <a href="../index.html"><i class="fas fa-rocket"></i> Visit Website</a>
+                            <div class="dropdown-divider"
+                                style="height: 1px; background: rgba(255, 255, 255, 0.05); margin: 8px 0;">
+                            </div>
                             <a href="#" onclick="switchSection('settings', null); return false;"><i
                                     class="fas fa-cog"></i>
                                 Account Settings</a>
@@ -199,8 +207,9 @@
                                 <div class="trend up"><i class="fas fa-plus"></i> 4 active</div>
                             </div>
                             <div class="stat-card animate-entry delay-3">
-                                <div class="icon-box" style="background: #fff7ed; color: #f97316;"><i
-                                        class="fas fa-video"></i></div>
+                                <div class="icon-box" style="background: rgba(255, 255, 255, 0.05)7ed; color: #f97316;">
+                                    <i class="fas fa-video"></i>
+                                </div>
                                 <div class="label">Digital Assets</div>
                                 <div class="value" id="stat-assets">0</div>
                                 <div class="trend up">99.9% Uptime</div>
@@ -240,44 +249,51 @@
                                     <h3 style="font-size: 1.1rem; margin-bottom: 20px;">Deployment Tools</h3>
                                     <div style="display: flex; flex-direction: column; gap: 12px;">
                                         <button class="quick-action-btn" onclick="showAddSubjectModal()"
-                                            style="display: flex; align-items: center; gap: 16px; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; background: #f8fafc; text-align: left; cursor: pointer; transition: all 0.2s ease;">
+                                            style="display: flex; align-items: center; gap: 16px; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; background: rgba(255, 255, 255, 0.05); text-align: left; cursor: pointer; transition: all 0.2s ease;">
                                             <div class="icon"
                                                 style="background: #f0fdf4; color: #166534; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 8px;">
                                                 <i class="fas fa-layer-group"></i>
                                             </div>
                                             <div class="text">
                                                 <div class="title"
-                                                    style="font-weight: 700; color: #1e293b; font-size: 0.95rem;">Exam
+                                                    style="font-weight: 700; color: rgba(255, 255, 255, 0.8); font-size: 0.95rem;">
+                                                    Exam
                                                     Architecture</div>
-                                                <div class="desc" style="font-size: 0.8rem; color: #64748b;">Define new
+                                                <div class="desc"
+                                                    style="font-size: 0.8rem; color: rgba(255, 255, 255, 0.8);">Define
+                                                    new
                                                     categories and subjects</div>
                                             </div>
                                         </button>
                                         <button class="quick-action-btn" onclick="toggleMaterialModal(true)"
-                                            style="display: flex; align-items: center; gap: 16px; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; background: #f8fafc; text-align: left; cursor: pointer; transition: all 0.2s ease;">
+                                            style="display: flex; align-items: center; gap: 16px; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; background: rgba(255, 255, 255, 0.05); text-align: left; cursor: pointer; transition: all 0.2s ease;">
                                             <div class="icon"
                                                 style="background: #eff6ff; color: #1e40af; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 8px;">
                                                 <i class="fas fa-file-pdf"></i>
                                             </div>
                                             <div class="text">
                                                 <div class="title"
-                                                    style="font-weight: 700; color: #1e293b; font-size: 0.95rem;">
+                                                    style="font-weight: 700; color: rgba(255, 255, 255, 0.8); font-size: 0.95rem;">
                                                     Resource Repository</div>
-                                                <div class="desc" style="font-size: 0.8rem; color: #64748b;">Upload PDF
+                                                <div class="desc"
+                                                    style="font-size: 0.8rem; color: rgba(255, 255, 255, 0.8);">Upload
+                                                    PDF
                                                     & document materials</div>
                                             </div>
                                         </button>
                                         <button class="quick-action-btn" onclick="toggleVideoModal(true)"
-                                            style="display: flex; align-items: center; gap: 16px; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; background: #f8fafc; text-align: left; cursor: pointer; transition: all 0.2s ease;">
+                                            style="display: flex; align-items: center; gap: 16px; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; background: rgba(255, 255, 255, 0.05); text-align: left; cursor: pointer; transition: all 0.2s ease;">
                                             <div class="icon"
-                                                style="background: #fff1f2; color: #9f1239; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 8px;">
+                                                style="background: rgba(255, 255, 255, 0.05)1f2; color: #9f1239; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 8px;">
                                                 <i class="fas fa-play-circle"></i>
                                             </div>
                                             <div class="text">
                                                 <div class="title"
-                                                    style="font-weight: 700; color: #1e293b; font-size: 0.95rem;">Media
+                                                    style="font-weight: 700; color: rgba(255, 255, 255, 0.8); font-size: 0.95rem;">
+                                                    Media
                                                     Master</div>
-                                                <div class="desc" style="font-size: 0.8rem; color: #64748b;">Publish
+                                                <div class="desc"
+                                                    style="font-size: 0.8rem; color: rgba(255, 255, 255, 0.8);">Publish
                                                     video lessons & tutorials</div>
                                             </div>
                                         </button>
@@ -377,7 +393,7 @@
                                     <tbody id="revenue-table-body">
                                         <tr>
                                             <td colspan="5"
-                                                style="text-align: center; padding: 40px; color: var(--text-muted);">
+                                                style="text-align: center; padding: 40px; color: rgba(255, 255, 255, 0.8);">
                                                 No active revenue streams detected.
                                             </td>
                                         </tr>
@@ -397,15 +413,16 @@
                                 </div>
                                 <h2 style="font-weight: 900; color: var(--primary-dark); margin-bottom: 4px;">Super
                                     Admin</h2>
-                                <p style="color: var(--text-muted); font-weight: 600; margin-bottom: 24px;">
+                                <p style="color: rgba(255, 255, 255, 0.8); font-weight: 600; margin-bottom: 24px;">
                                     admin@gmail.com</p>
 
                                 <div style="display: flex; flex-direction: column; gap: 12px; text-align: left;">
                                     <div
-                                        style="padding: 16px; background: #f8fafc; border-radius: 16px; display: flex; align-items: center; gap: 12px;">
+                                        style="padding: 16px; background: rgba(255, 255, 255, 0.05); border-radius: 16px; display: flex; align-items: center; gap: 12px;">
                                         <i class="fas fa-shield-alt" style="color: var(--primary);"></i>
                                         <div>
-                                            <div style="font-size: 0.75rem; color: var(--text-muted);">Access Level
+                                            <div style="font-size: 0.75rem; color: rgba(255, 255, 255, 0.8);">Access
+                                                Level
                                             </div>
                                             <div
                                                 style="font-size: 0.9rem; font-weight: 700; color: var(--primary-dark);">
@@ -413,10 +430,11 @@
                                         </div>
                                     </div>
                                     <div
-                                        style="padding: 16px; background: #f8fafc; border-radius: 16px; display: flex; align-items: center; gap: 12px;">
+                                        style="padding: 16px; background: rgba(255, 255, 255, 0.05); border-radius: 16px; display: flex; align-items: center; gap: 12px;">
                                         <i class="fas fa-clock" style="color: var(--accent-orange);"></i>
                                         <div>
-                                            <div style="font-size: 0.75rem; color: var(--text-muted);">Last Login</div>
+                                            <div style="font-size: 0.75rem; color: rgba(255, 255, 255, 0.8);">Last Login
+                                            </div>
                                             <div
                                                 style="font-size: 0.9rem; font-weight: 700; color: var(--primary-dark);">
                                                 Today, 10:45 AM</div>
@@ -481,18 +499,20 @@
                                     <h4
                                         style="font-weight: 800; color: var(--primary-dark); font-size: 1.1rem; margin-bottom: 8px;">
                                         Seed Sample Data</h4>
-                                    <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 24px;">Upload
+                                    <p
+                                        style="color: rgba(255, 255, 255, 0.8); font-size: 0.95rem; margin-bottom: 24px;">
+                                        Upload
                                         all mock/demo data to Firebase collections. This will populate Exam Categories,
                                         Courses, and more.</p>
                                     <div id="seed-progress" style="display: none; margin-bottom: 16px;">
                                         <div
-                                            style="background: #f1f5f9; border-radius: 99px; height: 10px; overflow: hidden;">
+                                            style="background: rgba(255, 255, 255, 0.05); border-radius: 99px; height: 10px; overflow: hidden;">
                                             <div id="seed-progress-bar"
                                                 style="background: linear-gradient(90deg, var(--primary-green), var(--accent-teal)); height: 100%; width: 0%; transition: width 0.4s; border-radius: 99px;">
                                             </div>
                                         </div>
                                         <p id="seed-status"
-                                            style="color: var(--text-muted); font-size: 0.85rem; margin-top: 10px; font-weight: 600;">
+                                            style="color: rgba(255, 255, 255, 0.8); font-size: 0.85rem; margin-top: 10px; font-weight: 600;">
                                             Starting...</p>
                                     </div>
                                     <button class="btn-modern btn-modern-primary" onclick="seedMockDataToFirebase()"
@@ -566,7 +586,7 @@
                                 </div>
                                 <div style="display: flex; gap: 12px;">
                                     <button type="button" class="btn-modern" onclick="resetPlanForm()"
-                                        style="background: #e2e8f0; color: #475569;">Cancel</button>
+                                        style="background: #e2e8f0; color: rgba(255, 255, 255, 0.8);">Cancel</button>
                                     <button type="submit" form="plan-form" class="btn-modern btn-modern-primary">
                                         <i class="fas fa-save" style="margin-right: 8px;"></i> Save Plan
                                     </button>
@@ -638,7 +658,7 @@
                                 <tbody id="plans-table-body">
                                     <tr>
                                         <td colspan="5"
-                                            style="text-align: center; padding: 40px; color: var(--text-muted);">
+                                            style="text-align: center; padding: 40px; color: rgba(255, 255, 255, 0.8);">
                                             Fetching subscriber plans...</td>
                                     </tr>
                                 </tbody>
@@ -674,7 +694,7 @@
                             </form>
 
                             <div
-                                style="margin-top: 24px; padding: 16px; background: #fffbeb; border: 1px solid #fef3c7; border-radius: 12px; display: flex; gap: 12px; align-items: flex-start;">
+                                style="margin-top: 24px; padding: 16px; background: rgba(255, 255, 255, 0.05)beb; border: 1px solid #fef3c7; border-radius: 12px; display: flex; gap: 12px; align-items: flex-start;">
                                 <div style="font-size: 1.2rem; color: #92400e;"><i
                                         class="fas fa-exclamation-circle"></i>
                                 </div>
@@ -850,7 +870,7 @@
                                         style="position: absolute; left: 18px; top: 14px; color: #94a3b8; font-size: 0.9rem;"></i>
                                     <input type="text" id="student-search-input" onkeyup="filterStudents()"
                                         placeholder="Search by name, email or mobile..."
-                                        style="width: 100%; padding: 12px 20px 12px 48px; border-radius: 12px; border: 1px solid #e2e8f0; background: #f8fafc; font-size: 0.9rem;">
+                                        style="width: 100%; padding: 12px 20px 12px 48px; border-radius: 12px; border: 1px solid #e2e8f0; background: rgba(255, 255, 255, 0.05); font-size: 0.9rem;">
                                 </div>
                             </div>
                             <div class="user-table-wrapper">
@@ -981,7 +1001,7 @@
                 <div class="form-group" style="margin: 24px 0;">
                     <label>Resource Upload (Cloud Storage)</label>
                     <div id="material-dropzone" onclick="document.getElementById('material-file').click()"
-                        style="border: 2px dashed #cbd5e1; border-radius: 16px; padding: 32px; text-align: center; cursor: pointer; background: #f8fafc; transition: 0.3s; border-color: var(--primary-green);">
+                        style="border: 2px dashed #cbd5e1; border-radius: 16px; padding: 32px; text-align: center; cursor: pointer; background: rgba(255, 255, 255, 0.05); transition: 0.3s; border-color: var(--primary-green);">
                         <p style="font-weight: 800; color: var(--primary-dark); margin-bottom: 4px;">Click to Select
                             Reference File</p>
                         <p style="color: #94a3b8; font-size: 0.85rem;">PDF, DOC, DOCX prioritized</p>
@@ -1000,10 +1020,10 @@
                 </div>
 
                 <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
-                    <div style="flex: 1; height: 1px; background: #f1f5f9;"></div>
+                    <div style="flex: 1; height: 1px; background: rgba(255, 255, 255, 0.05);"></div>
                     <span style="color: #94a3b8; font-size: 0.75rem; font-weight: 800; letter-spacing: 1px;">EXTERNAL
                         LINK</span>
-                    <div style="flex: 1; height: 1px; background: #f1f5f9;"></div>
+                    <div style="flex: 1; height: 1px; background: rgba(255, 255, 255, 0.05);"></div>
                 </div>
 
                 <div class="form-group">
@@ -1063,7 +1083,7 @@
                 <div class="form-group">
                     <label>Course Syllabus PDF (Ref/Guide)</label>
                     <div id="video-pdf-dropzone" onclick="document.getElementById('video-pdf-file').click()"
-                        style="border: 2px dashed #cbd5e1; border-radius: 16px; padding: 24px; text-align: center; cursor: pointer; background: #f8fafc; transition: 0.3s;">
+                        style="border: 2px dashed #cbd5e1; border-radius: 16px; padding: 24px; text-align: center; cursor: pointer; background: rgba(255, 255, 255, 0.05); transition: 0.3s;">
                         <p style="font-weight: 700; color: var(--primary-dark); margin-bottom: 4px;">Select Course
                             Syllabus</p>
                         <p id="video-pdf-file-name"
@@ -1298,9 +1318,9 @@
                         </div>
 
                         <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
-                            <div style="flex: 1; height: 1px; background: #f1f5f9;"></div>
+                            <div style="flex: 1; height: 1px; background: rgba(255, 255, 255, 0.05);"></div>
                             <span style="color: #94a3b8; font-size: 0.7rem; font-weight: 800;">REMOTE URL</span>
-                            <div style="flex: 1; height: 1px; background: #f1f5f9;"></div>
+                            <div style="flex: 1; height: 1px; background: rgba(255, 255, 255, 0.05);"></div>
                         </div>
 
                         <div class="form-group">
@@ -1317,7 +1337,8 @@
                             <label>Reference Material (PDF)</label>
                             <div id="lesson-pdf-dropzone" onclick="document.getElementById('lesson-pdf-file').click()"
                                 style="border: 1px dashed #cbd5e1; border-radius: 12px; padding: 16px; text-align: center; cursor: pointer; transition: 0.3s;">
-                                <p style="color: #64748b; font-size: 0.9rem; font-weight: 600;">Attach Study PDF</p>
+                                <p style="color: rgba(255, 255, 255, 0.8); font-size: 0.9rem; font-weight: 600;">Attach
+                                    Study PDF</p>
                                 <p id="lesson-pdf-file-name"
                                     style="color: var(--primary-green); font-weight: 700; margin-top: 4px; display: none;">
                                 </p>
@@ -1352,7 +1373,7 @@
                 style="margin-bottom: 12px; color: var(--primary-dark); font-weight: 900; font-size: 1.75rem;">Confirm
                 Action</h2>
             <p id="confirm-message"
-                style="color: var(--text-muted); margin-bottom: 40px; font-size: 1.1rem; line-height: 1.6;"></p>
+                style="color: rgba(255, 255, 255, 0.8); margin-bottom: 40px; font-size: 1.1rem; line-height: 1.6;"></p>
             <div style="display: flex; gap: 16px;">
                 <button id="confirm-cancel" class="btn-modern btn-modern-secondary" style="flex: 1;">Cancel</button>
                 <button id="confirm-ok" class="btn-modern btn-modern-primary"
@@ -1392,7 +1413,7 @@
         // Mobile & Desktop sidebar controllers
         window.toggleMobileSidebar = () => {
             const sidebar = safeGet('admin-sidebar');
-            if (sidebar) sidebar.classList.toggle('open');
+            if (sidebar) sidebar.classList.toggle('mobile-active');
         };
 
         window.toggleDesktopSidebar = () => {
@@ -1402,7 +1423,7 @@
 
         const closeMobileSidebar = () => {
             const sidebar = safeGet('admin-sidebar');
-            if (sidebar) sidebar.classList.remove('open');
+            if (sidebar) sidebar.classList.remove('mobile-active');
         };
 
 
@@ -1597,25 +1618,25 @@
         window.fetchTicker = async () => {
             const tbody = safeGet('ticker-table-body');
             if (!tbody) return;
-            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 30px; color: var(--text-muted);">Loading...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 30px; color: rgba(255, 255, 255, 0.8);">Loading...</td></tr>';
             try {
                 const snap = await db.collection('ticker').orderBy('createdAt', 'desc').get();
                 if (snap.empty) {
-                    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 40px; color: var(--text-muted);">No ticker items yet. Add one above!</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 40px; color: rgba(255, 255, 255, 0.8);">No ticker items yet. Add one above!</td></tr>';
                     return;
                 }
                 snap.forEach(doc => {
                     const d = doc.data();
                     const date = d.createdAt ? new Date(d.createdAt.seconds * 1000).toLocaleDateString() : 'N/A';
-                    const badgeColors = { NEW: '#10b981', ALERT: '#ef4444', UPDATE: '#3b82f6', OFFER: '#f59e0b', EXAM: '#8b5cf6', RESULT: '#06b6d4' };
+                    const badgeColors = { NEW: '#10b981', ALERT: '#f97316', UPDATE: '#3b82f6', OFFER: '#f59e0b', EXAM: '#8b5cf6', RESULT: '#06b6d4' };
                     const color = badgeColors[d.badge] || '#64748b';
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
                             <td class="text-center"><span class="badge" style="background: ${color}15; color: ${color}; border: 1px solid ${color}30; font-weight: 700;">${d.badge || 'UPDATE'}</span></td>
                             <td style="max-width: 400px; padding: 18px 24px;">
-                                <div style="font-weight: 600; color: #1e293b;">${d.text || ''}</div>
+                                <div style="font-weight: 600; color: rgba(255, 255, 255, 0.8);">${d.text || ''}</div>
                             </td>
-                            <td class="text-center" style="color: #64748b; font-size: 13px;">${date}</td>
+                            <td class="text-center" style="color: rgba(255, 255, 255, 0.8); font-size: 13px;">${date}</td>
                             <td class="text-center">
                                 <button class="action-btn btn-delete" title="Remove Notification" onclick="deleteTickerItem('${doc.id}')">
                                     <i class="fas fa-trash-alt"></i>
@@ -1694,8 +1715,8 @@
                             <span class="table-title">${plan.name}</span>
                             <span class="table-category">${plan.period} Cycle</span>
                         </td>
-                        <td style="font-weight:700; color: #1E293B;">₹${plan.price}</td>
-                        <td style="color:var(--text-muted); font-size: 14px;">${plan.features.join(', ')}</td>
+                        <td style="font-weight:700; color: rgba(255, 255, 255, 0.8);">₹${plan.price}</td>
+                        <td style="color:rgba(255, 255, 255, 0.8); font-size: 14px;">${plan.features.join(', ')}</td>
                         <td class="text-center">
                             ${plan.popular ? `<span class="badge badge-success">Popular</span>` : '<span class="badge badge-info">Standard</span>'}
                         </td>
@@ -1955,7 +1976,7 @@
         window.openPlaylistModal = (courseId, title) => {
             safeGet('manage-playlist-course-id').value = courseId;
             safeGet('playlist-modal-title').textContent = `Manage Playlist: ${title}`;
-            safeGet('playlist-list-container').innerHTML = `<p style="color: var(--text-muted); padding: 10px;">Loading lessons...</p>`;
+            safeGet('playlist-list-container').innerHTML = `<p style="color: rgba(255, 255, 255, 0.8); padding: 10px;">Loading lessons...</p>`;
             window.fetchCourseLessons(courseId);
             togglePlaylistModal(true);
         };
@@ -1967,7 +1988,7 @@
                 const snap = await db.collection('videos').doc(courseId).collection('lessons').orderBy('createdAt', 'asc').get();
                 container.innerHTML = '';
                 if (snap.empty) {
-                    container.innerHTML = `<p style="color: var(--text-muted); padding: 10px;">No lessons found. Add one above.</p>`;
+                    container.innerHTML = `<p style="color: rgba(255, 255, 255, 0.8); padding: 10px;">No lessons found. Add one above.</p>`;
                     return;
                 }
 
@@ -1975,13 +1996,13 @@
                 snap.forEach(doc => {
                     const lesson = doc.data();
                     const div = document.createElement('div');
-                    div.style = "display: flex; justify-content: space-between; align-items: center; padding: 16px; background: white; border-radius: 12px; border: 1px solid #e2e8f0;";
+                    div.style = "display: flex; justify-content: space-between; align-items: center; padding: 16px; background: rgba(255, 255, 255, 0.05); border-radius: 12px; border: 1px solid #e2e8f0;";
                     div.innerHTML = `
                         <div style="font-weight: 600; color: var(--primary-dark); display: flex; align-items: center; gap: 12px;">
                             <span style="display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; background: var(--primary-light); color: var(--primary-green); border-radius: 6px; font-size: 0.7rem; font-weight: 800;">${idx < 10 ? '0' + idx : idx}</span>
                             <span>${lesson.title}</span>
                         </div>
-                        <button type="button" class="action-btn" style="color: #ef4444; background: #fef2f2; font-size: 0.75rem; border: 1px solid #fee2e2;" onclick="deletePlaylistLesson('${courseId}', '${doc.id}')">
+                        <button type="button" class="action-btn" style="color: rgba(255, 255, 255, 0.8); background: rgba(255, 255, 255, 0.05); border: 1px solid #e2e8f0;" onclick="deletePlaylistLesson('${courseId}', '${doc.id}')">
                             <i class="fas fa-trash-alt"></i> Remove
                         </button>
                     `;
@@ -2065,12 +2086,12 @@
         window.fetchTestQuestions = async (testId) => {
             const container = safeGet('questions-list-container');
             if (!container) return;
-            container.innerHTML = '<p style="color:var(--text-muted);">Loading questions...</p>';
+            container.innerHTML = '<p style="color:rgba(255, 255, 255, 0.8);">Loading questions...</p>';
 
             try {
                 const snap = await db.collection('tests').doc(testId).collection('questions').orderBy('createdAt', 'asc').get();
                 if (snap.empty) {
-                    container.innerHTML = '<div style="padding: 24px; text-align: center; background: #fff; border: 1px dashed #cbd5e1; border-radius: 12px; color: #64748b;">No questions added yet.</div>';
+                    container.innerHTML = '<div style="padding: 24px; text-align: center; background: rgba(255, 255, 255, 0.05); border: 1px dashed #cbd5e1; border-radius: 12px; color: rgba(255, 255, 255, 0.8);">No questions added yet.</div>';
                     return;
                 }
 
@@ -2079,7 +2100,7 @@
                 snap.forEach(doc => {
                     const qData = doc.data();
                     const qEl = document.createElement('div');
-                    qEl.style.cssText = 'background: white; padding: 20px; border-radius: 16px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 12px; transition: all 0.3s;';
+                    qEl.style.cssText = 'background: rgba(255, 255, 255, 0.05); padding: 20px; border-radius: 16px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 12px; transition: all 0.3s;';
                     qEl.onmouseover = () => qEl.style.borderColor = 'var(--primary-green)';
                     qEl.onmouseout = () => qEl.style.borderColor = '#e2e8f0';
                     qEl.innerHTML = `
@@ -2088,7 +2109,7 @@
                                 <span style="background: var(--primary-light); color: var(--primary-green); width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; font-size: 0.85rem; margin-right: 8px;">${index}</span>
                                 ${qData.text}
                             </h4>
-                            <button class="action-btn" style="color: #ef4444; background: #fef2f2; width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: 8px; border: 1px solid #fee2e2;" onclick="deleteTestQuestion('${testId}', '${doc.id}')">
+                            <button class="action-btn" style="color: rgba(255, 255, 255, 0.8); background: rgba(255, 255, 255, 0.05); width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: 8px; border: 1px solid #e2e8f0;" onclick="deleteTestQuestion('${testId}', '${doc.id}')">
                                 <i class="fas fa-trash-alt"></i>
                             </button>
                         </div>
@@ -2309,7 +2330,7 @@
                         </td>
                         <td>
                             <div style="display:flex; align-items:center; gap:12px;">
-                                <div style="width:36px; height:36px; border-radius:10px; background: linear-gradient(135deg, var(--primary-light), #F8FAFC); color:#1E293B; display:flex; align-items:center; justify-content:center; font-weight:800; border:1px solid #E2E8F0; text-shadow: 0 0 10px rgba(0,0,0,0.05);">
+                                <div style="width:36px; height:36px; border-radius:10px; background: linear-gradient(135deg, var(--primary-light), #F8FAFC); color:rgba(255, 255, 255, 0.8); display:flex; align-items:center; justify-content:center; font-weight:800; border:1px solid #E2E8F0; text-shadow: 0 0 10px rgba(0,0,0,0.05);">
                                     ${(user.name || '?')[0].toUpperCase()}
                                 </div>
                                 <div class="table-title-stack">
@@ -2319,7 +2340,7 @@
                             </div>
                         </td>
                         <td>
-                            <div style="font-weight: 600; color: #1e293b;">${user.email || 'N/A'}</div>
+                            <div style="font-weight: 600; color: rgba(255, 255, 255, 0.8);">${user.email || 'N/A'}</div>
                             <div style="font-size: 11px; color: #94a3b8; letter-spacing: 0.5px;">SECURE IDENTIFIER: ${uid.substring(0, 8).toUpperCase()}</div>
                         </td>
                         <td class="text-center">
@@ -2341,7 +2362,7 @@
                     detailsRow.innerHTML = `
                                 <td colspan="5" style="background:rgba(241,245,249,0.5); padding:24px; border-radius:0 0 16px 16px;">
                                     <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:24px;">
-                                        <div><p style="color:#94a3b8; font-size:0.75rem; text-transform:uppercase; font-weight:700; margin-bottom:4px;">Unique ID</p><code style="font-size:0.85rem; background:#fff; padding:4px 8px; border:1px solid #e2e8f0; border-radius:6px;">${uid}</code></div>
+                                        <div><p style="color:#94a3b8; font-size:0.75rem; text-transform:uppercase; font-weight:700; margin-bottom:4px;">Unique ID</p><code style="font-size:0.85rem; background:rgba(255, 255, 255, 0.05); padding:4px 8px; border:1px solid #e2e8f0; border-radius:6px;">${uid}</code></div>
                                         <div><p style="color:#94a3b8; font-size:0.75rem; text-transform:uppercase; font-weight:700; margin-bottom:4px;">Enrollment Date</p><p style="font-weight:600; color:var(--primary-dark);">${user.enrolled ? user.enrolled.toDate().toLocaleDateString() : 'N/A'}</p></div>
                                         <div><p style="color:#94a3b8; font-size:0.75rem; text-transform:uppercase; font-weight:700; margin-bottom:4px;">Last Activity</p><p style="font-weight:600; color:var(--primary-dark);">${user.lastLogin ? user.lastLogin.toDate().toLocaleString() : 'Never'}</p></div>
                                     </div>
@@ -2860,12 +2881,7 @@
         });
 
 
-        window.toggleMobileSidebar = () => {
-            const sidebar = document.getElementById('admin-sidebar');
-            if (sidebar) {
-                sidebar.classList.toggle('mobile-active');
-            }
-        };
+
 
         window.logout = () => auth.signOut().then(() => {
             showToast("Logged out. Redirecting...");

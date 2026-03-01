@@ -9,18 +9,27 @@
         content="Interactive mock test session. Take the challenge and track your progress in real-time.">
     <link rel="stylesheet" href="../css/common.css">
     <link rel="stylesheet" href="../css/test-view.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
 </head>
 
 <body>
-    <nav style="height: 64px;">
-        <div class="container nav-content" style="height: 100%;">
-            <a href="index.html" class="logo">Gov<span>Learn</span></a>
+    <nav id="session-nav"
+        style="height: 72px; position: fixed; top: 0; left: 0; width: 100%; background: var(--nav-bg); backdrop-filter: blur(24px); border-bottom: 1px solid var(--border-glass); z-index: 1001;">
+        <div class="container nav-content"
+            style="height: 100%; display: flex; justify-content: space-between; align-items: center;">
+            <a href="../index.html" class="logo"
+                style="text-decoration: none; font-size: 1.6rem; font-weight: 700; color: var(--secondary);">Gov<span
+                    style="color: var(--primary);">Learn</span></a>
             <div style="display: flex; align-items: center; gap: 24px;">
-                <span id="subject-label" style="font-weight: 600; color: var(--text-muted);">Indian History</span>
-                <button type="button" class="btn-primary" style="background: #ef4444; padding: 8px 20px;"
-                    onclick="location.href='mock-tests.html'">End Test</button>
+                <span id="subject-label"
+                    style="font-weight: 700; color: var(--secondary); font-size: 1.1rem; letter-spacing: 0.5px;">Loading
+                    Title...</span>
+                <button type="button" class="btn-primary"
+                    style="background: rgba(239, 68, 68, 0.1); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.2); padding: 10px 24px; border-radius: 12px; font-weight: 700; cursor: pointer;"
+                    onclick="if(confirm('Quit the test session? Progress will be lost.')) location.href='mock-tests.html'">End
+                    Test</button>
             </div>
         </div>
     </nav>
@@ -31,7 +40,7 @@
                 <div class="question-header">
                     <span id="q-header-text"
                         style="font-weight: 700; color: var(--primary-green); text-transform: uppercase; letter-spacing: 1px;">Loading...</span>
-                    <span style="color: var(--text-muted);">Points: 1.0</span>
+                    <span style="color: rgba(255, 255, 255, 0.8);">Points: 1.0</span>
                 </div>
 
                 <div class="question-text" id="q-text">
@@ -43,10 +52,13 @@
                 </div>
 
                 <div class="action-footer">
-                    <button class="btn-primary" style="background: #e2e8f0; color: #64748b;"
+                    <button class="btn-primary"
+                        style="background: rgba(255, 255, 255, 0.05); color: white; border: 1px solid var(--border-glass);"
                         onclick="prevQuestion()">Previous</button>
-                    <div style="display: flex; gap: 12px;">
-                        <button class="btn-primary" style="background: #f59e0b;" onclick="markForReview()">Mark for
+                    <div style="display: flex; gap: 16px;">
+                        <button class="btn-primary"
+                            style="background: rgba(245, 158, 11, 0.1); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3);"
+                            onclick="markForReview()">Mark for
                             Review</button>
                         <button class="btn-primary" onclick="nextQuestion()">Save & Next</button>
                     </div>
@@ -55,9 +67,12 @@
 
             <div class="sidebar-area fade-in">
                 <div class="progress-container">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-end;">
-                        <span style="font-weight: 700; color: var(--primary-dark);">Test Progress</span>
-                        <span id="progress-text" style="font-size: 0.9rem; color: var(--text-muted);">0 Answered</span>
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <span
+                            style="font-weight: 700; color: var(--secondary); font-size: 1.1rem; text-transform: uppercase; letter-spacing: 1px;">Completion</span>
+                        <span id="progress-text" style="font-size: 0.95rem; font-weight: 700; color: var(--primary);">0
+                            / 0 Answered</span>
                     </div>
                     <div class="progress-bar">
                         <div class="progress-fill" id="progress-fill" style="width: 0%;"></div>
@@ -69,7 +84,10 @@
                 </div>
 
                 <div>
-                    <h4 style="margin-bottom: 16px; color: var(--primary-dark);">Question Navigator</h4>
+                    <h4
+                        style="margin-bottom: 24px; color: var(--secondary); font-weight: 700; display: flex; align-items: center; gap: 10px;">
+                        <i class="fas fa-th-large" style="color: var(--primary);"></i> Question Navigator
+                    </h4>
                     <div class="question-nav" id="q-nav-container">
                         <!-- Navigator injected via JS -->
                     </div>
@@ -77,6 +95,61 @@
 
                 <button type="button" class="btn-primary" style="width: 100%; margin-top: auto; padding: 16px;"
                     onclick="submitTest()">Submit Mock Test</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Result Overlay -->
+    <div id="result-overlay"
+        style="display: none; position: fixed; inset: 0; background: rgba(2, 6, 23, 0.95); backdrop-filter: blur(24px); z-index: 2000; align-items: center; justify-content: center; padding: 20px;">
+        <div class="card glass"
+            style="width: 100%; max-width: 800px; padding: 60px; border-radius: 40px; border: 1px solid var(--border-glass); text-align: center; animation: zoomIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);">
+            <div
+                style="width: 120px; height: 120px; background: var(--grad-primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 3rem; color: white; margin: 0 auto 32px; box-shadow: var(--glow-primary);">
+                <i class="fas fa-check-circle"></i>
+            </div>
+
+            <h1 style="font-size: 2.5rem; margin-bottom: 8px;">Test Submitted!</h1>
+            <p style="color: var(--text-muted); margin-bottom: 48px;">Great job completing the session. Here is your
+                performance overview.</p>
+
+            <div
+                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 24px; margin-bottom: 48px;">
+                <div
+                    style="background: rgba(255, 255, 255, 0.03); padding: 24px; border-radius: 24px; border: 1px solid var(--border-glass);">
+                    <h4
+                        style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 12px; text-transform: uppercase;">
+                        Total Score</h4>
+                    <p id="res-score" style="font-size: 2rem; font-weight: 700; color: var(--primary);">0.0</p>
+                </div>
+                <div
+                    style="background: rgba(255, 255, 255, 0.03); padding: 24px; border-radius: 24px; border: 1px solid var(--border-glass);">
+                    <h4
+                        style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 12px; text-transform: uppercase;">
+                        Correct</h4>
+                    <p id="res-correct" style="font-size: 2rem; font-weight: 700; color: #22c55e;">0</p>
+                </div>
+                <div
+                    style="background: rgba(255, 255, 255, 0.03); padding: 24px; border-radius: 24px; border: 1px solid var(--border-glass);">
+                    <h4
+                        style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 12px; text-transform: uppercase;">
+                        Wrong</h4>
+                    <p id="res-wrong" style="font-size: 2rem; font-weight: 700; color: #ef4444;">0</p>
+                </div>
+                <div
+                    style="background: rgba(255, 255, 255, 0.03); padding: 24px; border-radius: 24px; border: 1px solid var(--border-glass);">
+                    <h4
+                        style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 12px; text-transform: uppercase;">
+                        Accuracy</h4>
+                    <p id="res-accuracy" style="font-size: 2rem; font-weight: 700; color: #3b82f6;">0%</p>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 20px; justify-content: center;">
+                <button onclick="location.href='mock-tests.html'" class="btn-primary"
+                    style="background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-glass); color: white; padding: 16px 40px;">Exit
+                    Session</button>
+                <button onclick="location.reload()" class="btn-primary" style="padding: 16px 40px;">Retake Test</button>
             </div>
         </div>
     </div>
@@ -215,7 +288,9 @@
             if (navBtn) navBtn.classList.add('answered');
             if (reviewMarks.has(qIndex)) {
                 reviewMarks.delete(qIndex);
-                navBtn.style.border = '';
+                navBtn.style.boxShadow = '';
+                navBtn.style.background = '';
+                navBtn.style.color = '';
             }
 
             updateProgress();
@@ -238,8 +313,11 @@
         window.markForReview = function () {
             reviewMarks.add(currentQuestionIndex);
             const navBtn = document.getElementById(`nav-btn-${currentQuestionIndex}`);
-            if (navBtn) navBtn.style.border = '2px solid #f59e0b';
-
+            if (navBtn) {
+                navBtn.style.boxShadow = 'inset 0 0 15px rgba(245, 158, 11, 0.2)';
+                navBtn.style.background = 'rgba(245, 158, 11, 0.15)';
+                navBtn.style.color = '#fbbf24';
+            }
             nextQuestion();
         }
 
@@ -272,16 +350,27 @@
                         unattempted++;
                     } else if (ans === q.correct) {
                         correctCount++;
-                        score += 1; // Assuming 1 pt per correct
+                        score += 1;
                     } else {
                         wrongCount++;
-                        score -= 0.25; // Simple negative marking
+                        score -= 0.25;
                     }
                 });
 
-                const msg = `Submit successful!\n\nScore: ${score}\nCorrect: ${correctCount}\nWrong: ${wrongCount}\nUnattempted: ${unattempted}`;
-                alert(msg);
-                location.href = 'mock-tests.html';
+                const attempted = correctCount + wrongCount;
+                const accuracy = attempted > 0 ? Math.round((correctCount / attempted) * 100) : 0;
+
+                // Populate Result Overlay
+                document.getElementById('res-score').textContent = score.toFixed(2);
+                document.getElementById('res-correct').textContent = correctCount;
+                document.getElementById('res-wrong').textContent = wrongCount;
+                document.getElementById('res-accuracy').textContent = accuracy + '%';
+
+                document.getElementById('result-overlay').style.display = 'flex';
+
+                // Hide main content
+                document.querySelector('.test-layout').style.filter = 'blur(10px)';
+                document.getElementById('session-nav').style.filter = 'blur(10px)';
             }
         }
 

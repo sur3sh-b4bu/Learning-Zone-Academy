@@ -1,0 +1,145 @@
+<!-- Live Updates Ticker (Dynamic from Firebase) -->
+<div class="ticker-wrap">
+    <div class="ticker-title">LIVE UPDATES</div>
+    <div class="ticker" id="alert-ticker"></div>
+</div>
+
+<div class="nav-container">
+    <div class="nav-content">
+        <!-- Logo Left -->
+        <a href="/" class="logo" id="nav-logo">
+            <div class="logo-icon"><i class="fas fa-graduation-cap"></i></div>
+            <div class="logo-text">Gov<span>Learn</span></div>
+        </a>
+
+        <!-- Links Center -->
+        <ul class="nav-links">
+            <li class="dropdown">
+                <a href="#" class="nav-item">
+                    <i class="fas fa-th-large"></i> Dashboard <i class="fas fa-chevron-down"
+                        style="font-size: 0.8rem; margin-left: 4px;"></i>
+                </a>
+                <div class="dropdown-menu">
+                    <a href="/" data-link="home" class="dropdown-item"><i class="fas fa-compass"></i> Discover</a>
+                    <a href="/html/exams-hub.html" data-link="exams" class="dropdown-item"><i
+                            class="fas fa-layer-group"></i> Exams</a>
+                    <a href="/html/mock-tests.html" data-link="mocks" class="dropdown-item"><i
+                            class="fas fa-check-double"></i> Mocks</a>
+                    <a href="/html/materials.html" data-link="materials" class="dropdown-item"><i
+                            class="fas fa-book-reader"></i> Materials</a>
+                    <a href="/html/current-affairs.html" data-link="ca" class="dropdown-item"><i
+                            class="fas fa-globe-asia"></i> Current Affairs</a>
+                    <a href="/html/videos.html" data-link="videos" class="dropdown-item"><i
+                            class="fas fa-play-circle"></i> Videos</a>
+                </div>
+            </li>
+        </ul>
+
+        <div class="nav-actions">
+            <!-- Theme Toggle -->
+            <button type="button" class="theme-toggle" id="theme-toggle-btn" onclick="toggleTheme()"
+                title="Toggle Light/Dark Mode">
+                <i class="fas fa-moon"></i>
+            </button>
+
+            <div id="login-nav-item">
+                <button type="button" class="btn-primary login-toggle-btn" onclick="toggleModal('login-modal')">
+                    <i class="fas fa-user"></i> <span>Sign In</span>
+                </button>
+            </div>
+
+            <button type="button" class="mobile-menu-toggle" onclick="toggleNav()">
+                <div class="hamburger">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Premium Mobile Navigation Overlay -->
+<div class="mobile-nav-panel" id="mobile-panel">
+    <div class="mobile-nav-bg-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+    </div>
+    <div class="mobile-nav-content">
+        <a href="/" data-link="home" onclick="toggleNav()"><i class="fas fa-compass"></i> Discover</a>
+        <a href="/html/exams-hub.html" data-link="exams" onclick="toggleNav()"><i class="fas fa-layer-group"></i> Exams
+            Hub</a>
+        <a href="/html/mock-tests.html" data-link="mocks" onclick="toggleNav()"><i class="fas fa-check-double"></i> Mock
+            Tests</a>
+        <a href="/html/materials.html" data-link="materials" onclick="toggleNav()"><i class="fas fa-book-reader"></i>
+            Study Materials</a>
+        <a href="/html/current-affairs.html" data-link="ca" onclick="toggleNav()"><i class="fas fa-globe-asia"></i>
+            Current Affairs</a>
+        <a href="/html/videos.html" data-link="videos" onclick="toggleNav()"><i class="fas fa-play-circle"></i> Video
+            Lectures</a>
+
+        <div class="mobile-nav-footer" style="display: flex; gap: 12px; align-items: center;">
+            <button type="button" class="theme-toggle" onclick="toggleTheme()"
+                style="width: 56px; height: 56px; border-radius: 20px; flex-shrink: 0;">
+                <i class="fas fa-moon"></i>
+            </button>
+            <button type="button" class="btn-premium login-toggle-btn w-full"
+                onclick="toggleModal('login-modal'); toggleNav()">
+                <i class="fas fa-user"></i> Log In
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Login Modal -->
+<div id="login-modal" class="modal-overlay">
+    <div class="modal">
+        <button type="button" class="modal-close" onclick="toggleModal('login-modal')">&times;</button>
+        <h2 style="margin-bottom: 10px;">Welcome Back</h2>
+        <form id="login-form">
+            <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" id="login-email" placeholder="name@example.com" required>
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="login-password" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="btn-primary" style="width: 100%; margin-top: 10px;">Sign In</button>
+        </form>
+        <div class="social-divider">or</div>
+        <button type="button" class="google-btn" onclick="googleSignIn()">Sign in with Google</button>
+        <p style="margin-top: 24px; text-align: center; font-size: 0.9rem;">
+            Don't have an account? <a href="#" style="color: var(--primary-green); font-weight: 600;"
+                onclick="toggleModal('login-modal'); toggleModal('signup-modal'); return false;">Sign Up</a>
+        </p>
+    </div>
+</div>
+
+<div id="signup-modal" class="modal-overlay">
+    <div class="modal">
+        <button type="button" class="modal-close" onclick="toggleModal('signup-modal')">&times;</button>
+        <h2 style="margin-bottom: 10px;">Create Account</h2>
+        <form id="signup-form">
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" id="signup-name" placeholder="John Doe" required>
+            </div>
+            <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" id="signup-email" placeholder="name@example.com" required>
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="signup-password" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="btn-primary" style="width: 100%; margin-top: 10px;">Create Account</button>
+        </form>
+        <div class="social-divider">or</div>
+        <button type="button" class="google-btn" onclick="googleSignIn()">Sign up with Google</button>
+        <p style="margin-top: 24px; text-align: center; font-size: 0.9rem;">
+            Already have an account? <a href="#" style="color: var(--primary-green); font-weight: 600;"
+                onclick="toggleModal('signup-modal'); toggleModal('login-modal'); return false;">Sign In</a>
+        </p>
+    </div>
+</div>

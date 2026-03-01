@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mock Tests | Gov Learn - Real Exam Preparation</title>
     <link rel="stylesheet" href="../css/common.css">
+    <link rel="stylesheet" href="../css/navigation.css">
+    <link rel="stylesheet" href="../css/footer.css">
     <link rel="stylesheet" href="../css/mock-tests.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
@@ -13,33 +15,28 @@
 </head>
 
 <body>
-    <nav>
-        <div class="container nav-content">
-            <a href="index.html" class="logo">Gov<span>Learn</span></a>
-            <button type="button" class="mobile-menu-toggle" onclick="toggleNav()">
-                <span></span><span></span><span></span>
-            </button>
-            <ul class="nav-links">
-                <li><a href="index.html">Home</a></li>
-                <li><a href="exams-hub.html">Exams Hub</a></li>
-                <li><a href="mock-tests.html" class="active">Mock Tests</a></li>
-                <li><a href="materials.html">Materials</a></li>
-                <li><a href="current-affairs.html">Current Affairs</a></li>
-                <li><a href="videos.html">Videos</a></li>
-                <li id="login-nav-item"><button type="button" class="btn-primary login-toggle-btn"
-                        onclick="toggleModal('login-modal')">Login</button></li>
-            </ul>
-        </div>
-    </nav>
+    <nav id="main-nav"></nav>
 
-    <header class="hero">
-        <div class="container text-center">
-            <h1>Premium <span>Mock Tests</span></h1>
-            <p>Challenge yourself with sectional and full-length tests matching the latest patterns.</p>
+    <header class="hero" style="padding: 140px 0 80px; position: relative; overflow: hidden;">
+        <div class="div-glow hero-glow-pulse"
+            style="position: absolute; top: -100px; left: 50%; width: 600px; height: 300px; background: radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, transparent 70%); filter: blur(60px); z-index: -1;">
+        </div>
+        <div class="container text-center" style="position: relative; z-index: 10;">
+            <h1 class="hero-title fade-up">
+                Premium <span class="text-gradient">Mock Tests</span></h1>
         </div>
     </header>
 
-    <section class="subjects-section" style="min-height: 600px; padding: 60px 0;">
+    <div class="container" style="margin-top: -60px; position: relative; z-index: 20;">
+        <div class="premium-lead text-center fade-in" style="margin-bottom: 32px;">
+            <p style="max-width: 800px; margin: 0 auto;">
+                Challenge yourself with sectional and full-length tests matching the latest exam patterns.
+            </p>
+        </div>
+
+    </div>
+
+    <section class="subjects-section" style="min-height: 600px; padding: 40px 0 60px;">
         <div class="container">
             <!-- Tabs for Sectional/Full/Topic -->
             <div class="test-tabs">
@@ -49,11 +46,13 @@
                 <div class="test-tab" onclick="filterTests('topic')">Topic-wise</div>
             </div>
 
-            <div style="margin-bottom: 48px; position:relative; z-index:10;">
-                <div class="search-container" style="max-width: 600px; margin: 0 auto;">
+            <div class="search-wrap fade-in"
+                style="margin-bottom: 80px; position:relative; z-index:10; max-width: 800px; margin-left: auto; margin-right: auto;">
+                <div class="search-container">
+                    <i class="fas fa-search"
+                        style="position: absolute; left: 24px; top: 50%; transform: translateY(-50%); color: var(--primary); font-size: 1.2rem; z-index: 5;"></i>
                     <input type="text" id="mock-search" placeholder="Search for subjects or exam names..."
-                        style="width: 100%; padding: 18px 30px; border-radius: 99px; border: 2px solid rgba(5, 150, 105, 0.1); 
-                        background: white; box-shadow: var(--shadow-md); font-size: 1.1rem; outline: none; transition: all 0.3s;">
+                        style="width: 100%; padding: 22px 22px 22px 64px; border-radius: 20px; color: var(--secondary); font-size: 1.1rem; outline: none; transition: all 0.3s;">
                 </div>
             </div>
 
@@ -63,60 +62,77 @@
         </div>
     </section>
 
-    <footer>
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-info">
-                    <div class="footer-logo">Gov<span>Learn</span></div>
-                    <p class="footer-tagline">Empowering aspirants to achieve their dreams of a government career
-                        through quality education.</p>
-                </div>
-                <div class="footer-links">
-                    <h4>Learning</h4>
-                    <ul>
-                        <li><a href="exams-hub.html">Exams Hub</a></li>
-                        <li><a href="mock-tests.html">Mock Tests</a></li>
-                        <li><a href="materials.html">Study Notes</a></li>
-                        <li><a href="videos.html">Video Lessons</a></li>
-                    </ul>
-                </div>
-                <div class="footer-links">
-                    <h4>More</h4>
-                    <ul>
-                        <li><a href="current-affairs.html">Current Affairs</a></li>
-                        <li><a href="materials.html">Syllabus</a></li>
-
-                    </ul>
-                </div>
-                <div class="footer-links">
-                    <h4>Connect</h4>
-                    <div class="social-links">
-                        <a href="#" class="social-icon">FB</a>
-                        <a href="#" class="social-icon">TW</a>
-                        <a href="#" class="social-icon">IG</a>
-                    </div>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2026 Gov Learn. Premium Education.</p>
-                <div class="footer-bottom-links">
-                    <a href="#">Privacy Policy</a>
-                    <a href="#">Terms of Service</a>
-                </div>
-            </div>
-        </div>
-    </footer>
+    <footer id="main-footer"></footer>
 
     <!-- Modals same as before... -->
+    <div id="instruction-modal"
+        style="display: none; position: fixed; inset: 0; background: rgba(2, 6, 23, 0.85); backdrop-filter: blur(12px); z-index: 2000; align-items: center; justify-content: center; padding: 20px;">
+        <div class="card glass"
+            style="width: 100%; max-width: 600px; padding: 48px; border-radius: 40px; border: 1px solid var(--border-glass); animation: slideUp 0.4s ease-out;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px;">
+                <div>
+                    <h2 id="modal-test-name" style="font-size: 1.8rem; margin-bottom: 8px;">Test Instructions</h2>
+                    <p id="modal-test-meta" style="color: var(--primary); font-weight: 700;"></p>
+                </div>
+                <button onclick="hideInstructions()"
+                    style="background: rgba(255, 255, 255, 0.05); border: none; color: white; width: 44px; height: 44px; border-radius: 50%; cursor: pointer;"><i
+                        class="fas fa-times"></i></button>
+            </div>
+
+            <div
+                style="background: rgba(255, 255, 255, 0.02); padding: 24px; border-radius: 20px; border: 1px solid var(--border-glass); margin-bottom: 32px;">
+                <ul style="list-style: none; padding: 0; margin: 0;">
+                    <li
+                        style="margin-bottom: 12px; display: flex; gap: 12px; font-size: 0.95rem; color: var(--text-dark);">
+                        <i class="fas fa-check-circle" style="color: var(--primary); margin-top: 4px;"></i> Each
+                        question carries 1 mark.
+                    </li>
+                    <li
+                        style="margin-bottom: 12px; display: flex; gap: 12px; font-size: 0.95rem; color: var(--text-dark);">
+                        <i class="fas fa-exclamation-triangle" style="color: #f59e0b; margin-top: 4px;"></i> Negative
+                        marking of 0.25 applies for wrong answers.
+                    </li>
+                    <li
+                        style="margin-bottom: 12px; display: flex; gap: 12px; font-size: 0.95rem; color: var(--text-dark);">
+                        <i class="fas fa-history" style="color: var(--primary); margin-top: 4px;"></i> Auto-submission
+                        occurs when time runs out.
+                    </li>
+                    <li style="display: flex; gap: 12px; font-size: 0.95rem; color: var(--text-dark);"><i
+                            class="fas fa-clock" style="color: var(--primary); margin-top: 4px;"></i> Do not refresh the
+                        page during the session.</li>
+                </ul>
+            </div>
+
+            <div style="display: flex; gap: 16px;">
+                <button onclick="hideInstructions()" class="btn-primary"
+                    style="flex: 1; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-glass); color: white;">Cancel</button>
+                <button id="modal-start-btn" class="btn-primary" style="flex: 2;">I'm Ready to Start</button>
+            </div>
+        </div>
+    </div>
+
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <script src="../js/firebase-config.js"></script>
     <script src="../js/mock-data.js"></script>
+    <script src="../js/components-loader.js"></script>
     <script src="../js/main.js"></script>
 
     <script>
         let currentCategoryFilter = 'all';
+
+        function showInstructions(id, name, q, time) {
+            const modal = document.getElementById('instruction-modal');
+            document.getElementById('modal-test-name').textContent = name;
+            document.getElementById('modal-test-meta').textContent = `${q} Questions • ${time} Minutes`;
+            document.getElementById('modal-start-btn').onclick = () => location.href = `test-view.html?testId=${id}`;
+            modal.style.display = 'flex';
+        }
+
+        function hideInstructions() {
+            document.getElementById('instruction-modal').style.display = 'none';
+        }
 
         function filterTests(cat) {
             currentCategoryFilter = cat;
@@ -173,20 +189,29 @@
             const grid = document.createElement('div');
             grid.className = 'grid-3';
 
-            filtered.forEach(t => {
+            filtered.forEach((t, index) => {
                 const name = t.title || 'Mock Test';
                 const typeLabel = (t.category || 'Test').toUpperCase();
                 const qCount = t.questions || 0;
                 const duration = t.duration || 0;
+                const examType = t.examType || 'General';
 
                 const card = document.createElement('div');
-                card.className = 'card glass hover-3d fade-in';
+                card.className = 'mock-card';
+                card.style.animationDelay = `${0.1 + (index * 0.1)}s`;
                 card.innerHTML = `
-                    <div style="position: absolute; top: 20px; right: 20px; background: var(--primary-light); color: var(--primary-green); padding: 4px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 800; border: 1px solid rgba(16, 185, 129, 0.2);">${typeLabel}</div>
-                    <div class="card-icon" style="font-size: 1.8rem; color: var(--primary-green); margin-bottom: 16px;"><i class="fas fa-file-signature"></i></div>
-                    <h3>${name}</h3>
-                    <p style="color: var(--text-muted); margin-bottom: 16px;">${t.examType || 'General'} Exam Prep • ${qCount} Questions • ${duration} Mins</p>
-                    <a href="test-view.html?testId=${t.id}" class="btn-primary" style="display: block; text-align: center;">Start Practice</a>
+                    <div class="mock-category-tag">${typeLabel}</div>
+                    <div class="mock-icon-wrap"><i class="fas fa-file-invoice"></i></div>
+                    <h3 class="mock-title">${name}</h3>
+                    <div class="mock-meta">
+                        <div class="meta-item"><i class="fas fa-graduation-cap"></i> <span>${examType}</span></div>
+                        <div class="meta-item"><i class="fas fa-layer-group"></i> <span>${qCount} Qs</span></div>
+                        <div class="meta-item"><i class="fas fa-clock"></i> <span>${duration} Min</span></div>
+                    </div>
+                    <button onclick="showInstructions('${t.id}', '${name}', ${qCount}, ${duration})" class="mock-start-btn">
+                        <span>Start Practice Session</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
                 `;
                 grid.appendChild(card);
             });
@@ -196,6 +221,10 @@
         document.addEventListener('DOMContentLoaded', () => {
             renderMocks();
             document.getElementById('mock-search').addEventListener('input', (e) => renderMocks(e.target.value));
+
+            auth.onAuthStateChanged(user => {
+                // User state logic if needed elsewhere
+            });
         });
     </script>
 </body>

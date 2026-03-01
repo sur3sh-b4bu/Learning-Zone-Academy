@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Video Learning | Gov Learn - Classes & Doubt Clearing</title>
     <link rel="stylesheet" href="../css/common.css">
+    <link rel="stylesheet" href="../css/navigation.css">
+    <link rel="stylesheet" href="../css/footer.css">
     <link rel="stylesheet" href="../css/videos.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
@@ -13,31 +15,27 @@
 </head>
 
 <body>
-    <nav>
-        <div class="container nav-content">
-            <a href="index.html" class="logo">Gov<span>Learn</span></a>
-            <button type="button" class="mobile-menu-toggle" onclick="toggleNav()">
-                <span></span><span></span><span></span>
-            </button>
-            <ul class="nav-links">
-                <li><a href="index.html">Home</a></li>
-                <li><a href="exams-hub.html">Exams Hub</a></li>
-                <li><a href="mock-tests.html">Mock Tests</a></li>
-                <li><a href="materials.html">Materials</a></li>
-                <li><a href="current-affairs.html">Current Affairs</a></li>
-                <li><a href="videos.html" class="active">Videos</a></li>
-                <li id="login-nav-item"><button type="button" class="btn-primary login-toggle-btn"
-                        onclick="toggleModal('login-modal')">Login</button></li>
-            </ul>
-        </div>
-    </nav>
+    <nav id="main-nav"></nav>
 
-    <header class="hero">
-        <div class="container text-center">
-            <h1>Premium <span>Video Classes</span></h1>
-            <p>Learn from top-tier educators with recorded sessions and live doubt solving.</p>
+    <header class="hero" style="padding: 140px 0 80px; position: relative; overflow: hidden;">
+        <div class="div-glow hero-glow-pulse"
+            style="position: absolute; top: -100px; left: 50%; width: 600px; height: 300px; background: radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, transparent 70%); filter: blur(60px); z-index: -1;">
+        </div>
+        <div class="container text-center" style="position: relative; z-index: 10;">
+            <h1 class="hero-title"
+                style="font-size: 3.5rem; font-weight: 700; margin-bottom: 20px; line-height: 1.2; color: var(--secondary); opacity: 0; animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;">
+                Premium <span>Video Classes</span></h1>
         </div>
     </header>
+
+    <div class="container" style="margin-top: -40px; position: relative; z-index: 20;">
+        <div class="premium-lead text-center fade-in" style="margin-bottom: 24px;">
+            <p
+                style="font-size: 1.05rem; color: var(--text-muted); line-height: 1.6; max-width: 800px; margin: 0 auto; text-align: center; animation: reveal-lead 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;">
+                Learn from top-tier educators with recorded sessions and live doubt solving.
+            </p>
+        </div>
+    </div>
 
     <section class="subjects-section" style="min-height: 600px; padding: 60px 0;">
         <div class="container">
@@ -47,76 +45,37 @@
             </div>
 
             <!-- Video Categories -->
-            <div class="video-tabs" id="video-tabs-container">
-                <div class="video-tab active" onclick="filterVideos('all')">All Classes</div>
-                <div class="video-tab" onclick="filterVideos('recorded')">Recorded Sessions</div>
-                <div class="video-tab" onclick="filterVideos('live')">Live Classes</div>
-                <div class="video-tab" onclick="filterVideos('doubt')">Doubt Solving</div>
+            <div class="mat-tabs fade-in" id="video-tabs-container" style="margin-bottom: 50px;">
+                <div class="mat-tab active" onclick="filterVideos('all', this)">All Classes</div>
+                <div class="mat-tab" onclick="filterVideos('recorded', this)">Recorded Sessions</div>
+                <div class="mat-tab" onclick="filterVideos('live', this)">Live Classes</div>
+                <div class="mat-tab" onclick="filterVideos('doubt', this)">Doubt Solving</div>
             </div>
 
-            <div style="margin-bottom: 48px; position:relative; z-index:10;">
-                <div class="search-container" style="max-width: 600px; margin: 0 auto;">
+            <div class="search-wrapper fade-in"
+                style="margin-bottom: 60px; position:relative; z-index:10; max-width: 600px; margin-left: auto; margin-right: auto;">
+                <div class="search-container"
+                    style="display: flex; align-items: center; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 99px; padding: 0 28px; transition: all 0.3s;">
+                    <i class="fas fa-video" style="color: var(--primary); font-size: 1.1rem; margin-right: 16px;"></i>
                     <input type="text" id="videos-search" placeholder="Search for courses or topics..."
-                        style="width: 100%; padding: 18px 30px; border-radius: 99px; border: 2px solid rgba(59, 130, 246, 0.1); 
-                        background: white; box-shadow: var(--shadow-md); font-size: 1.1rem; outline: none; transition: all 0.3s;">
+                        style="width: 100%; height: 64px; border: none; background: transparent; color: var(--secondary); font-size: 1.05rem; outline: none;">
                 </div>
             </div>
 
-            <div id="videos-container" class="grid-3">
-                <div id="videos-loading" style="grid-column: 1 / -1; text-align: center; padding: 60px 20px;">
+            <div id="videos-container">
+                <div id="videos-loading" style="text-align: center; padding: 60px 20px;">
                     <div
-                        style="display: inline-block; width: 40px; height: 40px; border: 4px solid rgba(16, 185, 129, 0.2); border-top-color: var(--primary-green); border-radius: 50%; animation: spin 1s linear infinite;">
+                        style="display: inline-block; width: 40px; height: 40px; border: 4px solid rgba(16, 185, 129, 0.2); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite;">
                     </div>
-                    <p style="color: var(--text-muted); margin-top: 16px; font-weight: 600;">Fetching video library...
+                    <p style="color: rgba(255, 255, 255, 0.8); margin-top: 16px; font-weight: 600;">Fetching video
+                        library...
                     </p>
                 </div>
             </div>
         </div>
     </section>
 
-    <footer>
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-info">
-                    <div class="footer-logo">Gov<span>Learn</span></div>
-                    <p class="footer-tagline">Empowering aspirants to achieve their dreams of a government career
-                        through quality education.</p>
-                </div>
-                <div class="footer-links">
-                    <h4>Learning</h4>
-                    <ul>
-                        <li><a href="exams-hub.html">Exams Hub</a></li>
-                        <li><a href="mock-tests.html">Mock Tests</a></li>
-                        <li><a href="materials.html">Study Notes</a></li>
-                        <li><a href="videos.html">Video Lessons</a></li>
-                    </ul>
-                </div>
-                <div class="footer-links">
-                    <h4>More</h4>
-                    <ul>
-                        <li><a href="current-affairs.html">Current Affairs</a></li>
-                        <li><a href="materials.html">Syllabus</a></li>
-
-                    </ul>
-                </div>
-                <div class="footer-links">
-                    <h4>Connect</h4>
-                    <div class="social-links">
-                        <a href="#" class="social-icon">FB</a>
-                        <a href="#" class="social-icon">TW</a>
-                        <a href="#" class="social-icon">IG</a>
-                    </div>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2026 Gov Learn. Premium Education.</p>
-                <div class="footer-bottom-links">
-                    <a href="#">Privacy Policy</a>
-                    <a href="#">Terms of Service</a>
-                </div>
-            </div>
-        </div>
-    </footer>
+    <footer id="main-footer"></footer>
 
     <!-- Modals same as before... -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -124,15 +83,17 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <script src="../js/firebase-config.js"></script>
     <script src="../js/mock-data.js"></script>
+    <script src="../js/components-loader.js"></script>
     <script src="../js/main.js"></script>
 
     <script>
         let currentVideoFilter = 'all';
+        let videoCache = null;
 
-        function filterVideos(cat) {
+        function filterVideos(cat, btn) {
             currentVideoFilter = cat;
-            document.querySelectorAll('.video-tab').forEach(t => t.classList.remove('active'));
-            event.target.classList.add('active');
+            document.querySelectorAll('.mat-tab').forEach(t => t.classList.remove('active'));
+            if (btn) btn.classList.add('active');
             renderVideos(document.getElementById('videos-search').value);
         }
 
@@ -141,9 +102,16 @@
             if (!container) return;
 
             try {
-                const snap = await db.collection('videos').orderBy('createdAt', 'desc').get();
-                if (snap.empty) {
-                    container.innerHTML = `<div style="text-align:center; padding: 60px 20px; grid-column: 1/-1;"><h3>No video courses found</h3></div>`;
+                if (!videoCache) {
+                    const snap = await db.collection('videos').orderBy('createdAt', 'desc').get();
+                    videoCache = [];
+                    snap.forEach(doc => {
+                        videoCache.push({ id: doc.id, ...doc.data() });
+                    });
+                }
+
+                if (videoCache.length === 0) {
+                    container.innerHTML = `<div style="text-align:center; padding: 60px 20px;"><h3>No video courses found</h3></div>`;
                     return;
                 }
 
@@ -152,17 +120,14 @@
                 grid.className = 'grid-3';
 
                 let count = 0;
-                snap.forEach(doc => {
-                    const course = doc.data();
-
+                videoCache.forEach((course) => {
                     const title = course.title || '';
                     const subject = course.subject || '';
                     const matchesSearch = title.toLowerCase().includes(filterText.toLowerCase()) ||
                         subject.toLowerCase().includes(filterText.toLowerCase());
 
                     let typeFilterMatch = true;
-                    // The video type in admin form defaults to "recorded", "live", "doubt"
-                    if (currentVideoFilter === 'recorded' || currentVideoFilter === 'live' || currentVideoFilter === 'doubt') {
+                    if (currentVideoFilter !== 'all') {
                         typeFilterMatch = course.videoType === currentVideoFilter;
                     }
 
@@ -170,22 +135,36 @@
                         const delay = count * 0.1;
 
                         const card = document.createElement('div');
-                        card.className = 'course-card fade-in';
+                        card.className = 'video-card hover-3d';
                         card.style.animationDelay = `${delay}s`;
 
+                        const isLive = course.videoType === 'live';
+                        const liveBadge = isLive ? `<div class="live-indicator"><div class="live-dot"></div> LIVE</div>` : '';
+                        const typeTag = (course.videoType || 'Record').toUpperCase();
+
                         card.innerHTML = `
-                            <div style="position: absolute; top: 16px; right: 16px; background: var(--primary-dark); color: white; padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 800; border: 1px solid rgba(255,255,255,0.1); z-index: 2; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">${(course.videoType || 'COURSE').toUpperCase()}</div>
-                            <div class="course-img" style="position: relative;">
+                            <div class="video-thumbnail">
                                 <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&h=250&fit=crop" alt="${title}" loading="lazy">
-                                <div style="position: absolute; inset: 0; background: rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center;">
-                                    <i class="fas fa-play-circle" style="font-size: 4rem; color: white; opacity: 0.9; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));"></i>
+                                <div class="play-overlay">
+                                    <div class="play-icon"><i class="fas fa-play"></i></div>
                                 </div>
+                                <div class="video-duration">${typeTag}</div>
+                                ${liveBadge}
                             </div>
-                            <div class="course-content" style="padding: 24px;">
-                                <span class="course-tag">${subject}</span>
-                                <h3 style="margin-bottom: 12px; font-weight: 800; font-size: 1.25rem;">${title}</h3>
-                                <p style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 24px;">Master ${subject} with high-quality HD video content and expert doubt clearing.</p>
-                                <a href="video-view.html?course=${doc.id}" class="btn-primary" style="width: 100%; text-align: center;">Watch Course</a>
+                            <div class="video-info">
+                                <div style="margin-bottom: 12px;">
+                                    <span class="video-tag-pill">${subject}</span>
+                                </div>
+                                <h3 class="video-title">${title}</h3>
+                                <div class="video-meta-stats">
+                                    <span><i class="fas fa-users"></i> 1.2k</span>
+                                    <span><i class="fas fa-star"></i> 4.8</span>
+                                    <span><i class="fas fa-clock"></i> 12h+</span>
+                                </div>
+                                <a href="video-view.html?course=${course.id}" class="video-watch-btn">
+                                    <span>Continue Learning</span>
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
                             </div>
                         `;
                         grid.appendChild(card);
@@ -194,12 +173,12 @@
                 });
 
                 if (count === 0) {
-                    container.innerHTML = `<div style="text-align:center; padding: 60px 20px; grid-column: 1/-1;"><h3>No courses matched your search</h3></div>`;
+                    container.innerHTML = `<div style="text-align:center; padding: 60px 20px;"><h3>No courses matched your search</h3></div>`;
                 } else {
                     container.appendChild(grid);
                 }
             } catch (err) {
-                container.innerHTML = `<div style="text-align:center; padding: 60px 20px; grid-column: 1/-1; color: red;"><h3>Error loading courses: ${err.message}</h3></div>`;
+                container.innerHTML = `<div style="text-align:center; padding: 60px 20px; color: rgba(255, 255, 255, 0.8);"><h3>Error loading courses: ${err.message}</h3></div>`;
             }
         }
 
