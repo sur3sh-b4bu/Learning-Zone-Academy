@@ -1062,11 +1062,32 @@ body {
     animation: fadeIn 0.2s ease-out;
     background-color: transparent !important;
     border-radius: var(--radius-lg);
-    padding: 40px;
+    padding: 32px;
+}
+
+@media (max-width: 768px) {
+    .admin-section {
+        padding: 20px 10px;
+    }
 }
 
 .admin-section.active {
     display: block !important;
+}
+
+/* Grid Utilities */
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 24px;
+}
+
+@media (max-width: 600px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
 }
 
 @keyframes fadeIn {
@@ -1331,5 +1352,45 @@ input:checked+.slider:before {
 
     .stat-card {
         padding: 20px;
+    }
+
+    .modal-overlay {
+        padding: 16px;
+    }
+
+    .modal {
+        max-width: 100%;
+        margin: 0;
+        border-radius: 24px;
+    }
+
+    .modal-header,
+    .modal-body {
+        padding: 20px;
+    }
+
+    .modal-footer {
+        padding: 16px 20px;
+        flex-direction: column-reverse;
+    }
+
+    .modal-footer button {
+        width: 100%;
+    }
+
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 20px;
+        margin-bottom: 24px;
+    }
+
+    .header-actions-group {
+        width: 100%;
+    }
+
+    .header-actions-group button {
+        flex: 1;
+        width: 100%;
     }
 }

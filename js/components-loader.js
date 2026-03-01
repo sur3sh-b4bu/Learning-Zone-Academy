@@ -16,11 +16,15 @@
             if (!response.ok) throw new Error(`Failed to load ${filePath}`);
             let html = await response.text();
 
-            // Fix relative paths
-            // Replaces href="/" with base index path
-            html = html.replace(/href="\/"/g, `href="${base}index.html"`);
-            // Replaces href="/html/" with correct html path
-            html = html.replace(/href="\/html\//g, `href="${base}html/`);
+            // Correct paths starting with '/' for GitHub Pages (avoids repo root mismatch)
+            html = html.replace(/(href|src)="\/([^"]*)"/g, (match, attr, path) => {
+                // Skip external links or already correct relative links
+                if (path.startsWith('http') || path.startsWith('//') || path.startsWith('data:')) return match;
+                // If link is just "/", result in base + index.html
+                if (path === "") return `${attr}="${base}index.html"`;
+                // Otherwise prepend base and use path (stripping the leading slash)
+                return `${attr}="${base}${path}"`;
+            });
 
             container.innerHTML = html;
 
