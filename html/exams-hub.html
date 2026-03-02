@@ -27,13 +27,13 @@
     <div class="container" style="padding: 24px 24px;">
         <!-- Exam Selection Buttons -->
         <div class="exam-selector-header" id="exam-selector">
-            <button class="exam-btn active" onclick="switchExam('TNPSC')">TNPSC</button>
-            <button class="exam-btn" onclick="switchExam('RRB')">RRB</button>
-            <button class="exam-btn" onclick="switchExam('SSC')">SSC</button>
-            <button class="exam-btn" onclick="switchExam('TNUSRB')">TNUSRB</button>
-            <button class="exam-btn" onclick="switchExam('TRB')">TRB</button>
-            <button class="exam-btn" onclick="switchExam('TET')">TET</button>
-            <button class="exam-btn" onclick="switchExam('BANK')">BANK</button>
+            <button class="exam-btn active" onclick="switchExam('TNPSC', event)">TNPSC</button>
+            <button class="exam-btn" onclick="switchExam('RRB', event)">RRB</button>
+            <button class="exam-btn" onclick="switchExam('SSC', event)">SSC</button>
+            <button class="exam-btn" onclick="switchExam('TNUSRB', event)">TNUSRB</button>
+            <button class="exam-btn" onclick="switchExam('TRB', event)">TRB</button>
+            <button class="exam-btn" onclick="switchExam('TET', event)">TET</button>
+            <button class="exam-btn" onclick="switchExam('BANK', event)">BANK</button>
         </div>
 
         <!-- Tab Navigation -->
@@ -310,15 +310,119 @@
             }
         };
 
+        const CUSTOM_EXAM_KEY = '__CUSTOM_SUBJECT__';
         let currentExam = 'TNPSC';
         let currentTab = 'notifications';
 
-        function switchExam(exam) {
+        function normalizeExamKey(value) {
+            return String(value || '').trim().toLowerCase();
+        }
+
+        function cleanText(value) {
+            return String(value || '').trim();
+        }
+
+        function stripHtml(value) {
+            const div = document.createElement('div');
+            div.innerHTML = String(value || '');
+            return cleanText(div.textContent || div.innerText || '');
+        }
+
+        function splitToList(value) {
+            const text = cleanText(value);
+            if (!text) return [];
+            return text
+                .split(/\r?\n|,|;/)
+                .map(item => cleanText(item))
+                .filter(Boolean);
+        }
+
+        function formatFirestoreDate(ts) {
+            if (!ts) return 'Recent';
+            try {
+                const d = ts.toDate ? ts.toDate() : new Date(ts);
+                if (Number.isNaN(d.getTime())) return 'Recent';
+                return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+            } catch (_) {
+                return 'Recent';
+            }
+        }
+
+        function buildDynamicExamData(subject) {
+            const name = cleanText(subject.name) || 'Exam Details';
+            const examType = cleanText(subject.category) || 'General';
+            const pattern = cleanText(subject.pattern);
+            const eligibilityList = splitToList(subject.eligibility);
+            const syllabusText = stripHtml(subject.syllabus);
+            const syllabusLines = splitToList(syllabusText);
+            const updatedLabel = formatFirestoreDate(subject.updatedAt || subject.createdAt);
+            const descriptionSource = syllabusText || pattern || `${name} preparation details.`;
+            const description = descriptionSource.length > 180 ? `${descriptionSource.slice(0, 180)}...` : descriptionSource;
+
+            return {
+                fullName: name,
+                description,
+                queryValue: name,
+                notifications: [
+                    { title: `${name} details updated`, date: `Type: ${examType}`, status: 'Info' },
+                    { title: pattern || 'Pattern details available in syllabus tab', date: `Updated: ${updatedLabel}`, status: 'Update' }
+                ],
+                eligibility: eligibilityList.length ? eligibilityList : ['Eligibility details will be updated soon.'],
+                dates: [
+                    { event: 'Exam Type', date: examType },
+                    { event: 'Last Updated', date: updatedLabel }
+                ],
+                syllabus: [
+                    {
+                        subject: examType,
+                        marks: pattern || 'As notified',
+                        topics: syllabusLines.length ? syllabusLines.join(', ') : (syllabusText || 'Syllabus will be updated soon.')
+                    }
+                ],
+                cutoff: {
+                    Status: 'Will be updated'
+                }
+            };
+        }
+
+        async function getSubjectFromQuery(urlParams) {
+            const subjectId = cleanText(urlParams.get('subject'));
+            const subjectName = cleanText(urlParams.get('cat'));
+
+            if (!subjectId && !subjectName) return null;
+
+            try {
+                if (subjectId) {
+                    const doc = await db.collection('subjects').doc(subjectId).get();
+                    if (doc.exists) return { id: doc.id, ...doc.data() };
+                }
+
+                if (subjectName && !Object.keys(examData).some(k => normalizeExamKey(k) === normalizeExamKey(subjectName))) {
+                    const snap = await db.collection('subjects').orderBy('name').get();
+                    const match = snap.docs.find(d => normalizeExamKey(d.data().name) === normalizeExamKey(subjectName));
+                    if (match) return { id: match.id, ...match.data() };
+                }
+            } catch (e) {
+                console.warn('Could not fetch subject detail from Firestore:', e);
+            }
+
+            return null;
+        }
+
+        function setActiveExamButton(examKey) {
+            document.querySelectorAll('.exam-btn').forEach(btn => {
+                const btnLabel = cleanText(btn.textContent);
+                btn.classList.toggle('active', normalizeExamKey(btnLabel) === normalizeExamKey(examKey));
+            });
+        }
+
+        function switchExam(exam, evt) {
             currentExam = exam;
+            currentTab = 'notifications';
 
             // Update active button
             document.querySelectorAll('.exam-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
+            if (evt && evt.target) evt.target.classList.add('active');
 
             // Render content for first tab
             renderExamContent(exam, 'notifications');
@@ -336,51 +440,68 @@
         }
 
         function renderExamContent(exam, tab) {
-            const data = examData[exam];
+            const data = examData[exam] || examData.TNPSC;
             const contentDiv = document.getElementById('exam-content');
+            const notifications = Array.isArray(data.notifications) && data.notifications.length
+                ? data.notifications
+                : [{ title: 'No notifications available right now', date: 'Updated soon', status: 'Info' }];
+            const eligibility = Array.isArray(data.eligibility) && data.eligibility.length
+                ? data.eligibility
+                : ['Eligibility details will be updated soon.'];
+            const dates = Array.isArray(data.dates) && data.dates.length
+                ? data.dates
+                : [{ event: 'Important dates', date: 'To be announced' }];
+            const syllabus = Array.isArray(data.syllabus) && data.syllabus.length
+                ? data.syllabus
+                : [{ subject: 'General', marks: 'As notified', topics: 'Detailed syllabus will be updated soon.' }];
+            const cutoff = data.cutoff && typeof data.cutoff === 'object' && Object.keys(data.cutoff).length
+                ? data.cutoff
+                : { Status: 'Will be updated' };
+
             let html = `<h2 class="mb-32" style="font-size: 2.2rem; color: var(--secondary); font-weight: 700; letter-spacing: -1px;">${data.fullName}</h2>`;
 
             if (tab === 'notifications') {
                 html += '<div class="info-grid">';
-                data.notifications.forEach(notif => {
+                notifications.forEach(notif => {
                     html += `<div class="info-card"><h3>${notif.title}</h3><p style="font-size: 0.9rem; color: var(--primary); font-weight: 600;">${notif.date}</p></div>`;
                 });
                 html += '</div>';
             } else if (tab === 'eligibility') {
                 html += '<div class="info-card" style="border-left: 5px solid var(--primary);"><ul style="list-style: none; padding: 0;">';
-                data.eligibility.forEach(item => {
-                    html += `<li style="padding: 12px 0; display: flex; align-items: flex-start; gap: 12px;"><span style="color: var(--primary); font-weight: 700; flex-shrink: 0;">•</span><span>${item}</span></li>`;
+                eligibility.forEach(item => {
+                    html += `<li style="padding: 12px 0; display: flex; align-items: flex-start; gap: 12px;"><span style="color: var(--primary); font-weight: 700; flex-shrink: 0;">&#8226;</span><span>${item}</span></li>`;
                 });
                 html += '</ul></div>';
             } else if (tab === 'dates') {
                 html += '<div class="timeline">';
-                data.dates.forEach(item => {
+                dates.forEach(item => {
                     html += `<div class="timeline-item"><div class="timeline-date">${item.date}</div><div class="timeline-content"><h4>${item.event}</h4></div></div>`;
                 });
                 html += '</div>';
             } else if (tab === 'syllabus') {
                 html += '<table class="syllabus-table"><thead><tr><th>Subject</th><th>Marks</th><th>Topics</th></tr></thead><tbody>';
-                data.syllabus.forEach(item => {
+                syllabus.forEach(item => {
                     html += `<tr><td style="font-weight: 600;">${item.subject}</td><td>${item.marks}</td><td>${item.topics}</td></tr>`;
                 });
                 html += '</tbody></table>';
             } else if (tab === 'cutoff') {
                 html += '<div class="info-grid">';
-                Object.entries(data.cutoff).forEach(([category, marks]) => {
+                Object.entries(cutoff).forEach(([category, marks]) => {
                     html += `<div class="info-card"><h3>${category} Category</h3><p style="font-size: 1.8rem; color: var(--primary); font-weight: 700; margin: 12px 0;">${marks}</p><p style="font-size: 0.9rem;">Previous Year Cut-off</p></div>`;
                 });
                 html += '</div>';
             }
 
+            const examQuery = encodeURIComponent(data.queryValue || exam);
             html += `
             <div class="cta-section" style="margin-top: 60px;">
                 <h2>Start Your Success Journey</h2>
                 <p>Download syllabus PDF, access 50+ free mock tests, and get expert-guided materials for ${data.fullName}</p>
                 <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
-                    <a href="mock-tests.html?exam=${exam}" class="btn-glass">
+                    <a href="mock-tests.html?exam=${examQuery}" class="btn-glass">
                         <i class="fas fa-file-alt"></i> <span>Free Mock Tests</span>
                     </a>
-                    <a href="materials.html?exam=${exam}" class="btn-glass">
+                    <a href="materials.html?exam=${examQuery}" class="btn-glass">
                         <i class="fas fa-download"></i> <span>Study Materials</span>
                     </a>
                 </div>
@@ -390,20 +511,30 @@
         }
 
         // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             const urlParams = new URLSearchParams(window.location.search);
-            const exam = urlParams.get('cat') || 'TNPSC';
-            currentExam = exam;
-            renderExamContent(exam, 'notifications');
+            const requestedCat = cleanText(urlParams.get('cat'));
+            const staticExamKey = Object.keys(examData).find(key => normalizeExamKey(key) === normalizeExamKey(requestedCat));
+            const subjectFromAdmin = await getSubjectFromQuery(urlParams);
 
-            // Set active exam button
-            document.querySelectorAll('.exam-btn').forEach(btn => {
-                if (btn.textContent.trim() === exam) {
-                    btn.classList.add('active');
-                }
-            });
+            if (subjectFromAdmin) {
+                examData[CUSTOM_EXAM_KEY] = buildDynamicExamData(subjectFromAdmin);
+                currentExam = CUSTOM_EXAM_KEY;
+                currentTab = 'notifications';
+                renderExamContent(currentExam, currentTab);
+
+                const selector = document.getElementById('exam-selector');
+                if (selector) selector.style.display = 'none';
+                return;
+            }
+
+            currentExam = staticExamKey || 'TNPSC';
+            currentTab = 'notifications';
+            renderExamContent(currentExam, currentTab);
+            setActiveExamButton(currentExam);
         });
     </script>
 </body>
 
 </html>
+

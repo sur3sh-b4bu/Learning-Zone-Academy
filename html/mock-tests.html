@@ -85,12 +85,12 @@
                     <li
                         style="margin-bottom: 12px; display: flex; gap: 12px; font-size: 0.95rem; color: var(--text-dark);">
                         <i class="fas fa-check-circle" style="color: var(--primary); margin-top: 4px;"></i> Each
-                        question carries 1 mark.
+                        question carries <span id="instruction-positive-mark">1</span> mark.
                     </li>
                     <li
                         style="margin-bottom: 12px; display: flex; gap: 12px; font-size: 0.95rem; color: var(--text-dark);">
                         <i class="fas fa-exclamation-triangle" style="color: #f59e0b; margin-top: 4px;"></i> Negative
-                        marking of 0.25 applies for wrong answers.
+                        marking of <span id="instruction-negative-mark">0.25</span> applies for wrong answers.
                     </li>
                     <li
                         style="margin-bottom: 12px; display: flex; gap: 12px; font-size: 0.95rem; color: var(--text-dark);">
@@ -122,10 +122,24 @@
     <script>
         let currentCategoryFilter = 'all';
 
-        function showInstructions(id, name, q, time) {
+        function formatMark(value) {
+            const numeric = Number(value);
+            if (!Number.isFinite(numeric)) return '0';
+            const fixed = numeric.toFixed(4);
+            return fixed.replace(/\.?0+$/, '');
+        }
+
+        function showInstructions(id, name, q, time, positiveMark = 1, negativePercent = 25) {
             const modal = document.getElementById('instruction-modal');
             document.getElementById('modal-test-name').textContent = name;
-            document.getElementById('modal-test-meta').textContent = `${q} Questions • ${time} Minutes`;
+            document.getElementById('modal-test-meta').textContent = `${q} Questions | ${time} Minutes`;
+
+            const safePositive = Number.isFinite(Number(positiveMark)) && Number(positiveMark) > 0 ? Number(positiveMark) : 1;
+            const safePercent = Number.isFinite(Number(negativePercent)) && Number(negativePercent) >= 0 ? Number(negativePercent) : 25;
+            const negativeMark = Number((safePositive * (safePercent / 100)).toFixed(4));
+
+            document.getElementById('instruction-positive-mark').textContent = formatMark(safePositive);
+            document.getElementById('instruction-negative-mark').textContent = formatMark(negativeMark);
             document.getElementById('modal-start-btn').onclick = () => location.href = `test-view.html?testId=${id}`;
             modal.style.display = 'flex';
         }
@@ -195,6 +209,14 @@
                 const qCount = t.questions || 0;
                 const duration = t.duration || 0;
                 const examType = t.examType || 'General';
+                const positiveMark = Number.isFinite(Number(t.positiveMark)) && Number(t.positiveMark) > 0
+                    ? Number(t.positiveMark)
+                    : 1;
+                const negativePercent = Number.isFinite(Number(t.negativePercent)) && Number(t.negativePercent) >= 0
+                    ? Number(t.negativePercent)
+                    : (Number.isFinite(Number(t.negativeMark)) && positiveMark > 0
+                        ? Number(((Number(t.negativeMark) / positiveMark) * 100).toFixed(2))
+                        : 25);
 
                 const card = document.createElement('div');
                 card.className = 'mock-card';
@@ -208,11 +230,17 @@
                         <div class="meta-item"><i class="fas fa-layer-group"></i> <span>${qCount} Qs</span></div>
                         <div class="meta-item"><i class="fas fa-clock"></i> <span>${duration} Min</span></div>
                     </div>
-                    <button onclick="showInstructions('${t.id}', '${name}', ${qCount}, ${duration})" class="mock-start-btn">
+                    <button type="button" class="mock-start-btn">
                         <span>Start Practice Session</span>
                         <i class="fas fa-arrow-right"></i>
                     </button>
                 `;
+                const startBtn = card.querySelector('.mock-start-btn');
+                if (startBtn) {
+                    startBtn.addEventListener('click', () => {
+                        showInstructions(t.id, name, qCount, duration, positiveMark, negativePercent);
+                    });
+                }
                 grid.appendChild(card);
             });
             container.appendChild(grid);
@@ -230,3 +258,4 @@
 </body>
 
 </html>
+

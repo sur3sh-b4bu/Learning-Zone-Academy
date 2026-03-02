@@ -40,7 +40,7 @@
                 <div class="question-header">
                     <span id="q-header-text"
                         style="font-weight: 700; color: var(--primary-green); text-transform: uppercase; letter-spacing: 1px;">Loading...</span>
-                    <span style="color: rgba(255, 255, 255, 0.8);">Points: 1.0</span>
+                    <span id="question-points" style="color: rgba(255, 255, 255, 0.8);">Points: +1 / -0.25</span>
                 </div>
 
                 <div class="question-text" id="q-text">
@@ -190,6 +190,15 @@
         let reviewMarks = new Set();
         let timeRemaining = 3600;
         let timerInterval;
+        let marksPerQuestion = 1;
+        let negativeMarkPerWrong = 0.25;
+        let negativePercent = 25;
+
+        function formatMark(value) {
+            const numeric = Number(value);
+            if (!Number.isFinite(numeric)) return '0';
+            return numeric.toFixed(4).replace(/\.?0+$/, '');
+        }
 
         // Parse test details
         const params = new URLSearchParams(window.location.search);
@@ -213,6 +222,30 @@
                 const testData = testDoc.data();
                 document.getElementById('subject-label').textContent = testData.title || 'Mock Test';
                 timeRemaining = (testData.duration || 60) * 60;
+
+                const configuredPositive = Number(testData.positiveMark);
+                marksPerQuestion = Number.isFinite(configuredPositive) && configuredPositive > 0 ? configuredPositive : 1;
+
+                const configuredNegativeMark = Number(testData.negativeMark);
+                const configuredNegativePercent = Number(testData.negativePercent);
+                if (Number.isFinite(configuredNegativeMark) && configuredNegativeMark >= 0) {
+                    negativeMarkPerWrong = configuredNegativeMark;
+                } else {
+                    const safePercent = Number.isFinite(configuredNegativePercent) && configuredNegativePercent >= 0
+                        ? configuredNegativePercent
+                        : 25;
+                    negativeMarkPerWrong = Number((marksPerQuestion * (safePercent / 100)).toFixed(4));
+                }
+
+                negativePercent = Number.isFinite(configuredNegativePercent) && configuredNegativePercent >= 0
+                    ? configuredNegativePercent
+                    : (marksPerQuestion > 0 ? Number(((negativeMarkPerWrong / marksPerQuestion) * 100).toFixed(2)) : 0);
+
+                const pointsEl = document.getElementById('question-points');
+                if (pointsEl) {
+                    pointsEl.textContent = `Points: +${formatMark(marksPerQuestion)} / -${formatMark(negativeMarkPerWrong)}`;
+                    pointsEl.title = `Negative marking: ${formatMark(negativePercent)}%`;
+                }
                 startTimer();
 
                 // Fetch questions
@@ -350,10 +383,10 @@
                         unattempted++;
                     } else if (ans === q.correct) {
                         correctCount++;
-                        score += 1;
+                        score += marksPerQuestion;
                     } else {
                         wrongCount++;
-                        score -= 0.25;
+                        score -= negativeMarkPerWrong;
                     }
                 });
 

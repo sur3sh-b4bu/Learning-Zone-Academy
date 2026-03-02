@@ -87,37 +87,15 @@
                             style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 20px; padding: 32px;">
                             <h4 style="margin-bottom: 20px; color: var(--primary); font-size: 1.2rem;">Have a Doubt?
                             </h4>
-                            <textarea placeholder="Type your doubt here..."
-                                style="width: 100%; padding: 16px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color:white; border-radius: 12px; margin-bottom: 16px; height: 100px; outline: none; transition: 0.3s;"></textarea>
-                            <button class="btn-primary" style="padding: 12px 24px; border-radius: 12px;">Post
+                            <textarea id="qa-input" placeholder="Type your doubt here..."
+                                style="width: 100%; padding: 16px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color:white; border-radius: 12px; margin-bottom: 10px; height: 100px; outline: none; transition: 0.3s;"></textarea>
+                            <p id="qa-status" style="margin: 0 0 14px; min-height: 18px; font-size: 0.82rem; color: var(--text-muted);"></p>
+                            <button type="button" id="qa-submit-btn" class="btn-primary"
+                                onclick="postLessonQuestion()" style="padding: 12px 24px; border-radius: 12px;">Post
                                 Question</button>
 
-                            <div class="qa-chat-container">
-                                <!-- Example Message 1 -->
-                                <div class="qa-message">
-                                    <div class="user-avatar">AK</div>
-                                    <div class="message-content">
-                                        <h5>Ashok Kumar <span
-                                                style="font-weight: 400; color: var(--text-muted); font-size: 0.8rem; margin-left: 8px;">2
-                                                hours ago</span></h5>
-                                        <div class="msg-text">Can someone explain the shortcut used at 12:45 for the
-                                            integration problem? It was really fast.</div>
-                                    </div>
-                                </div>
-
-                                <!-- Example Message 2 (Instructor Reply) -->
-                                <div class="qa-message"
-                                    style="margin-left: 40px; border-left: 2px solid var(--primary);">
-                                    <div class="user-avatar"
-                                        style="background: var(--grad-dark); border: 1px solid var(--primary);">IN</div>
-                                    <div class="message-content">
-                                        <h5 style="color: var(--primary);">Instructor Team <span class="video-tag-pill"
-                                                style="padding: 2px 8px; font-size: 0.6rem; vertical-align: middle;">OFFICIAL</span>
-                                        </h5>
-                                        <div class="msg-text">Hey Ashok! We used the 'Substitution Method' shortcut
-                                            here. Check the resources tab for the detailed formula sheet!</div>
-                                    </div>
-                                </div>
+                            <div class="qa-chat-container" id="qa-chat-container">
+                                <div class="qa-empty">No questions yet for this lesson.</div>
                             </div>
                         </div>
                     </div>
@@ -174,16 +152,98 @@
     <script>
         let authResolvedUser = null;
         let courseLoadedOnce = false;
-        let planRankMapPromise = null;
+        let courseLoadInProgress = false;
+        let viewPlanRankMapPromise = null;
+
+        function escapeHtml(value) {
+            return String(value == null ? '' : value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function setPlaylistMessage(message, type = 'muted') {
+            const listContainer = document.getElementById('lesson-list-container');
+            if (!listContainer) return;
+            const color = type === 'error' ? '#ef4444' : 'var(--text-muted)';
+            listContainer.innerHTML = `<div style="padding:24px; text-align:center; color:${color}; font-weight:600;">${escapeHtml(message)}</div>`;
+        }
+
+        function normalizeLessonTimestamp(value) {
+            if (!value) return 0;
+            if (typeof value.toMillis === 'function') return value.toMillis();
+            if (typeof value.seconds === 'number') return value.seconds * 1000;
+            const asNumber = Number(value);
+            return Number.isFinite(asNumber) ? asNumber : 0;
+        }
+
+        function sortLessons(lessons) {
+            return lessons.sort((a, b) => {
+                const byCreated = normalizeLessonTimestamp(a.createdAt) - normalizeLessonTimestamp(b.createdAt);
+                if (byCreated !== 0) return byCreated;
+                return (a.title || '').localeCompare(b.title || '');
+            });
+        }
+
+        async function resolveViewer(timeoutMs = 3500) {
+            if (authResolvedUser || auth.currentUser) return authResolvedUser || auth.currentUser;
+            return new Promise((resolve) => {
+                let settled = false;
+                let timer = null;
+                let unsubscribe = null;
+                const done = (user) => {
+                    if (settled) return;
+                    settled = true;
+                    if (timer) clearTimeout(timer);
+                    if (unsubscribe) unsubscribe();
+                    resolve(user || null);
+                };
+                unsubscribe = auth.onAuthStateChanged((user) => {
+                    authResolvedUser = user || null;
+                    done(user);
+                });
+                timer = setTimeout(() => {
+                    done(auth.currentUser || authResolvedUser || null);
+                }, timeoutMs);
+            });
+        }
+
+        async function fetchCourseLessons(courseId) {
+            const results = [];
+            const lessonsRef = db.collection('videos').doc(courseId).collection('lessons');
+            const readers = [
+                async () => lessonsRef.orderBy('createdAt', 'asc').get(),
+                async () => lessonsRef.get(),
+                async () => db.collection('lessons').where('courseId', '==', courseId).orderBy('createdAt', 'asc').get(),
+                async () => db.collection('lessons').where('courseId', '==', courseId).get()
+            ];
+
+            for (const read of readers) {
+                try {
+                    const snap = await read();
+                    if (!snap.empty) {
+                        snap.forEach((doc) => {
+                            results.push({ id: doc.id, ...doc.data() });
+                        });
+                        break;
+                    }
+                } catch (_) {
+                    // Try the next source/shape (legacy data fallback).
+                }
+            }
+            return sortLessons(results);
+        }
 
         function normalizeAccessPlan(planId) {
             return String(planId || 'free').trim().toLowerCase();
         }
 
         async function getPlanRankMap() {
-            if (planRankMapPromise) return planRankMapPromise;
+            if (viewPlanRankMapPromise) return viewPlanRankMapPromise;
             const fallback = { free: 0, pro: 1, ultimate: 2 };
-            planRankMapPromise = (async () => {
+            viewPlanRankMapPromise = (async () => {
                 try {
                     const snap = await db.collection('plans').orderBy('price', 'asc').get();
                     if (snap.empty) return fallback;
@@ -199,7 +259,7 @@
                     return fallback;
                 }
             })();
-            return planRankMapPromise;
+            return viewPlanRankMapPromise;
         }
 
         function getPlanRank(rankMap, planId) {
@@ -239,17 +299,23 @@
             return getPlanRank(planRanks, userPlan) >= getPlanRank(planRanks, required);
         }
 
-        // Access Gate
-        auth.onAuthStateChanged(async (user) => {
-            authResolvedUser = user || null;
-            if (!user) {
-                alert("Please login to watch videos!");
-                window.location.href = '../index.html';
-                return;
+        async function ensureCourseLoaded(force = false) {
+            if (courseLoadInProgress) return;
+            if (courseLoadedOnce && !force) return;
+
+            courseLoadInProgress = true;
+            try {
+                const loaded = await loadCourseData();
+                if (loaded) courseLoadedOnce = true;
+            } finally {
+                courseLoadInProgress = false;
             }
-            if (!courseLoadedOnce) {
-                courseLoadedOnce = true;
-                await loadCourseData();
+        }
+
+        auth.onAuthStateChanged((user) => {
+            authResolvedUser = user || null;
+            if (!courseLoadedOnce && document.readyState !== 'loading') {
+                ensureCourseLoaded();
             }
         });
 
@@ -258,24 +324,31 @@
             const courseId = params.get('course');
             if (!courseId) {
                 document.getElementById('v-title').textContent = "Course not found.";
-                document.getElementById('lesson-list-container').innerHTML = "<div style='padding:20px; text-align:center;'>Invalid URL parameter. Please go back to the Videos page.</div>";
-                return;
+                setPlaylistMessage('Invalid URL parameter. Please open this course from Videos page.', 'error');
+                return false;
             }
+            activeCourseId = courseId;
+
+            const lessonCountEl = document.getElementById('lesson-count');
+            if (lessonCountEl) lessonCountEl.textContent = 'Loading lessons...';
+            setPlaylistMessage('Loading lessons...');
 
             try {
                 // Fetch Course Doc
                 const courseDoc = await db.collection('videos').doc(courseId).get();
                 if (!courseDoc.exists) {
                     document.getElementById('v-title').textContent = "Course not found.";
-                    return;
+                    if (lessonCountEl) lessonCountEl.textContent = 'Course unavailable';
+                    setPlaylistMessage('This course does not exist anymore.', 'error');
+                    return false;
                 }
                 const course = courseDoc.data();
-                const viewer = authResolvedUser || auth.currentUser;
+                const viewer = await resolveViewer();
 
                 if (!viewer) {
                     alert("Please login to watch videos!");
                     window.location.href = '../index.html';
-                    return;
+                    return false;
                 }
 
                 const requiredPlan = normalizeAccessPlan(course.requiredPlan || 'pro');
@@ -283,7 +356,7 @@
                 if (!allowed) {
                     alert(`Upgrade required!\n\nThis course requires ${requiredPlan.toUpperCase()} plan access.`);
                     window.location.href = '../index.html#pricing';
-                    return;
+                    return false;
                 }
 
                 document.getElementById('v-title').textContent = course.title || 'Untitled Course';
@@ -297,28 +370,28 @@
                     `;
                 }
 
-                // Fetch Lessons
-                const snap = await db.collection('videos').doc(courseId).collection('lessons').orderBy('createdAt', 'asc').get();
+                const lessons = await fetchCourseLessons(courseId);
 
                 const listContainer = document.getElementById('lesson-list-container');
                 listContainer.innerHTML = '';
-                document.getElementById('lesson-count').textContent = snap.size + (snap.size === 1 ? ' Lesson' : ' Lessons');
+                if (lessonCountEl) lessonCountEl.textContent = lessons.length + (lessons.length === 1 ? ' Lesson' : ' Lessons');
 
                 lessonDataCache = [];
-                if (snap.empty) {
-                    listContainer.innerHTML = "<div style='padding:24px; text-align:center; color: rgba(255, 255, 255, 0.4);'>No lessons available.</div>";
-                    return;
+                if (lessons.length === 0) {
+                    setPlaylistMessage('No lessons available for this course yet.');
+                    return true;
                 }
 
                 let idx = 1;
-                snap.forEach(doc => {
-                    const l = { id: doc.id, ...doc.data(), index: idx };
+                lessons.forEach((lesson) => {
+                    const title = String(lesson.title || lesson.name || `Lesson ${idx}`).trim();
+                    const l = { ...lesson, title, index: idx };
                     lessonDataCache.push(l);
 
                     const lessonCard = document.createElement('div');
                     lessonCard.className = 'lesson-card fade-in';
                     lessonCard.style.animationDelay = `${idx * 0.08}s`;
-                    lessonCard.setAttribute('data-title', l.title.toLowerCase());
+                    lessonCard.setAttribute('data-title', title.toLowerCase());
                     lessonCard.onclick = () => playLesson(l, lessonCard);
 
                     lessonCard.innerHTML = `
@@ -327,10 +400,10 @@
                             <i class="fas fa-play l-play-icon"></i>
                         </div>
                         <div class="lesson-details">
-                            <h4>${l.title}</h4>
+                            <h4>${escapeHtml(title)}</h4>
                             <div style="display: flex; align-items: center; gap: 8px;">
                                 <span class="now-playing-tag">Now Playing</span>
-                                <span><i class="fas fa-clock" style="font-size: 0.7rem;"></i> 12:45</span>
+                                <span><i class="fas fa-clock" style="font-size: 0.7rem;"></i> Lesson ${idx}</span>
                             </div>
                         </div>
                     `;
@@ -343,18 +416,190 @@
                     const firstCard = listContainer.querySelector('.lesson-card');
                     playLesson(lessonDataCache[0], firstCard);
                 }
+                return true;
 
             } catch (err) {
                 console.error("Error loading course:", err);
                 document.getElementById('v-title').textContent = "Error loading course.";
+                if (lessonCountEl) lessonCountEl.textContent = 'Unable to load';
+                setPlaylistMessage(`Could not load playlist: ${err.message}`, 'error');
+                return false;
             }
         }
 
         let lessonDataCache = [];
         let currentLessonIndex = -1;
+        let activeCourseId = null;
+        let activeLessonId = null;
+        let qaUnsubscribe = null;
+        let qaPostInProgress = false;
+
+        function setQAStatus(message, type = 'muted') {
+            const el = document.getElementById('qa-status');
+            if (!el) return;
+            el.textContent = message || '';
+            if (!message) {
+                el.style.color = 'var(--text-muted)';
+                return;
+            }
+            if (type === 'error') el.style.color = '#ef4444';
+            else if (type === 'success') el.style.color = '#10b981';
+            else el.style.color = 'var(--text-muted)';
+        }
+
+        function formatTimeAgo(value) {
+            const ts = normalizeLessonTimestamp(value);
+            if (!ts) return 'Just now';
+            const diff = Date.now() - ts;
+            if (diff < 60 * 1000) return 'Just now';
+            if (diff < 60 * 60 * 1000) return `${Math.floor(diff / (60 * 1000))}m ago`;
+            if (diff < 24 * 60 * 60 * 1000) return `${Math.floor(diff / (60 * 60 * 1000))}h ago`;
+            return `${Math.floor(diff / (24 * 60 * 60 * 1000))}d ago`;
+        }
+
+        function getInitials(name) {
+            const cleaned = String(name || '').trim();
+            if (!cleaned) return 'U';
+            const parts = cleaned.split(/\s+/).filter(Boolean);
+            if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+            return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+        }
+
+        function renderQAMessages(messages) {
+            const container = document.getElementById('qa-chat-container');
+            if (!container) return;
+            if (!messages || !messages.length) {
+                container.innerHTML = '<div class="qa-empty">No questions yet for this lesson.</div>';
+                return;
+            }
+
+            container.innerHTML = messages.map((item) => {
+                const name = escapeHtml(item.userName || 'Learner');
+                const time = escapeHtml(formatTimeAgo(item.createdAt));
+                const text = escapeHtml(item.text || '').replace(/\n/g, '<br>');
+                const initials = escapeHtml(getInitials(item.userName || 'Learner'));
+                return `
+                    <div class="qa-message">
+                        <div class="user-avatar">${initials}</div>
+                        <div class="message-content">
+                            <h5>${name} <span style="font-size:0.78rem; color:var(--text-muted); font-weight:500;">${time}</span></h5>
+                            <div class="msg-text">${text}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function subscribeLessonQA(lessonId) {
+            if (qaUnsubscribe) {
+                qaUnsubscribe();
+                qaUnsubscribe = null;
+            }
+
+            activeLessonId = lessonId || null;
+            if (!activeCourseId || !activeLessonId) {
+                renderQAMessages([]);
+                setQAStatus('Select a lesson to post your question.');
+                return;
+            }
+
+            try {
+                const ref = db
+                    .collection('videos')
+                    .doc(activeCourseId)
+                    .collection('lessons')
+                    .doc(activeLessonId)
+                    .collection('qa')
+                    .orderBy('createdAt', 'desc')
+                    .limit(50);
+
+                qaUnsubscribe = ref.onSnapshot((snap) => {
+                    const items = [];
+                    snap.forEach((doc) => items.push({ id: doc.id, ...doc.data() }));
+                    items.sort((a, b) => normalizeLessonTimestamp(b.createdAt) - normalizeLessonTimestamp(a.createdAt));
+                    renderQAMessages(items);
+                }, (err) => {
+                    console.error('Failed to load lesson Q&A:', err);
+                    setQAStatus('Could not load questions for this lesson.', 'error');
+                });
+            } catch (err) {
+                console.error('Unable to subscribe lesson Q&A:', err);
+                setQAStatus('Could not initialise lesson Q&A.', 'error');
+            }
+        }
+
+        async function postLessonQuestion() {
+            if (qaPostInProgress) return;
+
+            const input = document.getElementById('qa-input');
+            const btn = document.getElementById('qa-submit-btn');
+            const message = String(input?.value || '').trim();
+
+            if (!message) {
+                setQAStatus('Type your question before posting.', 'error');
+                if (input) input.focus();
+                return;
+            }
+            if (!activeCourseId || !activeLessonId) {
+                setQAStatus('Select a lesson before posting your question.', 'error');
+                return;
+            }
+
+            const user = auth.currentUser || await resolveViewer();
+            if (!user) {
+                setQAStatus('Please login to post a question.', 'error');
+                return;
+            }
+
+            const derivedName = String(user.displayName || user.email || 'Learner').split('@')[0];
+            const payload = {
+                text: message,
+                userId: user.uid,
+                userEmail: user.email || '',
+                userName: derivedName || 'Learner',
+                role: 'learner',
+                courseId: activeCourseId,
+                lessonId: activeLessonId,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            qaPostInProgress = true;
+            if (btn) {
+                btn.disabled = true;
+                btn.style.opacity = '0.7';
+                btn.textContent = 'Posting...';
+            }
+            setQAStatus('Posting your question...');
+
+            try {
+                await db
+                    .collection('videos')
+                    .doc(activeCourseId)
+                    .collection('lessons')
+                    .doc(activeLessonId)
+                    .collection('qa')
+                    .add(payload);
+
+                if (input) input.value = '';
+                setQAStatus('Question posted successfully.', 'success');
+            } catch (err) {
+                console.error('Failed to post question:', err);
+                setQAStatus(`Failed to post question: ${err.message || 'Please try again.'}`, 'error');
+            } finally {
+                qaPostInProgress = false;
+                if (btn) {
+                    btn.disabled = false;
+                    btn.style.opacity = '';
+                    btn.textContent = 'Post Question';
+                }
+            }
+        }
 
         function playLesson(lesson, cardElement) {
             currentLessonIndex = lessonDataCache.findIndex(l => l.id === lesson.id);
+            activeLessonId = lesson.id || null;
+            subscribeLessonQA(activeLessonId);
 
             // Update Progress Bar
             const percent = Math.round(((currentLessonIndex + 1) / lessonDataCache.length) * 100);
@@ -398,7 +643,7 @@
             if (lesson.resourcePdfUrl) {
                 resContainer.innerHTML = `<div style="display: flex; align-items: center; gap: 16px; background: rgba(16, 185, 129, 0.05); border: 1px solid rgba(16, 185, 129, 0.2); padding: 20px; border-radius: 16px;">
                     <div style="width: 48px; height: 48px; border-radius: 12px; background: var(--grad-primary); display: flex; align-items: center; justify-content: center; color: white;"><i class="fas fa-file-download"></i></div>
-                    <div style="flex: 1;"><h5 style="margin: 0; color: white;">${lesson.resourcePdfName || 'Resource.pdf'}</h5></div>
+                    <div style="flex: 1;"><h5 style="margin: 0; color: var(--secondary);">${lesson.resourcePdfName || 'Resource.pdf'}</h5></div>
                     <a href="${lesson.resourcePdfUrl}" target="_blank" class="btn-primary" style="padding: 10px 20px; font-size: 0.8rem;">Download</a>
                 </div>`;
             } else {
@@ -419,7 +664,7 @@
         function filterSidebarLessons() {
             const q = document.getElementById('lesson-search').value.toLowerCase();
             document.querySelectorAll('.lesson-card').forEach(card => {
-                const title = card.getAttribute('data-title');
+                const title = (card.getAttribute('data-title') || '').toLowerCase();
                 card.style.display = title.includes(q) ? 'flex' : 'none';
             });
         }
@@ -441,12 +686,30 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            if (auth.currentUser && !courseLoadedOnce) {
-                courseLoadedOnce = true;
-                loadCourseData();
-            }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => ensureCourseLoaded());
+        } else {
+            ensureCourseLoaded();
+        }
+
+        window.addEventListener('pageshow', () => {
+            if (!courseLoadedOnce) ensureCourseLoaded();
         });
+
+        window.addEventListener('beforeunload', () => {
+            if (qaUnsubscribe) qaUnsubscribe();
+            qaUnsubscribe = null;
+        });
+
+        const qaInput = document.getElementById('qa-input');
+        if (qaInput) {
+            qaInput.addEventListener('keydown', (event) => {
+                if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+                    event.preventDefault();
+                    postLessonQuestion();
+                }
+            });
+        }
     </script>
 
 

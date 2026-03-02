@@ -1,4 +1,4 @@
-﻿let subjects = [];
+let subjects = [];
 window.subjects = subjects;
 
 function getPath(filename) {
@@ -719,17 +719,23 @@ async function fetchAndRenderExamCategories() {
         const snap = await db.collection('subjects').get();
         snap.forEach(doc => {
             const d = doc.data();
+            const categoryName = d.name || d.category || 'Unknown';
             categories.push({
-                name: d.name || d.category || 'Unknown',
-                shortCode: (d.name || 'XX').substring(0, 2).toUpperCase(),
+                name: categoryName,
+                shortCode: (categoryName || 'XX').substring(0, 2).toUpperCase(),
                 color: d.color || '#059669',
                 bg: d.bg || 'var(--primary-light)',
-                link: `${getPath('exams-hub.html')}?cat=${encodeURIComponent(d.name || d.category || '')}`
+                link: `${getPath('exams-hub.html')}?subject=${encodeURIComponent(doc.id)}&cat=${encodeURIComponent(categoryName)}`
             });
         });
     } catch (e) { console.warn('ExamCategories fetch error:', e); }
 
-    if (categories.length === 0 && window.MOCK_DATA) categories = MOCK_DATA.examCategories;
+    if (categories.length === 0 && window.MOCK_DATA) {
+        categories = (MOCK_DATA.examCategories || []).map(cat => ({
+            ...cat,
+            link: `${getPath('exams-hub.html')}?cat=${encodeURIComponent(cat.name || '')}`
+        }));
+    }
 
     container.innerHTML = categories.map((cat, i) => `
         <a href="${cat.link}" class="exam-cat-card glass hover-3d fade-in"
@@ -967,12 +973,68 @@ window.fetchAndRenderCAPDFs = fetchAndRenderCAPDFs;
 // ==========================================
 // LIVE UPDATES TICKER (Dynamic from Firebase)
 // ==========================================
+function parseBroadcastEnabled(value, fallback = true) {
+    if (typeof value === 'boolean') return value;
+    if (typeof value === 'number') return value !== 0;
+    if (typeof value === 'string') {
+        const normalized = value.trim().toLowerCase();
+        if (['false', '0', 'off', 'no', 'disabled'].includes(normalized)) return false;
+        if (['true', '1', 'on', 'yes', 'enabled'].includes(normalized)) return true;
+    }
+    return fallback;
+}
+
+async function getBroadcastEnabled() {
+    // Primary source for learner-facing config (matches siteConfig usage in homepage).
+    try {
+        const siteDoc = await db.collection('siteConfig').doc('broadcast').get();
+        if (siteDoc.exists) {
+            return parseBroadcastEnabled(siteDoc.data() && siteDoc.data().enabled, true);
+        }
+    } catch (e) {
+        console.warn('Broadcast siteConfig read failed:', e);
+    }
+
+    // Backward compatibility with previous settings path.
+    try {
+        const settingsDoc = await db.collection('settings').doc('broadcastEnabled').get();
+        if (settingsDoc.exists) {
+            return parseBroadcastEnabled(settingsDoc.data() && settingsDoc.data().enabled, true);
+        }
+    } catch (e) {
+        console.warn('Broadcast settings read failed:', e);
+    }
+
+    return true;
+}
+
+function applyTickerVisibility(enabled, container) {
+    const tickerWrap = container
+        ? container.closest('.ticker-wrap')
+        : document.querySelector('.ticker-wrap');
+    if (tickerWrap) tickerWrap.style.display = enabled ? '' : 'none';
+    if (document.documentElement) {
+        document.documentElement.classList.toggle('ticker-hidden', !enabled);
+    }
+    if (document.body) {
+        document.body.classList.toggle('ticker-hidden', !enabled);
+    }
+}
+
 async function fetchAndRenderTicker() {
     const container = document.getElementById('alert-ticker');
     if (!container) return;
 
     let items = [];
     try {
+        const broadcastEnabled = await getBroadcastEnabled();
+        if (!broadcastEnabled) {
+            applyTickerVisibility(false, container);
+            container.innerHTML = '';
+            return;
+        }
+        applyTickerVisibility(true, container);
+
         const snap = await db.collection('ticker').orderBy('createdAt', 'desc').get();
         snap.forEach(doc => {
             const d = doc.data();
@@ -987,7 +1049,232 @@ async function fetchAndRenderTicker() {
     container.innerHTML = html + html; // duplicate for seamless CSS marquee
 }
 
+let tickerBroadcastWatcherAttached = false;
+function watchBroadcastTickerSetting() {
+    if (tickerBroadcastWatcherAttached) return;
+    const container = document.getElementById('alert-ticker');
+    if (!container) return;
+
+    tickerBroadcastWatcherAttached = true;
+    try {
+        db.collection('siteConfig').doc('broadcast').onSnapshot((doc) => {
+            const enabled = doc.exists
+                ? parseBroadcastEnabled(doc.data() && doc.data().enabled, true)
+                : true;
+            applyTickerVisibility(enabled, container);
+            if (!enabled) {
+                container.innerHTML = '';
+                return;
+            }
+            fetchAndRenderTicker();
+        }, (error) => {
+            console.warn('Broadcast watcher error:', error);
+        });
+    } catch (e) {
+        console.warn('Unable to attach broadcast watcher:', e);
+    }
+}
+
 window.fetchAndRenderTicker = fetchAndRenderTicker;
+
+// ==========================================
+// RAZORPAY PAYMENT FLOW (Firebase Functions)
+// ==========================================
+const RAZORPAY_FUNCTION_REGION = 'asia-south1';
+const RAZORPAY_CHECKOUT_SRC = 'https://checkout.razorpay.com/v1/checkout.js';
+let razorpayScriptPromise = null;
+let paymentInProgress = false;
+
+function getFunctionsBaseUrl() {
+    const projectId = (firebase.app && firebase.app().options && firebase.app().options.projectId)
+        ? firebase.app().options.projectId
+        : 'nellailearningacademy';
+    return `https://${RAZORPAY_FUNCTION_REGION}-${projectId}.cloudfunctions.net`;
+}
+
+function parseApiError(rawBody, fallbackMessage) {
+    if (!rawBody) return fallbackMessage;
+    try {
+        const parsed = JSON.parse(rawBody);
+        return parsed.error || parsed.message || fallbackMessage;
+    } catch (_) {
+        return fallbackMessage;
+    }
+}
+
+async function postToFunctions(path, payload) {
+    const endpoint = `${getFunctionsBaseUrl()}/${path}`;
+    let response;
+    try {
+        response = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload || {})
+        });
+    } catch (_) {
+        throw new Error('Unable to reach payment server. Check internet and function URL.');
+    }
+    const raw = await response.text();
+    if (!response.ok) {
+        if (response.status === 404) {
+            throw new Error('Payment API not deployed. Deploy Firebase functions first.');
+        }
+        throw new Error(parseApiError(raw, `Request failed (${response.status})`));
+    }
+    try {
+        return raw ? JSON.parse(raw) : {};
+    } catch (_) {
+        throw new Error('Invalid server response.');
+    }
+}
+
+function ensureRazorpayCheckoutLoaded() {
+    if (window.Razorpay) return Promise.resolve();
+    if (razorpayScriptPromise) return razorpayScriptPromise;
+
+    razorpayScriptPromise = new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = RAZORPAY_CHECKOUT_SRC;
+        script.async = true;
+        script.onload = () => resolve();
+        script.onerror = () => reject(new Error('Unable to load Razorpay checkout script.'));
+        document.head.appendChild(script);
+    });
+
+    return razorpayScriptPromise;
+}
+
+async function getPlanForPayment(planId) {
+    const normalizedPlanId = normalizePlanId(planId);
+    if (!normalizedPlanId || normalizedPlanId === 'free') return null;
+
+    try {
+        const doc = await db.collection('plans').doc(normalizedPlanId).get();
+        if (doc.exists) {
+            return { id: doc.id, ...doc.data() };
+        }
+    } catch (e) {
+        console.warn('Plan fetch failed from Firestore doc lookup:', e);
+    }
+
+    const cached = (window.plansData || []).find(p => normalizePlanId(p.id) === normalizedPlanId);
+    if (cached) return cached;
+    return null;
+}
+
+window.processMockPayment = async (planId) => {
+    const selectedPlanId = normalizePlanId(planId);
+
+    if (!selectedPlanId) {
+        alert('Invalid plan selected.');
+        return;
+    }
+
+    if (selectedPlanId === 'free') {
+        alert('You are already on the Free plan.');
+        return;
+    }
+
+    if (paymentInProgress) {
+        alert('A payment is already in progress. Please complete it first.');
+        return;
+    }
+
+    const user = auth.currentUser;
+    if (!user) {
+        alert('Please login first to upgrade your plan.');
+        toggleModal('login-modal');
+        return;
+    }
+
+    const plan = await getPlanForPayment(selectedPlanId);
+    if (!plan) {
+        alert('Selected plan details were not found. Please refresh and try again.');
+        return;
+    }
+
+    const amountValue = Number(plan.price || 0);
+    if (!Number.isFinite(amountValue) || amountValue <= 0) {
+        alert('Plan amount is invalid. Please contact support.');
+        return;
+    }
+
+    paymentInProgress = true;
+
+    try {
+        const idToken = await user.getIdToken(true);
+        const orderResponse = await postToFunctions('createRazorpayOrder', {
+            idToken,
+            planId: selectedPlanId
+        });
+
+        if (!orderResponse || !orderResponse.orderId || !orderResponse.keyId) {
+            throw new Error('Unable to create Razorpay order.');
+        }
+
+        await ensureRazorpayCheckoutLoaded();
+
+        const options = {
+            key: orderResponse.keyId,
+            amount: orderResponse.amount,
+            currency: orderResponse.currency || 'INR',
+            name: 'Gov Learn',
+            description: `${orderResponse.planName || (plan.name || selectedPlanId.toUpperCase())} Subscription`,
+            order_id: orderResponse.orderId,
+            prefill: {
+                name: user.displayName || '',
+                email: user.email || ''
+            },
+            notes: {
+                plan_id: selectedPlanId,
+                user_uid: user.uid
+            },
+            theme: { color: '#059669' },
+            modal: {
+                ondismiss: () => {
+                    paymentInProgress = false;
+                }
+            },
+            handler: async (razorpayResponse) => {
+                try {
+                    const verifyPayload = {
+                        idToken,
+                        planId: selectedPlanId,
+                        razorpayOrderId: razorpayResponse.razorpay_order_id,
+                        razorpayPaymentId: razorpayResponse.razorpay_payment_id,
+                        razorpaySignature: razorpayResponse.razorpay_signature
+                    };
+                    const verifyResponse = await postToFunctions('verifyRazorpayPayment', verifyPayload);
+                    if (!verifyResponse || !verifyResponse.ok) {
+                        throw new Error((verifyResponse && verifyResponse.error) || 'Payment verification failed.');
+                    }
+
+                    alert(`Payment successful! Your plan is now ${selectedPlanId.toUpperCase()}.`);
+                    window.location.reload();
+                } catch (verifyError) {
+                    console.error('Payment verification error:', verifyError);
+                    alert(`Payment captured but verification failed.\n${verifyError.message}`);
+                } finally {
+                    paymentInProgress = false;
+                }
+            }
+        };
+
+        const razorpay = new window.Razorpay(options);
+        razorpay.on('payment.failed', (response) => {
+            const message = response && response.error && response.error.description
+                ? response.error.description
+                : 'Payment failed. Please try again.';
+            alert(message);
+            paymentInProgress = false;
+        });
+        razorpay.open();
+    } catch (error) {
+        console.error('Razorpay payment initiation failed:', error);
+        alert(`Payment could not be started.\n${error.message}`);
+        paymentInProgress = false;
+    }
+};
 
 // Function to fetch and render subscription plans
 async function fetchAndRenderPlans() {
@@ -1045,6 +1332,7 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchAndRenderCourses();
     fetchAndRenderTestimonials();
     fetchAndRenderTicker();
+    watchBroadcastTickerSetting();
     fetchAndRenderCAPDFs();
     fetchAndRenderPlans();
 });

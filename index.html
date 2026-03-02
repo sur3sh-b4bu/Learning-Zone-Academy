@@ -220,23 +220,6 @@
         }
         loadHeroConfig();
 
-        async function processMockPayment(plan) {
-            const user = auth.currentUser;
-            if (!user) {
-                alert("Please login first to upgrade your plan!");
-                toggleModal('login-modal');
-                return;
-            }
-            if (plan === 'free') {
-                alert("You are already on the Free Plan!");
-                return;
-            }
-            if (confirm(`Proceed to pay for the ${plan.toUpperCase()} Plan?`)) {
-                await db.collection('students').doc(user.uid).set({ plan: plan }, { merge: true });
-                alert("Upgraded successfully!");
-                location.reload();
-            }
-        }
     </script>
 </body>
 
