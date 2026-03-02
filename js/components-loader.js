@@ -40,6 +40,12 @@
 
             // Dispatch event to notify that nav is loaded
             if (elementId === 'main-nav') {
+                // Move modals to body to avoid transform-related positioning bugs (fixed position relative to transformed parent)
+                const modals = container.querySelectorAll('.modal-overlay');
+                modals.forEach(modal => {
+                    document.body.appendChild(modal);
+                });
+
                 const tickerWrap = container.querySelector('.ticker-wrap');
                 if (tickerWrap) {
                     document.body.insertBefore(tickerWrap, document.body.firstChild);

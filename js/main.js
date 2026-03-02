@@ -1,4 +1,4 @@
-let subjects = [];
+﻿let subjects = [];
 window.subjects = subjects;
 
 function getPath(filename) {
@@ -37,6 +37,132 @@ async function injectSubjects(filter = '') {
     });
 }
 window.fetchSubjects = fetchSubjects;
+
+function normalizePlanId(planId) {
+    return String(planId || 'free').trim().toLowerCase();
+}
+
+let planRankMapPromise = null;
+
+async function getPlanRankMap() {
+    if (planRankMapPromise) return planRankMapPromise;
+
+    const fallback = { free: 0, pro: 1, ultimate: 2 };
+    planRankMapPromise = (async () => {
+        try {
+            const snap = await db.collection('plans').orderBy('price', 'asc').get();
+            if (snap.empty) return fallback;
+
+            const map = {};
+            let idx = 0;
+            snap.forEach(doc => {
+                map[normalizePlanId(doc.id)] = idx++;
+            });
+
+            if (map.free == null) map.free = 0;
+            if (map.pro == null && idx > 1) map.pro = 1;
+            if (map.ultimate == null && idx > 2) map.ultimate = 2;
+            return map;
+        } catch (e) {
+            console.warn('Using fallback plan rank map:', e);
+            return fallback;
+        }
+    })();
+
+    return planRankMapPromise;
+}
+
+function getPlanRank(rankMap, planId) {
+    const normalized = normalizePlanId(planId);
+    if (rankMap[normalized] != null) return rankMap[normalized];
+
+    const staticRank = {
+        free: 0, basic: 0, starter: 0,
+        pro: 1, plus: 1, premium: 1,
+        ultimate: 2, diamond: 3, platinum: 4, enterprise: 5
+    };
+
+    if (staticRank[normalized] != null) return staticRank[normalized];
+    if (normalized.includes('free')) return 0;
+    if (normalized.includes('pro') || normalized.includes('premium')) return 1;
+    if (normalized.includes('ultimate')) return 2;
+    return 1;
+}
+
+async function hasPlanAccess(userPlan, requiredPlan) {
+    const required = normalizePlanId(requiredPlan || 'free');
+    if (required === 'free') return true;
+
+    const map = await getPlanRankMap();
+    const userRank = getPlanRank(map, userPlan);
+    const requiredRank = getPlanRank(map, required);
+    return userRank >= requiredRank;
+}
+
+async function getCurrentUserPlanId() {
+    const user = auth.currentUser;
+    if (!user) return null;
+    // Hardcoded admin bypass for access checks.
+    if (String(user.email || '').toLowerCase() === 'admin@gmail.com') return 'ultimate';
+
+    try {
+        const doc = await db.collection('students').doc(user.uid).get();
+        if (!doc.exists) return 'free';
+        return normalizePlanId(doc.data().plan || 'free');
+    } catch (e) {
+        console.warn('Failed to fetch current user plan, defaulting to free:', e);
+        return 'free';
+    }
+}
+
+async function verifyPlanAccess(requiredPlan) {
+    const required = normalizePlanId(requiredPlan || 'free');
+    if (required === 'free') return { allowed: true };
+
+    const user = auth.currentUser;
+    if (!user) {
+        return {
+            allowed: false,
+            reason: 'login',
+            message: `Please sign in to access ${required.toUpperCase()} content.`
+        };
+    }
+
+    const userPlan = await getCurrentUserPlanId();
+    const allowed = await hasPlanAccess(userPlan, required);
+    if (allowed) return { allowed: true };
+
+    return {
+        allowed: false,
+        reason: 'plan',
+        message: `Upgrade required.\n\nThis content requires ${required.toUpperCase()} plan access.`
+    };
+}
+
+window.handlePlanLockedAsset = async (event, targetUrl, requiredPlan, label = 'content') => {
+    if (event) event.preventDefault();
+    const url = targetUrl || '#';
+
+    if (url === '#') {
+        alert(`No ${label} link available.`);
+        return false;
+    }
+
+    const result = await verifyPlanAccess(requiredPlan);
+    if (!result.allowed) {
+        alert(result.message);
+        if (result.reason === 'login') {
+            toggleModal('login-modal');
+        } else {
+            const pricingPath = window.location.pathname.includes('/html/') ? '../index.html#pricing' : 'index.html#pricing';
+            window.location.href = pricingPath;
+        }
+        return false;
+    }
+
+    window.open(url, '_blank', 'noopener');
+    return false;
+};
 
 function toggleModal(id) {
     const modal = document.getElementById(id);
@@ -430,13 +556,23 @@ async function fetchAndRenderVideos() {
 
         snapshot.forEach(doc => {
             const data = doc.data();
-            const isPremium = data.videoType === 'premium';
+            const requiredPlan = normalizePlanId(data.requiredPlan || 'free');
+            const isLockedPlan = requiredPlan !== 'free';
+            const courseUrl = `${getPath('video-view.html')}?course=${encodeURIComponent(doc.id)}`;
+            const safeCourseUrl = courseUrl.replace(/'/g, "\\'");
 
-            // Premium vs Free specific styling
-            const externalStyles = isPremium ? 'border: 2px solid transparent; background: linear-gradient(white, white) padding-box, linear-gradient(135deg, var(--primary-light), var(--accent-teal)) border-box;' : '';
-            const badgeType = isPremium ? '<span class="badge" style="background: linear-gradient(135deg, var(--primary-light), var(--accent-teal)); color: var(--primary-dark);">Premium</span>' : '<span class="badge" style="background: rgba(255, 255, 255, 0.05); color: rgba(255, 255, 255, 0.8);">Free</span>';
-            const actionBtn = isPremium ? `<a href="#" class="btn-primary" style="display: block; text-align: center; margin-top: 16px; background: linear-gradient(135deg, var(--primary-green), var(--accent-teal));" onclick="alert('Unlock with GovLearn Premium');">Unlock Video</a>` : `<a href="${getPath('video-view.html')}" class="btn-primary" style="display: block; text-align: center; margin-top: 16px;">Watch Now</a>`;
-            const premiumOverlay = isPremium ? `<div style="position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); padding: 4px 12px; border-radius: 20px; color: gold; font-weight: 800; font-size: 0.8rem; display: flex; align-items: center; gap: 4px;">⭐ PRO</div>` : '';
+            const externalStyles = isLockedPlan
+                ? 'border: 2px solid transparent; background: linear-gradient(white, white) padding-box, linear-gradient(135deg, var(--primary-light), var(--accent-teal)) border-box;'
+                : '';
+            const badgeType = isLockedPlan
+                ? `<span class="badge" style="background: linear-gradient(135deg, var(--primary-light), var(--accent-teal)); color: var(--primary-dark);">${requiredPlan.toUpperCase()}+</span>`
+                : '<span class="badge" style="background: rgba(255, 255, 255, 0.05); color: rgba(255, 255, 255, 0.8);">Free</span>';
+            const actionBtn = isLockedPlan
+                ? `<a href="#" class="btn-primary" style="display: block; text-align: center; margin-top: 16px; background: linear-gradient(135deg, var(--primary-green), var(--accent-teal));" onclick="return handlePlanLockedAsset(event, '${safeCourseUrl}', '${requiredPlan}', 'video');">Unlock ${requiredPlan.toUpperCase()}</a>`
+                : `<a href="${courseUrl}" class="btn-primary" style="display: block; text-align: center; margin-top: 16px;">Watch Now</a>`;
+            const premiumOverlay = isLockedPlan
+                ? `<div style="position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); padding: 4px 12px; border-radius: 20px; color: gold; font-weight: 800; font-size: 0.8rem; display: flex; align-items: center; gap: 4px;">⭐ ${requiredPlan.toUpperCase()}</div>`
+                : '';
 
             const fallbackImg = "https://images.unsplash.com/photo-1577493340887-b7bfff550145?auto=format&fit=crop&q=80";
 
@@ -472,7 +608,6 @@ async function fetchAndRenderVideos() {
         container.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: rgba(255, 255, 255, 0.8);">Failed to load videos. Please try again later.</div>';
     }
 }
-
 async function fetchAndRenderMaterials(filterText = '', filterCat = 'all') {
     const container = document.getElementById('materials-container');
     if (!container) return; // Only run on materials.html
@@ -489,7 +624,7 @@ async function fetchAndRenderMaterials(filterText = '', filterCat = 'all') {
 
     try {
         const snapshot = await db.collection('materials').orderBy('createdAt', 'desc').get();
-        let materials = snapshot.docs.map(doc => doc.data());
+        let materials = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
         // Fallback to mock data if empty
         if (materials.length === 0 && window.MOCK_DATA && MOCK_DATA.materials) {
@@ -516,16 +651,31 @@ async function fetchAndRenderMaterials(filterText = '', filterCat = 'all') {
         grid.className = 'grid-3';
 
         materials.forEach((material, index) => {
-            const isPremium = false;
+            const requiredPlan = normalizePlanId(material.requiredPlan || 'free');
+            const isLockedPlan = requiredPlan !== 'free';
+            const targetUrl = String(material.pdfUrl || '#');
+            const safeTargetUrl = targetUrl.replace(/'/g, "\\'");
 
             const card = document.createElement('div');
             card.className = 'mock-card';
             card.style.animationDelay = `${0.1 + (index * 0.1)}s`;
+            if (isLockedPlan) {
+                card.style.border = '1px solid rgba(16, 185, 129, 0.35)';
+                card.style.boxShadow = '0 8px 24px rgba(16, 185, 129, 0.12)';
+            }
 
-            const premiumTag = isPremium ? '<div class="mock-category-tag" style="background: #fef08a; color: #a16207; border: 1px solid rgba(161, 98, 7, 0.2);">PREMIUM</div>' : '';
+            const accessTag = isLockedPlan
+                ? `<div class="mock-category-tag" style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.35);">${requiredPlan.toUpperCase()}+</div>`
+                : '<div class="mock-category-tag" style="background: rgba(148, 163, 184, 0.2); color: #64748b; border: 1px solid rgba(148, 163, 184, 0.25);">FREE</div>';
+            const viewAction = isLockedPlan
+                ? `href="#" onclick="return handlePlanLockedAsset(event, '${safeTargetUrl}', '${requiredPlan}', 'material')"`
+                : `href="${targetUrl}" target="_blank"`;
+            const downloadAction = isLockedPlan
+                ? `href="#" onclick="return handlePlanLockedAsset(event, '${safeTargetUrl}', '${requiredPlan}', 'material')"`
+                : `href="${targetUrl}" target="_blank" download`;
 
             card.innerHTML = `
-                ${premiumTag}
+                ${accessTag}
                 <div class="mock-icon-wrap" style="background: ${getColorForSubject(material.subject)}; color: white;">
                     <i class="fas fa-file-pdf"></i>
                 </div>
@@ -538,10 +688,10 @@ async function fetchAndRenderMaterials(filterText = '', filterCat = 'all') {
                     <span><i class="fas fa-star" style="color: #f59e0b; margin-right: 4px;"></i> 5.0 Rating</span>
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: auto;">
-                    <a href="${material.pdfUrl || '#'}" target="_blank" class="mock-start-btn" style="padding: 12px; font-size: 0.9rem;">
+                    <a ${viewAction} class="mock-start-btn" style="padding: 12px; font-size: 0.9rem;">
                         <i class="fas fa-eye"></i> <span>View</span>
                     </a>
-                    <a href="${material.pdfUrl || '#'}" target="_blank" class="mock-start-btn" style="padding: 12px; font-size: 0.9rem;">
+                    <a ${downloadAction} class="mock-start-btn" style="padding: 12px; font-size: 0.9rem;">
                         <i class="fas fa-download"></i> <span>PDF</span>
                     </a>
                 </div>
@@ -870,7 +1020,7 @@ async function fetchAndRenderPlans() {
                 card.innerHTML = `
                     ${plan.popular ? `<div class="popular-badge" ${popularBadgeStyle}>${plan.badge || 'MOST VALUE'}</div>` : ''}
                     <h3 style="${pColor ? `color: ${pColor}` : ''}">${plan.name}</h3>
-                    <div class="price" style="${pColor ? `color: ${pColor}` : ''}">₹${plan.price}<span>${plan.period}</span></div>
+                    <div class="price" style="${pColor ? `color: ${pColor}` : ''}">&#8377;${plan.price}<span>${plan.period}</span></div>
                     <ul class="features-list">
                         ${featuresHtml}
                     </ul>
@@ -898,3 +1048,5 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchAndRenderCAPDFs();
     fetchAndRenderPlans();
 });
+
+

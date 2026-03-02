@@ -133,6 +133,10 @@
 
                     if (matchesSearch && typeFilterMatch) {
                         const delay = count * 0.1;
+                        const requiredPlan = String(course.requiredPlan || 'free').toLowerCase();
+                        const isLockedPlan = requiredPlan !== 'free';
+                        const courseUrl = `video-view.html?course=${encodeURIComponent(course.id)}`;
+                        const safeCourseUrl = courseUrl.replace(/'/g, "\\'");
 
                         const card = document.createElement('div');
                         card.className = 'video-card hover-3d';
@@ -141,6 +145,13 @@
                         const isLive = course.videoType === 'live';
                         const liveBadge = isLive ? `<div class="live-indicator"><div class="live-dot"></div> LIVE</div>` : '';
                         const typeTag = (course.videoType || 'Record').toUpperCase();
+                        const planTag = isLockedPlan
+                            ? `<span class="video-tag-pill" style="background: rgba(16,185,129,0.14); color: #0f766e; border: 1px solid rgba(16,185,129,0.35);">${requiredPlan.toUpperCase()}+</span>`
+                            : `<span class="video-tag-pill" style="background: rgba(148,163,184,0.18); color: #475569; border: 1px solid rgba(148,163,184,0.25);">FREE</span>`;
+                        const actionAttrs = isLockedPlan
+                            ? `href="#" onclick="return handlePlanLockedAsset(event, '${safeCourseUrl}', '${requiredPlan}', 'video')"`
+                            : `href="${courseUrl}"`;
+                        const actionText = isLockedPlan ? `Unlock ${requiredPlan.toUpperCase()}` : 'Continue Learning';
 
                         card.innerHTML = `
                             <div class="video-thumbnail">
@@ -152,8 +163,9 @@
                                 ${liveBadge}
                             </div>
                             <div class="video-info">
-                                <div style="margin-bottom: 12px;">
+                                <div style="margin-bottom: 12px; display: flex; gap: 8px; flex-wrap: wrap;">
                                     <span class="video-tag-pill">${subject}</span>
+                                    ${planTag}
                                 </div>
                                 <h3 class="video-title">${title}</h3>
                                 <div class="video-meta-stats">
@@ -161,8 +173,8 @@
                                     <span><i class="fas fa-star"></i> 4.8</span>
                                     <span><i class="fas fa-clock"></i> 12h+</span>
                                 </div>
-                                <a href="video-view.html?course=${course.id}" class="video-watch-btn">
-                                    <span>Continue Learning</span>
+                                <a ${actionAttrs} class="video-watch-btn">
+                                    <span>${actionText}</span>
                                     <i class="fas fa-chevron-right"></i>
                                 </a>
                             </div>

@@ -172,25 +172,84 @@
     <script src="../js/components-loader.js"></script>
     <script src="../js/main.js"></script>
     <script>
-        // Access Gate
-        auth.onAuthStateChanged(async (user) => {
-            if (!user) {
-                alert("Please login to watch videos!");
-                window.location.href = 'index.html';
-                return;
-            }
+        let authResolvedUser = null;
+        let courseLoadedOnce = false;
+        let planRankMapPromise = null;
 
+        function normalizeAccessPlan(planId) {
+            return String(planId || 'free').trim().toLowerCase();
+        }
+
+        async function getPlanRankMap() {
+            if (planRankMapPromise) return planRankMapPromise;
+            const fallback = { free: 0, pro: 1, ultimate: 2 };
+            planRankMapPromise = (async () => {
+                try {
+                    const snap = await db.collection('plans').orderBy('price', 'asc').get();
+                    if (snap.empty) return fallback;
+                    const rankMap = {};
+                    let index = 0;
+                    snap.forEach((doc) => {
+                        rankMap[normalizeAccessPlan(doc.id)] = index++;
+                    });
+                    if (rankMap.free == null) rankMap.free = 0;
+                    return rankMap;
+                } catch (e) {
+                    console.warn('Could not read plans for ranking. Using fallback.', e);
+                    return fallback;
+                }
+            })();
+            return planRankMapPromise;
+        }
+
+        function getPlanRank(rankMap, planId) {
+            const normalized = normalizeAccessPlan(planId);
+            if (rankMap[normalized] != null) return rankMap[normalized];
+
+            const staticRanks = {
+                free: 0, basic: 0, starter: 0,
+                pro: 1, plus: 1, premium: 1,
+                ultimate: 2, diamond: 3, platinum: 4, enterprise: 5
+            };
+            if (staticRanks[normalized] != null) return staticRanks[normalized];
+            if (normalized.includes('free')) return 0;
+            if (normalized.includes('pro') || normalized.includes('premium')) return 1;
+            if (normalized.includes('ultimate')) return 2;
+            return 1;
+        }
+
+        async function getUserPlan(user) {
+            const adminEmail = String((typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : 'admin@gmail.com') || '').toLowerCase();
+            if (String(user?.email || '').toLowerCase() === adminEmail) return 'ultimate';
             try {
                 const userDoc = await db.collection('students').doc(user.uid).get();
-                if (userDoc.exists) {
-                    const userData = userDoc.data();
-                    if (userData.plan !== 'pro' && userData.plan !== 'ultimate' && user.email !== ADMIN_EMAIL) {
-                        alert("Upgrade required!\n\nVideo lessons are only available for PRO or ULTIMATE plan members. Please upgrade to start watching.");
-                        window.location.href = 'index.html#pricing';
-                    }
-                }
+                if (!userDoc.exists) return 'free';
+                return normalizeAccessPlan(userDoc.data().plan || 'free');
             } catch (e) {
-                console.error("Access verification failed:", e);
+                console.warn('Failed to fetch user plan. Defaulting to free.', e);
+                return 'free';
+            }
+        }
+
+        async function hasCourseAccess(user, requiredPlan) {
+            const required = normalizeAccessPlan(requiredPlan || 'pro');
+            if (required === 'free') return true;
+            const userPlan = await getUserPlan(user);
+            const planRanks = await getPlanRankMap();
+            return getPlanRank(planRanks, userPlan) >= getPlanRank(planRanks, required);
+        }
+
+        // Access Gate
+        auth.onAuthStateChanged(async (user) => {
+            authResolvedUser = user || null;
+            if (!user) {
+                alert("Please login to watch videos!");
+                window.location.href = '../index.html';
+                return;
+            }
+            if (!courseLoadedOnce) {
+                courseLoadedOnce = true;
+                await loadCourseData();
             }
         });
 
@@ -211,6 +270,21 @@
                     return;
                 }
                 const course = courseDoc.data();
+                const viewer = authResolvedUser || auth.currentUser;
+
+                if (!viewer) {
+                    alert("Please login to watch videos!");
+                    window.location.href = '../index.html';
+                    return;
+                }
+
+                const requiredPlan = normalizeAccessPlan(course.requiredPlan || 'pro');
+                const allowed = await hasCourseAccess(viewer, requiredPlan);
+                if (!allowed) {
+                    alert(`Upgrade required!\n\nThis course requires ${requiredPlan.toUpperCase()} plan access.`);
+                    window.location.href = '../index.html#pricing';
+                    return;
+                }
 
                 document.getElementById('v-title').textContent = course.title || 'Untitled Course';
                 document.getElementById('v-desc').textContent = course.description || "Master " + (course.subject || 'this subject') + " with high-quality HD video content. Select a lesson to begin.";
@@ -367,7 +441,12 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', loadCourseData);
+        document.addEventListener('DOMContentLoaded', () => {
+            if (auth.currentUser && !courseLoadedOnce) {
+                courseLoadedOnce = true;
+                loadCourseData();
+            }
+        });
     </script>
 
 
