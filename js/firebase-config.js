@@ -15,7 +15,7 @@ const auth = firebase.auth();
 const googleProvider = new firebase.auth.GoogleAuthProvider();
 const storage = (typeof firebase.storage === 'function') ? firebase.storage() : null;
 if (!storage) {
-    console.warn("Firebase Storage SDK not loaded on this page. Upload features are unavailable here.");
+    console.info("Firebase Storage SDK not loaded on this page. Upload features are unavailable here.");
 }
 
 console.log("Firebase initialized successfully (Compat Mode)");

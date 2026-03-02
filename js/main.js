@@ -472,13 +472,15 @@ window.googleSignIn = async () => {
         console.log("Logged in:", result.user);
         toggleModal('login-modal');
     } catch (error) {
-        console.error("Auth error:", error);
         if (error.code === 'auth/operation-not-supported-in-this-environment') {
+            console.warn("Auth environment not supported:", error);
             alert("Security Error: Firebase Authentication requires a local server. \n\nPlease open this project using 'Live Server' in VS Code or any other local server.");
         } else if (error.code === 'auth/unauthorized-domain') {
+            console.warn("Auth unauthorized domain:", error);
             const currentDomain = window.location.hostname;
             alert(`Unauthorized Domain Error!\n\nThe domain '${currentDomain}' is not authorized in your Firebase Project.\n\nTO FIX THIS:\n1. Open your Firebase Console\n2. Go to Authentication -> Settings -> Authorized Domains\n3. Click 'Add Domain' and enter: ${currentDomain}`);
         } else {
+            console.error("Auth error:", error);
             alert("Login failed: " + error.message);
         }
     }
@@ -753,11 +755,34 @@ async function fetchAndRenderCurrentAffairs() {
     const container = document.getElementById('ca-highlights-container');
     if (!container) return;
 
+    const allowedTypes = new Set(['daily_ca', 'weekly_ca', 'monthly_ca']);
     let items = [];
     try {
-        const snap = await db.collection('materials').where('assetType', 'in', ['daily_ca', 'weekly_ca', 'monthly_ca']).orderBy('createdAt', 'desc').limit(3).get();
+        const snap = await db
+            .collection('materials')
+            .where('assetType', 'in', ['daily_ca', 'weekly_ca', 'monthly_ca'])
+            .orderBy('createdAt', 'desc')
+            .limit(3)
+            .get();
         snap.forEach(doc => items.push(doc.data().title || 'Current Affairs Update'));
-    } catch (e) { console.warn('CA highlights fetch error:', e); }
+    } catch (e) {
+        if (e && (e.code === 'failed-precondition' || String(e.message || '').toLowerCase().includes('requires an index'))) {
+            try {
+                const fallbackSnap = await db.collection('materials').orderBy('createdAt', 'desc').limit(30).get();
+                fallbackSnap.forEach(doc => {
+                    const d = doc.data() || {};
+                    if (allowedTypes.has(String(d.assetType || '').toLowerCase())) {
+                        items.push(d.title || 'Current Affairs Update');
+                    }
+                });
+                items = items.slice(0, 3);
+            } catch (fallbackError) {
+                console.warn('CA highlights fallback fetch error:', fallbackError);
+            }
+        } else {
+            console.warn('CA highlights fetch error:', e);
+        }
+    }
 
     if (items.length === 0 && window.MOCK_DATA) items = MOCK_DATA.currentAffairs;
 
