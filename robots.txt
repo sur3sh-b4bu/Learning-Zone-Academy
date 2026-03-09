@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /html/admin.html
+Disallow: /html/profile.html
+
+Sitemap: https://nellailearningacademy.web.app/sitemap.xml

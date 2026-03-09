@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mock Test Session | Gov Learn</title>
+    <title>Mock Test Session | NellaiLearningAcademy</title>
     <meta name="description"
         content="Interactive mock test session. Take the challenge and track your progress in real-time.">
     <link rel="stylesheet" href="../css/common.css">
@@ -27,7 +27,7 @@
                     style="font-weight: 700; color: var(--secondary); font-size: 1.1rem; letter-spacing: 0.5px;">Loading
                     Title...</span>
                 <button type="button" class="btn-primary"
-                    style="background: rgba(239, 68, 68, 0.1); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.2); padding: 10px 24px; border-radius: 12px; font-weight: 700; cursor: pointer;"
+                    style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); padding: 10px 24px; border-radius: 12px; font-weight: 700; cursor: pointer;"
                     onclick="if(confirm('Quit the test session? Progress will be lost.')) location.href='mock-tests.html'">End
                     Test</button>
             </div>
@@ -53,7 +53,7 @@
 
                 <div class="action-footer">
                     <button class="btn-primary"
-                        style="background: rgba(255, 255, 255, 0.05); color: white; border: 1px solid var(--border-glass);"
+                        style="background: rgba(255, 255, 255, 0.05); color: var(--primary); border: 1px solid var(--border-glass);"
                         onclick="prevQuestion()">Previous</button>
                     <div style="display: flex; gap: 16px;">
                         <button class="btn-primary"
@@ -147,7 +147,7 @@
 
             <div style="display: flex; gap: 20px; justify-content: center;">
                 <button onclick="location.href='mock-tests.html'" class="btn-primary"
-                    style="background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-glass); color: white; padding: 16px 40px;">Exit
+                    style="background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-glass); color: var(--primary); padding: 16px 40px;">Exit
                     Session</button>
                 <button onclick="location.reload()" class="btn-primary" style="padding: 16px 40px;">Retake Test</button>
             </div>
@@ -161,28 +161,6 @@
     <script src="../js/firebase-config.js"></script>
     <script src="../js/main.js"></script>
     <script>
-        // Access Gate
-        auth.onAuthStateChanged(async (user) => {
-            if (!user) {
-                alert("Please login to access mock tests!");
-                window.location.href = 'index.html';
-                return;
-            }
-
-            try {
-                const userDoc = await db.collection('students').doc(user.uid).get();
-                if (userDoc.exists) {
-                    const userData = userDoc.data();
-                    if (userData.plan !== 'pro' && userData.plan !== 'ultimate' && user.email !== ADMIN_EMAIL) {
-                        alert("Upgrade required!\n\nThis premium content requires a PRO or ULTIMATE plan. Please upgrade to continue.");
-                        window.location.href = 'index.html#pricing';
-                    }
-                }
-            } catch (e) {
-                console.error("Access verification failed:", e);
-            }
-        });
-
         // State
         let questions = [];
         let currentQuestionIndex = 0;
@@ -200,9 +178,52 @@
             return numeric.toFixed(4).replace(/\.?0+$/, '');
         }
 
+        function normalizeTestRequiredPlan(plan) {
+            return String(plan || 'free').trim().toLowerCase();
+        }
+
+        async function checkTestPlanAccess(requiredPlan) {
+            const normalized = normalizeTestRequiredPlan(requiredPlan);
+            if (typeof verifyPlanAccess === 'function') {
+                try {
+                    return await verifyPlanAccess(normalized);
+                } catch (e) {
+                    console.warn('verifyPlanAccess failed, using fallback:', e);
+                }
+            }
+
+            if (normalized === 'free') return { allowed: true };
+            const user = auth.currentUser;
+            if (!user) {
+                return {
+                    allowed: false,
+                    reason: 'login',
+                    message: `Please sign in to access ${normalized.toUpperCase()} mock tests.`
+                };
+            }
+            if (String(user.email || '').toLowerCase() === String(ADMIN_EMAIL || '').toLowerCase()) {
+                return { allowed: true };
+            }
+            try {
+                const userDoc = await db.collection('students').doc(user.uid).get();
+                const userPlan = normalizeTestRequiredPlan((userDoc.exists ? userDoc.data() : {}).plan || 'free');
+                const rank = { free: 0, pro: 1, ultimate: 2 };
+                const allowed = (rank[userPlan] || 0) >= (rank[normalized] || 0);
+                return { allowed, reason: allowed ? undefined : 'plan', message: allowed ? '' : `Upgrade required. This mock test needs ${normalized.toUpperCase()} access.` };
+            } catch (_) {
+                return { allowed: false, reason: 'plan', message: 'Unable to verify your plan right now.' };
+            }
+        }
+
         // Parse test details
         const params = new URLSearchParams(window.location.search);
-        const testId = params.get('testId');
+        const testIdRaw = params.get('testId');
+
+        function isSafeDocId(value) {
+            return /^[A-Za-z0-9_-]{3,120}$/.test(String(value || ''));
+        }
+
+        const testId = isSafeDocId(testIdRaw) ? testIdRaw : '';
 
         async function loadTest() {
             if (!testId) {
@@ -220,6 +241,18 @@
                     return;
                 }
                 const testData = testDoc.data();
+                const requiredPlan = normalizeTestRequiredPlan(testData.requiredPlan || 'free');
+                const accessResult = await checkTestPlanAccess(requiredPlan);
+                if (!accessResult.allowed) {
+                    alert(accessResult.message || `Upgrade required. This mock test requires ${requiredPlan.toUpperCase()} access.`);
+                    if (accessResult.reason === 'login') {
+                        window.location.href = '../index.html';
+                    } else {
+                        window.location.href = '../index.html#pricing';
+                    }
+                    return;
+                }
+
                 document.getElementById('subject-label').textContent = testData.title || 'Mock Test';
                 timeRemaining = (testData.duration || 60) * 60;
 
@@ -426,29 +459,12 @@
         auth.onAuthStateChanged(async (user) => {
             if (!user) {
                 alert("Please login to access mock tests!");
-                window.location.href = 'index.html';
+                window.location.href = '../index.html';
                 return;
             }
 
-            try {
-                const userDoc = await db.collection('students').doc(user.uid).get();
-                if (userDoc.exists) {
-                    const userData = userDoc.data();
-                    if (userData.plan !== 'pro' && userData.plan !== 'ultimate' && user.email !== ADMIN_EMAIL) {
-                        alert("Upgrade required!\n\nThis premium content requires a PRO or ULTIMATE plan. Please upgrade to continue.");
-                        window.location.href = 'index.html#pricing';
-                        return;
-                    }
-                }
-
-                // User approved, load the test
-                loadTest();
-
-            } catch (e) {
-                console.error("Access verification failed:", e);
-                alert("Error verifying access. Please login again.");
-                window.location.href = 'index.html';
-            }
+            // User approved, load test and verify plan per test
+            loadTest();
         });
     </script>
 

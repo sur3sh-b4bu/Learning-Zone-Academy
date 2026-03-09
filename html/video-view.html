@@ -4,9 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Lesson | Gov Learn - Immersive Education</title>
+    <title>Video Lesson | NellaiLearningAcademy - Immersive Education</title>
     <meta name="description"
-        content="Watch expert video lessons and master your subjects with Gov Learn's immersive video platform.">
+        content="Watch expert video lessons and master your subjects with NellaiLearningAcademy's immersive video platform.">
     <link rel="stylesheet" href="../css/common.css">
     <link rel="stylesheet" href="../css/navigation.css">
     <link rel="stylesheet" href="../css/footer.css">
@@ -88,10 +88,12 @@
                             <h4 style="margin-bottom: 20px; color: var(--primary); font-size: 1.2rem;">Have a Doubt?
                             </h4>
                             <textarea id="qa-input" placeholder="Type your doubt here..."
-                                style="width: 100%; padding: 16px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color:white; border-radius: 12px; margin-bottom: 10px; height: 100px; outline: none; transition: 0.3s;"></textarea>
-                            <p id="qa-status" style="margin: 0 0 14px; min-height: 18px; font-size: 0.82rem; color: var(--text-muted);"></p>
-                            <button type="button" id="qa-submit-btn" class="btn-primary"
-                                onclick="postLessonQuestion()" style="padding: 12px 24px; border-radius: 12px;">Post
+                                style="width: 100%; padding: 16px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color:var(--secondary); border-radius: 12px; margin-bottom: 10px; height: 100px; outline: none; transition: 0.3s;"></textarea>
+                            <p id="qa-status"
+                                style="margin: 0 0 14px; min-height: 18px; font-size: 0.82rem; color: var(--text-muted);">
+                            </p>
+                            <button type="button" id="qa-submit-btn" class="btn-primary" onclick="postLessonQuestion()"
+                                style="padding: 12px 24px; border-radius: 12px;">Post
                                 Question</button>
 
                             <div class="qa-chat-container" id="qa-chat-container">
@@ -240,17 +242,34 @@
             return String(planId || 'free').trim().toLowerCase();
         }
 
+        function parseAccessPlanPrice(priceValue) {
+            if (typeof priceValue === 'number') return Number.isFinite(priceValue) ? priceValue : Number.POSITIVE_INFINITY;
+            const cleaned = String(priceValue == null ? '' : priceValue).replace(/[^0-9.]/g, '');
+            const parsed = Number(cleaned);
+            return Number.isFinite(parsed) ? parsed : Number.POSITIVE_INFINITY;
+        }
+
         async function getPlanRankMap() {
             if (viewPlanRankMapPromise) return viewPlanRankMapPromise;
             const fallback = { free: 0, pro: 1, ultimate: 2 };
             viewPlanRankMapPromise = (async () => {
                 try {
-                    const snap = await db.collection('plans').orderBy('price', 'asc').get();
+                    const snap = await db.collection('plans').get();
                     if (snap.empty) return fallback;
+                    const plans = snap.docs.map((doc) => {
+                        const data = doc.data() || {};
+                        return {
+                            id: normalizeAccessPlan(doc.id),
+                            price: parseAccessPlanPrice(data.price)
+                        };
+                    }).sort((a, b) => {
+                        if (a.price !== b.price) return a.price - b.price;
+                        return a.id.localeCompare(b.id);
+                    });
                     const rankMap = {};
                     let index = 0;
-                    snap.forEach((doc) => {
-                        rankMap[normalizeAccessPlan(doc.id)] = index++;
+                    plans.forEach((plan) => {
+                        rankMap[plan.id] = index++;
                     });
                     if (rankMap.free == null) rankMap.free = 0;
                     return rankMap;
@@ -321,13 +340,15 @@
 
         async function loadCourseData() {
             const params = new URLSearchParams(window.location.search);
-            const courseId = params.get('course');
-            if (!courseId) {
+            const courseIdParam = params.get('course');
+            const safeCourseId = /^[A-Za-z0-9_-]{3,120}$/.test(String(courseIdParam || '')) ? courseIdParam : '';
+            if (!safeCourseId) {
                 document.getElementById('v-title').textContent = "Course not found.";
                 setPlaylistMessage('Invalid URL parameter. Please open this course from Videos page.', 'error');
                 return false;
             }
-            activeCourseId = courseId;
+            const courseId = safeCourseId;
+            activeCourseId = safeCourseId;
 
             const lessonCountEl = document.getElementById('lesson-count');
             if (lessonCountEl) lessonCountEl.textContent = 'Loading lessons...';
@@ -394,9 +415,10 @@
                     lessonCard.setAttribute('data-title', title.toLowerCase());
                     lessonCard.onclick = () => playLesson(l, lessonCard);
 
+                    const thumbUrl = lesson.thumbnail || '';
                     lessonCard.innerHTML = `
-                        <div class="lesson-thumb">
-                            <span class="l-number">${idx < 10 ? '0' + idx : idx}</span>
+                        <div class="lesson-thumb" style="${thumbUrl ? `background: url('${thumbUrl}') center/cover;` : ''}">
+                            ${thumbUrl ? '' : `<span class="l-number">${idx < 10 ? '0' + idx : idx}</span>`}
                             <i class="fas fa-play l-play-icon"></i>
                         </div>
                         <div class="lesson-details">

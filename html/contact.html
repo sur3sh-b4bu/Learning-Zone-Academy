@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us | NellaiLearningAcademy - Premium Preparation</title>
+    <meta name="description"
+        content="Reach out to NellaiLearningAcademy for any inquiries, support, or guidance regarding your government exam preparation.">
+    <link rel="stylesheet" href="../css/common.css">
+    <link rel="stylesheet" href="../css/navigation.css">
+    <link rel="stylesheet" href="../css/footer.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        .page-header-section {
+            padding: 180px 0 80px;
+            background: radial-gradient(circle at 50% 100%, rgba(16, 185, 129, 0.1), transparent 70%);
+            text-align: center;
+        }
+
+        .page-header-section h1 {
+            font-size: clamp(1.5rem, 7vw, 4.5rem);
+        }
+
+        .page-header-section h1 .text-gradient {
+            display: inline;
+        }
+
+        .contact-section {
+            padding: 80px 0;
+        }
+
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 60px;
+            align-items: start;
+        }
+
+        .contact-info-card {
+            padding: 48px;
+            background: var(--bg-glass);
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--border-glass);
+            box-shadow: var(--shadow-premium);
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .contact-item .icon-box {
+            width: 60px;
+            height: 60px;
+            border-radius: 20px;
+            background: var(--primary-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--primary);
+            flex-shrink: 0;
+        }
+
+        .contact-item h4 {
+            font-size: 1.25rem;
+            margin-bottom: 4px;
+            color: var(--secondary);
+        }
+
+        .contact-item p {
+            font-size: 1rem;
+            margin-bottom: 0;
+            color: var(--text-muted);
+        }
+
+        .contact-form {
+            padding: 48px;
+            background: var(--bg-glass);
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--border-glass);
+            box-shadow: var(--shadow-md);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 12px;
+            font-weight: 600;
+            color: var(--secondary);
+            font-size: 0.95rem;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 16px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-glass);
+            border-radius: 12px;
+            color: var(--secondary);
+            font-family: inherit;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+        }
+
+        @media (max-width: 992px) {
+            .contact-grid {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .page-header-section {
+                padding: 140px 0 60px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav id="main-nav"></nav>
+
+    <header class="page-header-section fade-in">
+        <div class="container">
+            <span class="badge" data-field="badge"
+                style="background: var(--primary-light); color: var(--primary); font-weight: 800; padding: 8px 20px; border-radius: 99px;">GET
+                IN TOUCH</span>
+            <h1 class="mt-16" data-field="title">Contact <span class="text-gradient">NellaiLearningAcademy</span></h1>
+            <p style="max-width: 700px; margin: 24px auto 0;" data-field="subtitle">Have a question? We are here to
+                help. Reach out to us
+                through any of the following channels.</p>
+        </div>
+    </header>
+
+    <section class="contact-section">
+        <div class="container">
+            <div class="contact-grid">
+                <div class="fade-in" style="animation-delay: 0.2s;">
+                    <div class="contact-info-card glass">
+                        <div class="contact-item">
+                            <div class="icon-box"><i class="fas fa-map-marker-alt"></i></div>
+                            <div>
+                                <h4>Our Office</h4>
+                                <p data-field="address">PLOT. NO. 18 J J NAGAR C COLONY, <br>REDDIYARPATTI,
+                                    <br>TIRUNELVELI - 627007
+                                </p>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <div class="icon-box"><i class="fas fa-phone-alt"></i></div>
+                            <div>
+                                <h4>Phone Numbers</h4>
+                                <p data-field="phone">9445233717, 9486164832</p>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <div class="icon-box"><i class="fas fa-envelope"></i></div>
+                            <div>
+                                <h4>Email ID</h4>
+                                <p data-field="email">admin@gmail.com</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="fade-in" style="animation-delay: 0.4s;">
+                    <div class="contact-form glass">
+                        <h2 class="mb-32">Send us a Message</h2>
+                        <form id="contact-form">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Full Name</label>
+                                    <input id="contact-name" type="text" placeholder="John Doe" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Email Address</label>
+                                    <input id="contact-email" type="email" placeholder="name@example.com" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Subject</label>
+                                <input id="contact-subject" type="text" placeholder="Inquiry about TNPSC Course">
+                            </div>
+                            <div class="form-group">
+                                <label>Your Message</label>
+                                <textarea id="contact-message" rows="5" placeholder="How can we help you today?"
+                                    required></textarea>
+                            </div>
+                            <button id="contact-submit-btn" type="submit" class="btn-primary" style="width: 100%;">Send Inquiry Now</button>
+                            <p id="contact-status" style="margin-top:12px; font-size:0.95rem; min-height:22px; color: var(--text-muted);"></p>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer id="main-footer"></footer>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="../js/firebase-config.js"></script>
+    <script src="../js/components-loader.js"></script>
+    <script src="../js/main.js"></script>
+    <script src="../js/company-loader.js"></script>
+    <script>
+        (function () {
+            const form = document.getElementById('contact-form');
+            const statusEl = document.getElementById('contact-status');
+            const submitBtn = document.getElementById('contact-submit-btn');
+            if (!form || !statusEl || !submitBtn) return;
+
+            function setStatus(message, isError) {
+                statusEl.textContent = message || '';
+                statusEl.style.color = isError ? '#ef4444' : 'var(--text-muted)';
+            }
+
+            function getFunctionsBaseUrl() {
+                const appOptions = firebase.app && firebase.app().options ? firebase.app().options : {};
+                const projectId = appOptions.projectId || 'nellailearningacademy';
+                return `https://asia-south1-${projectId}.cloudfunctions.net`;
+            }
+
+            async function postContact(payload) {
+                const endpoint = `${getFunctionsBaseUrl()}/sendContactFeedbackAlert`;
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload || {})
+                });
+
+                let result = {};
+                try {
+                    result = await response.json();
+                } catch (_) { }
+
+                if (!response.ok) {
+                    const message = result.error || result.message || 'Failed to send your message.';
+                    throw new Error(message);
+                }
+                return result;
+            }
+
+            form.addEventListener('submit', async (event) => {
+                event.preventDefault();
+
+                const name = (document.getElementById('contact-name')?.value || '').trim();
+                const email = (document.getElementById('contact-email')?.value || '').trim();
+                const subject = (document.getElementById('contact-subject')?.value || '').trim();
+                const message = (document.getElementById('contact-message')?.value || '').trim();
+
+                if (!name || !email || !message) {
+                    setStatus('Please fill in name, email, and message.', true);
+                    return;
+                }
+
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Sending...';
+                setStatus('Sending your message...', false);
+
+                try {
+                    await postContact({ name, email, subject, message });
+                    form.reset();
+                    setStatus('Message sent successfully. Our admin team has been notified.', false);
+                } catch (error) {
+                    setStatus(error.message || 'Unable to send your message right now.', true);
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Send Inquiry Now';
+                }
+            });
+        })();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us | NellaiLearningAcademy - Premium Preparation</title>
+    <meta name="description"
+        content="Learn more about NellaiLearningAcademy, our mission to empower students for government exam success with premium resources and expert guidance.">
+    <link rel="stylesheet" href="../css/common.css">
+    <link rel="stylesheet" href="../css/navigation.css">
+    <link rel="stylesheet" href="../css/footer.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        .page-header-section {
+            padding: 180px 0 80px;
+            background: radial-gradient(circle at 50% 100%, rgba(16, 185, 129, 0.1), transparent 70%);
+            text-align: center;
+        }
+
+        .page-header-section h1 {
+            font-size: clamp(1.5rem, 7vw, 4.5rem);
+        }
+
+        .page-header-section h1 .text-gradient {
+            display: inline;
+        }
+
+        .content-section {
+            padding: 80px 0;
+        }
+
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+
+        .about-image {
+            position: relative;
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+            box-shadow: var(--shadow-premium);
+        }
+
+        .about-image img {
+            width: 100%;
+            display: block;
+            border-radius: var(--radius-xl);
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .about-image:hover img {
+            transform: scale(1.05);
+        }
+
+        .stat-grid-about {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-top: 40px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 32px;
+            border-radius: var(--radius-lg);
+            background: var(--bg-glass);
+            border: 1px solid var(--border-glass);
+        }
+
+        .stat-item h3 {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        .stat-item p {
+            font-size: 0.9rem;
+            margin-bottom: 0;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        @media (max-width: 992px) {
+            .about-grid {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .page-header-section {
+                padding: 140px 0 60px;
+            }
+
+            .content-section {
+                padding: 50px 0;
+            }
+
+            .stat-grid-about {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 16px;
+            }
+
+            .stat-item {
+                padding: 20px;
+            }
+
+            .stat-item h3 {
+                font-size: 2rem;
+            }
+
+            .page-header-section h1 {
+                font-size: 2.5rem;
+            }
+
+            .about-grid h2 {
+                font-size: 1.8rem;
+                line-height: 1.3;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stat-grid-about {
+                grid-template-columns: 1fr;
+            }
+
+            .page-header-section h1 {
+                font-size: 2.2rem;
+            }
+
+            .about-grid h2 {
+                font-size: 1.6rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav id="main-nav"></nav>
+
+    <header class="page-header-section fade-in">
+        <div class="container">
+            <span class="badge" data-field="badge"
+                style="background: var(--primary-light); color: var(--primary); font-weight: 800; padding: 8px 20px; border-radius: 99px;">OUR
+                STORY</span>
+            <h1 class="mt-16" data-field="title">About <span class="text-gradient">NellaiLearningAcademy</span></h1>
+            <p style="max-width: 700px; margin: 24px auto 0;" data-field="subtitle">Empowering the next generation of
+                government officials
+                through high-fidelity learning resources and expert-led guidance.</p>
+        </div>
+    </header>
+
+    <section class="content-section">
+        <div class="container">
+            <div class="about-grid">
+                <div class="fade-in" style="animation-delay: 0.2s;">
+                    <h2 class="mb-24" data-field="section_title">Driving Excellence in <br><span
+                            class="text-gradient">Public Service Exam
+                            Prep</span></h2>
+                    <p data-field="description_1">Founded with a singular vision, Gov Learn has become a beacon for
+                        aspirants aiming for excellence
+                        in competitive government exams. We understand the challenges and the dedication required to
+                        succeed in exams like SSC, TNPSC, and Banking.</p>
+                    <p data-field="description_2">Our methodology combines traditional learning values with modern
+                        technology, providing a
+                        seamless, immersive, and highly effective preparation environment.</p>
+
+                    <div class="stat-grid-about">
+                        <div class="stat-item glass">
+                            <h3 data-field="stat_1_val">10K+</h3>
+                            <p data-field="stat_1_lab">Active Learners</p>
+                        </div>
+                        <div class="stat-item glass">
+                            <h3 data-field="stat_2_val">500+</h3>
+                            <p data-field="stat_2_lab">Toppers Produced</p>
+                        </div>
+                        <div class="stat-item glass">
+                            <h3 data-field="stat_3_val">200+</h3>
+                            <p data-field="stat_3_lab">Expert Faculty</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="fade-in about-image" style="animation-delay: 0.4s;">
+                    <img src="../images/mentorship.png" alt="Mentorship" class="premium-img-large">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer id="main-footer"></footer>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="../js/firebase-config.js"></script>
+    <script src="../js/components-loader.js"></script>
+    <script src="../js/main.js"></script>
+    <script src="../js/company-loader.js"></script>
+</body>
+
+</html>

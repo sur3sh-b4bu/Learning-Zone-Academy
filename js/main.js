@@ -1,10 +1,47 @@
 let subjects = [];
 window.subjects = subjects;
 
+// Admin Configuration
+const ADMIN_EMAIL = 'admin@gmail.com'; // Change this to your actual email
+
 function getPath(filename) {
     const isSubDir = window.location.pathname.includes('/html/');
+    if (filename === 'index.html') {
+        return isSubDir ? '../index.html' : 'index.html';
+    }
     return (isSubDir ? '' : 'html/') + filename;
 }
+
+window.moveOTPFocus = (current, direction, context) => {
+    const wrapper = current.parentElement;
+    const inputs = Array.from(wrapper.querySelectorAll('.otp-digit'));
+    const index = inputs.indexOf(current);
+    const ev = window.event;
+
+    if (direction === 'next' && current.value.length === 1) {
+        if (index < inputs.length - 1) {
+            inputs[index + 1].focus();
+        }
+    } else if (direction === 'prev' && ev && (ev.key === 'Backspace' || ev.keyCode === 8) && current.value.length === 0) {
+        if (index > 0) {
+            inputs[index - 1].focus();
+        }
+    }
+
+    // Sync to hidden input
+    let code = "";
+    inputs.forEach(i => { code += i.value; });
+    const hiddenInput = document.getElementById(context + '-otp');
+    if (hiddenInput) {
+        hiddenInput.value = code;
+        // Trigger verification if 6 digits entered
+        if (code.length === 6) {
+            if (context === 'onboarding' && typeof verifyOnboardingOTP === 'function') {
+                // We'll let the user click the button to be safe, or we could auto-trigger
+            }
+        }
+    }
+};
 
 async function fetchSubjects() {
     try {
@@ -42,6 +79,15 @@ function normalizePlanId(planId) {
     return String(planId || 'free').trim().toLowerCase();
 }
 
+function parsePlanPriceValue(priceValue) {
+    if (typeof priceValue === 'number') {
+        return Number.isFinite(priceValue) ? priceValue : Number.POSITIVE_INFINITY;
+    }
+    const cleaned = String(priceValue == null ? '' : priceValue).replace(/[^0-9.]/g, '');
+    const parsed = Number(cleaned);
+    return Number.isFinite(parsed) ? parsed : Number.POSITIVE_INFINITY;
+}
+
 let planRankMapPromise = null;
 
 async function getPlanRankMap() {
@@ -50,13 +96,25 @@ async function getPlanRankMap() {
     const fallback = { free: 0, pro: 1, ultimate: 2 };
     planRankMapPromise = (async () => {
         try {
-            const snap = await db.collection('plans').orderBy('price', 'asc').get();
+            const snap = await db.collection('plans').get();
             if (snap.empty) return fallback;
+
+            const plans = snap.docs.map(doc => {
+                const data = doc.data() || {};
+                return {
+                    id: normalizePlanId(doc.id),
+                    price: parsePlanPriceValue(data.price)
+                };
+            });
+            plans.sort((a, b) => {
+                if (a.price !== b.price) return a.price - b.price;
+                return a.id.localeCompare(b.id);
+            });
 
             const map = {};
             let idx = 0;
-            snap.forEach(doc => {
-                map[normalizePlanId(doc.id)] = idx++;
+            plans.forEach(plan => {
+                map[plan.id] = idx++;
             });
 
             if (map.free == null) map.free = 0;
@@ -103,7 +161,7 @@ async function getCurrentUserPlanId() {
     const user = auth.currentUser;
     if (!user) return null;
     // Hardcoded admin bypass for access checks.
-    if (String(user.email || '').toLowerCase() === 'admin@gmail.com') return 'ultimate';
+    if (String(user.email || '').toLowerCase() === ADMIN_EMAIL.toLowerCase()) return 'ultimate';
 
     try {
         const doc = await db.collection('students').doc(user.uid).get();
@@ -307,12 +365,29 @@ window.addEventListener('navLoaded', () => {
     updateThemeIcon(isLight);
 });
 
-// Admin Configuration
-const ADMIN_EMAIL = 'admin@gmail.com'; // Change this to your actual email
+window.currentUserIsAdmin = false;
+
+function isTruthyAdminFlag(value) {
+    if (value === true) return true;
+    if (typeof value === 'string') {
+        const normalized = value.trim().toLowerCase();
+        return normalized === 'true' || normalized === '1' || normalized === 'yes';
+    }
+    if (typeof value === 'number') return value === 1;
+    return false;
+}
+
+function hasAdminAccess(user, studentData = {}) {
+    const emailMatch = String((user && user.email) || '').trim().toLowerCase() === String(ADMIN_EMAIL || '').trim().toLowerCase();
+    const adminFlag = isTruthyAdminFlag(studentData.isAdmin);
+    const normalizedRole = String(studentData.role || '').trim().toLowerCase();
+    const roleFlag = normalizedRole === 'admin' || normalizedRole === 'super admin' || normalizedRole === 'superadmin';
+    return emailMatch || adminFlag || roleFlag;
+}
 
 // Auth State Handling
 // Auth State UI Synchronization
-function updateNavUI(user) {
+function updateNavUI(user, isAdmin = false) {
     const loginBtns = document.querySelectorAll('.login-toggle-btn');
     const isProfilePage = window.location.pathname.includes('profile.html');
 
@@ -340,6 +415,22 @@ function updateNavUI(user) {
                 profileLi.id = 'profile-nav-link';
                 profileLi.innerHTML = `<a href="${getPath('profile.html')}" class="nav-item"><i class="fas fa-user-circle"></i> Profile</a>`;
                 navLinks.appendChild(profileLi);
+            }
+        }
+
+        if (navLinks) {
+            const adminDashboardLink = document.getElementById('admin-dashboard-link');
+            if (isAdmin) {
+                if (!adminDashboardLink) {
+                    const adminLi = document.createElement('li');
+                    adminLi.id = 'admin-dashboard-link';
+                    adminLi.innerHTML = `<a href="${getPath('admin.html')}" class="nav-item"><i class="fas fa-user-shield"></i> Admin Console</a>`;
+                    navLinks.appendChild(adminLi);
+                } else {
+                    adminDashboardLink.style.display = '';
+                }
+            } else if (adminDashboardLink) {
+                adminDashboardLink.remove();
             }
         }
 
@@ -381,6 +472,27 @@ function updateNavUI(user) {
             }
         }
 
+        if (mobileContent) {
+            const mobileAdminLink = document.getElementById('mobile-admin-link');
+            if (isAdmin) {
+                if (!mobileAdminLink) {
+                    const adminA = document.createElement('a');
+                    adminA.id = 'mobile-admin-link';
+                    adminA.href = getPath('admin.html');
+                    adminA.innerHTML = '<i class="fas fa-user-shield"></i> Admin Console';
+                    adminA.style.order = "97";
+
+                    if (mobileFooter) {
+                        mobileContent.insertBefore(adminA, mobileFooter);
+                    } else {
+                        mobileContent.appendChild(adminA);
+                    }
+                }
+            } else if (mobileAdminLink) {
+                mobileAdminLink.remove();
+            }
+        }
+
         if (mobileFooter && !isProfilePage) {
             if (!document.getElementById('mobile-logout-btn')) {
                 const logoutBtn = document.createElement('button');
@@ -392,23 +504,21 @@ function updateNavUI(user) {
                 mobileFooter.appendChild(logoutBtn);
             }
         }
-
-        // Check for admin
-        if (user.email === ADMIN_EMAIL) {
-            const adminDashboardLink = document.getElementById('admin-dashboard-link');
-            if (adminDashboardLink) adminDashboardLink.style.display = 'block';
-        }
     } else {
         // Cleanup UI
         const profileLink = document.getElementById('profile-nav-link');
         const logoutBtn = document.getElementById('logout-btn');
         const mobileProfileLink = document.getElementById('mobile-profile-link');
         const mobileLogoutBtn = document.getElementById('mobile-logout-btn');
+        const adminDashboardLink = document.getElementById('admin-dashboard-link');
+        const mobileAdminLink = document.getElementById('mobile-admin-link');
 
         if (profileLink) profileLink.remove();
         if (logoutBtn) logoutBtn.remove();
         if (mobileProfileLink) mobileProfileLink.remove();
         if (mobileLogoutBtn) mobileLogoutBtn.remove();
+        if (adminDashboardLink) adminDashboardLink.remove();
+        if (mobileAdminLink) mobileAdminLink.remove();
         loginBtns.forEach(btn => {
             btn.style.display = 'inline-flex';
             if (btn.parentElement && btn.parentElement.id === 'login-nav-item') {
@@ -425,11 +535,14 @@ window.currentUser = null;
 
 auth.onAuthStateChanged(async (user) => {
     window.currentUser = user;
+    let isAdminUser = false;
 
     if (user) {
         try {
             const userRef = db.collection('students').doc(user.uid);
             const userSnap = await userRef.get();
+            const userData = userSnap.exists ? (userSnap.data() || {}) : {};
+            isAdminUser = hasAdminAccess(user, userData);
 
             if (!userSnap.exists) {
                 const finalName = user.displayName || 'Learner';
@@ -441,15 +554,19 @@ auth.onAuthStateChanged(async (user) => {
             } else {
                 await userRef.set({ lastLogin: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
             }
-        } catch (e) { console.error("Error saving user:", e); }
+        } catch (e) {
+            console.error("Error saving user:", e);
+            isAdminUser = hasAdminAccess(user, {});
+        }
     }
 
-    updateNavUI(user);
+    window.currentUserIsAdmin = isAdminUser;
+    updateNavUI(user, isAdminUser);
 });
 
 // Sync UI when navigation finishes loading
 window.addEventListener('navLoaded', () => {
-    updateNavUI(window.currentUser);
+    updateNavUI(window.currentUser, window.currentUserIsAdmin === true);
     attachFormListeners();
 });
 
@@ -458,7 +575,7 @@ function attachFormListeners() {
     if (loginForm) loginForm.onsubmit = emailSignIn;
 
     const signupForm = document.getElementById('signup-form');
-    if (signupForm) signupForm.onsubmit = emailSignUp;
+    if (signupForm) signupForm.onsubmit = startSignupFlow;
 
     document.querySelectorAll('.google-btn').forEach(btn => {
         btn.onclick = googleSignIn;
@@ -470,58 +587,198 @@ window.googleSignIn = async () => {
     try {
         const result = await auth.signInWithPopup(googleProvider);
         console.log("Logged in:", result.user);
-        toggleModal('login-modal');
+        if (window.location.pathname.endsWith('index.html') || window.location.pathname === '/' || window.location.pathname.endsWith('/')) {
+            window.location.href = getPath('profile.html');
+        }
     } catch (error) {
-        if (error.code === 'auth/operation-not-supported-in-this-environment') {
-            console.warn("Auth environment not supported:", error);
-            alert("Security Error: Firebase Authentication requires a local server. \n\nPlease open this project using 'Live Server' in VS Code or any other local server.");
-        } else if (error.code === 'auth/unauthorized-domain') {
-            console.warn("Auth unauthorized domain:", error);
-            const currentDomain = window.location.hostname;
-            alert(`Unauthorized Domain Error!\n\nThe domain '${currentDomain}' is not authorized in your Firebase Project.\n\nTO FIX THIS:\n1. Open your Firebase Console\n2. Go to Authentication -> Settings -> Authorized Domains\n3. Click 'Add Domain' and enter: ${currentDomain}`);
+        handleAuthError(error);
+    }
+};
+
+function handleAuthError(error) {
+    console.error("Auth error details:", error);
+    const errorCode = String(error && error.code || '');
+    const errorMessage = String(error && error.message || 'Unknown error');
+    const errorString = JSON.stringify(error, null, 2);
+
+    if (errorCode === 'auth/operation-not-supported-in-this-environment') {
+        alert("Security Error: Social login not supported here. Use HTTPS.");
+        return;
+    }
+
+    if (errorCode === 'auth/unauthorized-domain') {
+        const currentDomain = window.location.hostname;
+        const rootDomain = currentDomain.replace(/^www\./, '');
+        alert(`Google login is blocked for this domain.\n\nAdd both '${currentDomain}' and '${rootDomain}' in Firebase Authentication -> Authorized domains, then try again.`);
+        return;
+    }
+
+    if (
+        errorCode === 'auth/internal-error' ||
+        errorCode === 'auth/popup-blocked' ||
+        errorCode === 'auth/cancelled-popup-request' ||
+        (errorMessage && errorMessage.includes('auth/internal-error'))
+    ) {
+        // Popup can fail in strict browsers; redirect-based auth is more reliable.
+        auth.signInWithRedirect(googleProvider).catch((redirectErr) => {
+            console.error('Google redirect fallback failed:', redirectErr);
+            alert(`Google login failed.\n\n${redirectErr.message || 'Please retry or use email login.'}`);
+        });
+        return;
+    }
+
+    if (errorCode === 'auth/popup-closed-by-user') {
+        // Intentional user action; keep silent to avoid noise.
+        return;
+    } else {
+        alert("Login failed: " + errorMessage + "\n\nDebug: " + errorString);
+    }
+}
+
+
+window.emailSignIn = async (e) => {
+    if (e) e.preventDefault();
+    const email = document.getElementById('login-email').value;
+    const pass = document.getElementById('login-password').value;
+
+    // Clear previous errors/visuals if any
+    try {
+        await auth.signInWithEmailAndPassword(email, pass);
+        // Success
+        toggleModal('login-modal');
+        // If on index, redirect to profile
+        if (window.location.pathname.endsWith('index.html') || window.location.pathname === '/' || window.location.pathname.endsWith('/')) {
+            window.location.href = getPath('profile.html');
         } else {
-            console.error("Auth error:", error);
-            alert("Login failed: " + error.message);
+            location.reload();
+        }
+    } catch (error) {
+        console.error("Login sync failed:", error.code);
+        if (error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
+            alert("Security Alert: The email address or password you entered is incorrect. Please try again or use the 'Forgot Password' link.");
+        } else if (error.code === 'auth/too-many-requests') {
+            alert("Security Protocol: Access temporarily frozen due to too many failed attempts. Please reset your password or try again later.");
+        } else {
+            handleAuthError(error);
         }
     }
 };
 
+window.sendResetLink = async () => {
+    const email = document.getElementById('forgot-email').value;
+    if (!email) { alert("Please enter your registered email address."); return; }
 
-window.emailSignIn = async (e) => {
-    e.preventDefault();
-    const email = document.getElementById('login-email').value;
-    const pass = document.getElementById('login-password').value;
     try {
-        await auth.signInWithEmailAndPassword(email, pass);
-        toggleModal('login-modal');
+        await auth.sendPasswordResetEmail(email);
+        alert("Password reset email sent! Please check your inbox (and spam folder) for a link to reset your password.");
+        toggleModal('forgot-password-modal');
+        toggleModal('login-modal'); // Take them back to sign in
     } catch (error) {
-        alert("Login failed: " + error.message);
+        if (error.code === 'auth/user-not-found') {
+            alert("No account found with this email address. Please check and try again.");
+        } else {
+            alert("Failed to send reset email: " + error.message);
+        }
     }
 };
 
-window.emailSignUp = async (e) => {
-    e.preventDefault();
-    const name = document.getElementById('signup-name').value;
+window.startSignupFlow = async () => {
     const email = document.getElementById('signup-email').value;
     const pass = document.getElementById('signup-password').value;
+    const name = document.getElementById('signup-name').value;
+
+    if (!name || !email || !pass) { alert("Please complete all registration fields."); return; }
+
+    // PASSWORD STRENGTH VALIDATOR (Cyber-Security Grade)
+    const strongPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!strongPassword.test(pass)) {
+        alert("SECURITY PROTOCOL: Your password is not strong enough.\n\nIt must contain:\n• At least 8 characters\n• At least one uppercase letter (A-Z)\n• At least one lowercase letter (a-z)\n• At least one number (0-9)\n• At least one special symbol (@$!%*?&)");
+        return;
+    }
+
+    // Check if email already exists in Firestore/Auth
     try {
-        const result = await auth.createUserWithEmailAndPassword(email, pass);
-        // Update profile with name
-        await result.user.updateProfile({ displayName: name });
+        const methods = await auth.fetchSignInMethodsForEmail(email);
+        if (methods.length > 0) {
+            alert("Identity Conflict: A student is already registered with this email. Please sign in or use a different address.");
+            return;
+        }
 
-        // Explicitly create Firestore doc to avoid race condition with onAuthStateChanged
-        await db.collection('students').doc(result.user.uid).set({
-            name: name,
-            email: email,
-            plan: 'free',
-            enrolled: firebase.firestore.FieldValue.serverTimestamp(),
-            lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+        // Proceed to OTP Step
+        const res = await fetch('https://asia-south1-nellailearningacademy.cloudfunctions.net/sendVerificationOTP', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: email })
         });
+        const data = await res.json();
 
-        toggleModal('signup-modal');
-        location.reload(); // Refresh to ensure session and data are in sync
+        if (data.ok) {
+            document.getElementById('display-signup-email').textContent = email;
+            document.getElementById('signup-step-1').style.display = 'none';
+            document.getElementById('signup-step-otp').style.display = 'block';
+        } else {
+            alert("Verification Link Failed: " + (data.error || "Please try again."));
+        }
     } catch (error) {
-        alert("Signup failed: " + error.message);
+        alert("Security Sync Error: " + error.message);
+    }
+};
+
+window.verifySignupOTP = async () => {
+    let otp = "";
+    document.querySelectorAll('#signup-modal .otp-digit').forEach(input => otp += input.value);
+
+    if (otp.length < 6) { alert("Please enter the 6-digit sync code."); return; }
+
+    const email = document.getElementById('signup-email').value;
+    const pass = document.getElementById('signup-password').value;
+    const name = document.getElementById('signup-name').value;
+    const phone = document.getElementById('signup-phone').value;
+    const qualification = document.getElementById('signup-qualification').value;
+    const address = document.getElementById('signup-address').value;
+
+    try {
+        const res = await fetch('https://asia-south1-nellailearningacademy.cloudfunctions.net/verifySignupOTP', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, otp })
+        });
+        const data = await res.json();
+
+        if (data.ok) {
+            // OTP verified, now create actual Auth account
+            const userCred = await auth.createUserWithEmailAndPassword(email, pass);
+            await userCred.user.updateProfile({ displayName: name });
+
+            // Sync with Firestore
+            await db.collection('students').doc(userCred.user.uid).set({
+                name, email, phone, qualification, address,
+                plan: 'free',
+                onboardingCompleted: true,
+                enrolled: firebase.firestore.FieldValue.serverTimestamp(),
+                lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+            });
+
+            alert("Account Synchronized: Welcome to Nellai Learning Academy!");
+            window.location.href = getPath('profile.html');
+        } else {
+            alert(data.error || "Invalid synchronization code.");
+        }
+    } catch (error) {
+        alert("Verification System Error: " + error.message);
+    }
+};
+
+window.resendSignupOTP = () => {
+    document.querySelectorAll('#signup-modal .otp-digit').forEach(input => input.value = '');
+    document.querySelectorAll('#signup-modal .otp-digit')[0]?.focus();
+    startSignupFlow();
+};
+
+window.goToSignupStep = (n) => {
+    if (n === 1) {
+        document.getElementById('signup-step-1').style.display = 'block';
+        document.getElementById('signup-step-otp').style.display = 'none';
     }
 };
 
@@ -535,12 +792,159 @@ document.addEventListener('DOMContentLoaded', () => {
     if (loginForm) loginForm.onsubmit = emailSignIn;
 
     const signupForm = document.getElementById('signup-form');
-    if (signupForm) signupForm.onsubmit = emailSignUp;
+    if (signupForm) signupForm.onsubmit = startSignupFlow;
+
+    const forgotForm = document.getElementById('forgot-password-form');
+    if (forgotForm) forgotForm.onsubmit = sendResetLink;
 });
 
 // ==========================================
 // DYNAMIC CONTENT RENDERING (Videos & Materials)
 // ==========================================
+
+async function fetchAndApplySEO() {
+    const seoDoc = await db.collection('siteConfig').doc('seo').get().catch(() => null);
+    if (!seoDoc || !seoDoc.exists) return;
+
+    const data = seoDoc.data() || {};
+    const head = document.head;
+    if (!head) return;
+
+    const upsertMetaByName = (name, content) => {
+        if (!name || !content) return;
+        let meta = document.querySelector(`meta[name="${name}"]`);
+        if (!meta) {
+            meta = document.createElement('meta');
+            meta.setAttribute('name', name);
+            head.appendChild(meta);
+        }
+        meta.setAttribute('content', String(content));
+    };
+
+    const upsertMetaByProperty = (property, content) => {
+        if (!property || !content) return;
+        let meta = document.querySelector(`meta[property="${property}"]`);
+        if (!meta) {
+            meta = document.createElement('meta');
+            meta.setAttribute('property', property);
+            head.appendChild(meta);
+        }
+        meta.setAttribute('content', String(content));
+    };
+
+    const upsertLink = (rel, href) => {
+        if (!rel || !href) return;
+        let link = document.querySelector(`link[rel="${rel}"]`);
+        if (!link) {
+            link = document.createElement('link');
+            link.setAttribute('rel', rel);
+            head.appendChild(link);
+        }
+        link.setAttribute('href', String(href));
+    };
+
+    const toAbsoluteUrl = (value) => {
+        if (!value) return '';
+        try {
+            return new URL(String(value).trim(), window.location.origin).href;
+        } catch (_) {
+            return '';
+        }
+    };
+
+    const canonicalBaseUrlRaw = String(data.canonicalBaseUrl || window.location.origin || '').trim();
+    const canonicalBaseUrl = toAbsoluteUrl(canonicalBaseUrlRaw);
+    let canonicalUrl = '';
+    if (canonicalBaseUrl) {
+        try {
+            const current = new URL(window.location.href);
+            const base = new URL(canonicalBaseUrl);
+            let path = current.pathname || '/';
+
+            const basePath = String(base.pathname || '/').replace(/\/+$/, '');
+            if (basePath && basePath !== '/' && !path.startsWith(basePath + '/')) {
+                path = `${basePath}${path.startsWith('/') ? '' : '/'}${path}`;
+            }
+            path = path.replace(/\/index\.html$/i, '/');
+
+            const canonical = new URL(base.origin);
+            canonical.pathname = path;
+            canonical.search = '';
+            canonical.hash = '';
+            canonicalUrl = canonical.href;
+        } catch (_) { }
+    }
+
+    // Keep an immutable base page title so repeated calls don't append suffix multiple times.
+    const root = document.documentElement;
+    const storedBaseTitle = root.getAttribute('data-seo-base-title');
+    const baseTitle = (storedBaseTitle || document.title || '').trim();
+    if (!storedBaseTitle) {
+        root.setAttribute('data-seo-base-title', baseTitle);
+    }
+
+    const siteName = String(data.siteName || '').trim();
+    let finalTitle = baseTitle;
+    if (siteName) {
+        if (!baseTitle) finalTitle = siteName;
+        else if (!baseTitle.toLowerCase().includes(siteName.toLowerCase())) finalTitle = `${baseTitle} | ${siteName}`;
+    }
+    if (finalTitle) document.title = finalTitle;
+
+    const description = String(data.description || '').trim();
+    const keywords = String(data.keywords || '').trim();
+    const author = String(data.author || '').trim();
+    const robots = String(data.robots || 'index, follow').trim();
+    const ogTitle = String(data.ogTitle || finalTitle || '').trim();
+    const ogDescription = String(data.ogDescription || description || '').trim();
+    const ogImage = toAbsoluteUrl(data.ogImage);
+    const twitterHandleRaw = String(data.twitterHandle || '').trim();
+    const twitterHandle = twitterHandleRaw ? `@${twitterHandleRaw.replace(/^@+/, '')}` : '';
+
+    if (keywords) upsertMetaByName('keywords', keywords);
+    if (description) upsertMetaByName('description', description);
+    if (author) upsertMetaByName('author', author);
+    if (robots) upsertMetaByName('robots', robots);
+
+    if (data.googleVerificationCode) {
+        upsertMetaByName('google-site-verification', String(data.googleVerificationCode).trim());
+    }
+    if (data.bingVerificationCode) {
+        upsertMetaByName('msvalidate.01', String(data.bingVerificationCode).trim());
+    }
+
+    if (canonicalUrl) upsertLink('canonical', canonicalUrl);
+
+    if (ogTitle) upsertMetaByProperty('og:title', ogTitle);
+    if (ogDescription) upsertMetaByProperty('og:description', ogDescription);
+    if (canonicalUrl) upsertMetaByProperty('og:url', canonicalUrl);
+    if (siteName) upsertMetaByProperty('og:site_name', siteName);
+    upsertMetaByProperty('og:type', 'website');
+    if (ogImage) upsertMetaByProperty('og:image', ogImage);
+
+    const twitterCard = ogImage ? 'summary_large_image' : 'summary';
+    upsertMetaByName('twitter:card', twitterCard);
+    if (twitterHandle) upsertMetaByName('twitter:site', twitterHandle);
+    if (ogTitle) upsertMetaByName('twitter:title', ogTitle);
+    if (ogDescription) upsertMetaByName('twitter:description', ogDescription);
+    if (ogImage) upsertMetaByName('twitter:image', ogImage);
+
+    // Lightweight Organization schema for richer search understanding.
+    const schemaId = 'dynamic-org-schema';
+    const schemaEl = document.getElementById(schemaId) || document.createElement('script');
+    schemaEl.id = schemaId;
+    schemaEl.type = 'application/ld+json';
+    const orgSchema = {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": siteName || 'NellaiLearningAcademy',
+        "url": canonicalBaseUrl || window.location.origin,
+        "logo": ogImage || `${window.location.origin}/logo1.png`
+    };
+    schemaEl.textContent = JSON.stringify(orgSchema);
+    if (!schemaEl.parentNode) head.appendChild(schemaEl);
+}
+window.fetchAndApplySEO = fetchAndApplySEO;
 
 async function fetchAndRenderVideos() {
     const container = document.getElementById('videos-container');
@@ -802,9 +1206,11 @@ async function fetchAndRenderFreeMocks() {
 
     let tests = [];
     try {
-        const snap = await db.collection('tests').orderBy('createdAt', 'desc').limit(3).get();
+        const snap = await db.collection('tests').orderBy('createdAt', 'desc').limit(30).get();
         snap.forEach(doc => {
             const d = doc.data();
+            const requiredPlan = normalizePlanId(d.requiredPlan || 'free');
+            if (requiredPlan !== 'free') return;
             tests.push({
                 title: d.title || 'Mock Test',
                 category: d.examType || d.category || 'General',
@@ -815,6 +1221,7 @@ async function fetchAndRenderFreeMocks() {
                 bg: 'var(--primary-light)'
             });
         });
+        tests = tests.slice(0, 3);
     } catch (e) { console.warn('FreeMocks fetch error:', e); }
 
     if (tests.length === 0 && window.MOCK_DATA) tests = MOCK_DATA.freeMockTests;
@@ -1212,14 +1619,31 @@ window.processMockPayment = async (planId) => {
         return;
     }
 
+    const currentPlanId = await getCurrentUserPlanId();
+    const normalizedCurrentPlanId = normalizePlanId(currentPlanId || 'free');
+    if (normalizedCurrentPlanId === selectedPlanId) {
+        alert(`You are already subscribed to the ${selectedPlanId.toUpperCase()} plan.`);
+        return;
+    }
+
+    const rankMap = await getPlanRankMap();
+    const selectedRank = getPlanRank(rankMap, selectedPlanId);
+    const currentRank = getPlanRank(rankMap, normalizedCurrentPlanId);
+    const selectedRankKnown = Object.prototype.hasOwnProperty.call(rankMap, selectedPlanId);
+    const currentRankKnown = Object.prototype.hasOwnProperty.call(rankMap, normalizedCurrentPlanId);
+    if (selectedRankKnown && currentRankKnown && selectedRank <= currentRank) {
+        alert('Your current plan already covers this tier.');
+        return;
+    }
+
     const plan = await getPlanForPayment(selectedPlanId);
     if (!plan) {
         alert('Selected plan details were not found. Please refresh and try again.');
         return;
     }
 
-    const amountValue = Number(plan.price || 0);
-    if (!Number.isFinite(amountValue) || amountValue <= 0) {
+    const amountValue = parsePlanPriceValue(plan.price);
+    if (!Number.isFinite(amountValue) || amountValue <= 0 || amountValue === Number.POSITIVE_INFINITY) {
         alert('Plan amount is invalid. Please contact support.');
         return;
     }
@@ -1307,8 +1731,14 @@ async function fetchAndRenderPlans() {
     if (!container) return;
 
     try {
-        const snapshot = await db.collection('plans').orderBy('price', 'asc').get();
+        const snapshot = await db.collection('plans').get();
         let plans = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        plans.sort((a, b) => {
+            const aPrice = parsePlanPriceValue(a.price);
+            const bPrice = parsePlanPriceValue(b.price);
+            if (aPrice !== bPrice) return aPrice - bPrice;
+            return String(a.id || '').localeCompare(String(b.id || ''));
+        });
 
         // Fallback to mock data if empty
         if (plans.length === 0 && window.MOCK_DATA && MOCK_DATA.plans) {
@@ -1316,6 +1746,9 @@ async function fetchAndRenderPlans() {
         }
 
         if (plans.length > 0) {
+            const currentPlanId = normalizePlanId(await getCurrentUserPlanId() || 'free');
+            const rankMap = await getPlanRankMap();
+            const currentPlanRank = getPlanRank(rankMap, currentPlanId);
             container.innerHTML = '';
             plans.forEach(plan => {
                 const card = document.createElement('div');
@@ -1328,6 +1761,18 @@ async function fetchAndRenderPlans() {
 
                 const pColor = plan.color || '';
                 const popularBadgeStyle = pColor ? `style="background: ${pColor}"` : '';
+                const normalizedPlanId = normalizePlanId(plan.id);
+                const planRank = getPlanRank(rankMap, normalizedPlanId);
+                const isCurrentPlan = normalizedPlanId === currentPlanId;
+                const isIncludedInCurrentPlan = !isCurrentPlan && currentPlanId !== 'free' && planRank < currentPlanRank;
+                const isActionDisabled = isCurrentPlan || isIncludedInCurrentPlan;
+                const buttonLabel = isCurrentPlan
+                    ? 'Current Plan'
+                    : isIncludedInCurrentPlan
+                        ? 'Included in Your Plan'
+                        : (plan.buttonText || 'Get Started');
+                const safePlanId = String(plan.id || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+                const buttonAction = isActionDisabled ? '' : `onclick=\"processMockPayment('${safePlanId}')\"`;
 
                 card.innerHTML = `
                     ${plan.popular ? `<div class="popular-badge" ${popularBadgeStyle}>${plan.badge || 'MOST VALUE'}</div>` : ''}
@@ -1336,8 +1781,8 @@ async function fetchAndRenderPlans() {
                     <ul class="features-list">
                         ${featuresHtml}
                     </ul>
-                    <button type="button" class="btn-primary" style="width: 100%;"
-                        onclick="processMockPayment('${plan.id}')">${plan.buttonText || 'Get Started'}</button>
+                    <button type="button" class="btn-primary" style="width: 100%; ${isActionDisabled ? 'opacity:0.85; cursor:not-allowed;' : ''}"
+                        ${isActionDisabled ? 'disabled aria-disabled="true"' : buttonAction}>${buttonLabel}</button>
                 `;
                 container.appendChild(card);
             });
@@ -1349,6 +1794,7 @@ async function fetchAndRenderPlans() {
 
 // Call all render functions when DOM loads
 document.addEventListener('DOMContentLoaded', () => {
+    fetchAndApplySEO();
     fetchAndRenderVideos();
     fetchAndRenderMaterials();
     fetchAndRenderExamCategories();
@@ -1361,5 +1807,3 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchAndRenderCAPDFs();
     fetchAndRenderPlans();
 });
-
-

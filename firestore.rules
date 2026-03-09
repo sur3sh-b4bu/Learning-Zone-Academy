@@ -1,0 +1,255 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function authEmail() {
+      return signedIn() && request.auth.token.email is string
+        ? request.auth.token.email.lower()
+        : '';
+    }
+
+    function studentPath(uid) {
+      return /databases/$(database)/documents/students/$(uid);
+    }
+
+    function studentExists(uid) {
+      return exists(studentPath(uid));
+    }
+
+    function studentData(uid) {
+      return get(studentPath(uid)).data;
+    }
+
+    function adminFromStudentDoc() {
+      return signedIn()
+        && studentExists(request.auth.uid)
+        && (
+          studentHasTruthyAdminFlag(studentData(request.auth.uid).isAdmin)
+          || (
+            studentData(request.auth.uid).role is string
+            && (
+              studentData(request.auth.uid).role.lower() == 'admin'
+              || studentData(request.auth.uid).role.lower() == 'super admin'
+              || studentData(request.auth.uid).role.lower() == 'superadmin'
+            )
+          )
+        );
+    }
+
+    function studentHasTruthyAdminFlag(flag) {
+      return flag == true
+        || (flag is string && (
+          flag.lower() == 'true'
+          || flag.lower() == '1'
+          || flag.lower() == 'yes'
+        ))
+        || (flag is int && flag == 1)
+        || (flag is float && flag == 1);
+    }
+
+    function isAdmin() {
+      return signedIn()
+        && (
+          request.auth.token.admin == true
+          || authEmail() == 'admin@gmail.com'
+          || adminFromStudentDoc()
+        );
+    }
+
+    function normalizePlan(planId) {
+      return planId is string ? planId.lower() : 'free';
+    }
+
+    function planRank(planId) {
+      let normalized = normalizePlan(planId);
+      return normalized == 'ultimate' ? 3
+        : normalized == 'pro' ? 2
+        : 1;
+    }
+
+    function currentUserPlanRank() {
+      return !signedIn() ? 1
+        : isAdmin() ? 999
+        : (
+          studentExists(request.auth.uid)
+            ? planRank(studentData(request.auth.uid).plan)
+            : 1
+        );
+    }
+
+    function hasPlanAccess(requiredPlan) {
+      return planRank(requiredPlan) <= 1
+        || currentUserPlanRank() >= planRank(requiredPlan);
+    }
+
+    function videoRequiredPlan(videoId) {
+      return get(/databases/$(database)/documents/videos/$(videoId)).data.requiredPlan;
+    }
+
+    function testRequiredPlan(testId) {
+      return get(/databases/$(database)/documents/tests/$(testId)).data.requiredPlan;
+    }
+
+    function validStudentCreate(uid) {
+      return signedIn()
+        && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly([
+          'name', 'email', 'phone', 'qualification', 'address',
+          'plan', 'onboardingCompleted', 'enrolled', 'lastLogin'
+        ])
+        && (
+          !request.resource.data.keys().hasAny(['email'])
+          || (
+            request.resource.data.email is string
+            && request.resource.data.email.lower() == authEmail()
+          )
+        )
+        && (
+          !request.resource.data.keys().hasAny(['plan'])
+          || normalizePlan(request.resource.data.plan) == 'free'
+        )
+        && !request.resource.data.keys().hasAny([
+          'isAdmin', 'role', 'subscriptionStatus', 'subscriptionUpdatedAt'
+        ]);
+    }
+
+    function validStudentSelfUpdate(uid) {
+      let changed = request.resource.data.diff(resource.data).changedKeys();
+      return signedIn()
+        && request.auth.uid == uid
+        && changed.hasOnly([
+          'name', 'phone', 'qualification', 'address',
+          'lastLogin', 'onboardingCompleted'
+        ])
+        && (
+          !request.resource.data.keys().hasAny(['email'])
+          || (
+            request.resource.data.email is string
+            && request.resource.data.email.lower() == authEmail()
+          )
+        );
+    }
+
+    match /students/{uid} {
+      allow read: if isAdmin() || (signedIn() && request.auth.uid == uid);
+      allow create: if isAdmin() || validStudentCreate(uid);
+      allow update: if isAdmin() || validStudentSelfUpdate(uid);
+      allow delete: if isAdmin();
+    }
+
+    match /payments/{paymentId} {
+      allow read: if isAdmin() || (signedIn() && resource.data.studentUid == request.auth.uid);
+      allow create, update, delete: if false;
+    }
+
+    match /subjects/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /plans/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /materials/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /videos/{videoId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /videos/{videoId}/lessons/{lessonId} {
+      allow read: if hasPlanAccess(videoRequiredPlan(videoId));
+      allow write: if isAdmin();
+    }
+
+    match /videos/{videoId}/lessons/{lessonId}/qa/{qaId} {
+      allow read: if hasPlanAccess(videoRequiredPlan(videoId));
+      allow create: if signedIn()
+        && hasPlanAccess(videoRequiredPlan(videoId))
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.text is string
+        && request.resource.data.text.size() > 0
+        && request.resource.data.text.size() <= 2000
+        && request.resource.data.keys().hasOnly([
+          'text', 'userId', 'userEmail', 'userName', 'role',
+          'courseId', 'lessonId', 'createdAt', 'updatedAt'
+        ]);
+      allow update, delete: if isAdmin();
+    }
+
+    match /tests/{testId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /tests/{testId}/questions/{questionId} {
+      allow read: if hasPlanAccess(testRequiredPlan(testId));
+      allow write: if isAdmin();
+    }
+
+    match /pyqs/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /ticker/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /settings/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /siteConfig/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /company_pages/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /courses/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /testimonials/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /alerts/{docId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /seoLogs/{docId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /otp_verifications/{docId} {
+      allow read, write: if false;
+    }
+
+    // Legacy shape fallback currently used in one viewer route.
+    match /lessons/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

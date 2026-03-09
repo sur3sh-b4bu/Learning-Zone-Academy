@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mock Tests | Gov Learn - Real Exam Preparation</title>
+    <title>Mock Tests | NellaiLearningAcademy - Real Exam Preparation</title>
     <link rel="stylesheet" href="../css/common.css">
     <link rel="stylesheet" href="../css/navigation.css">
     <link rel="stylesheet" href="../css/footer.css">
@@ -75,7 +75,7 @@
                     <p id="modal-test-meta" style="color: var(--primary); font-weight: 700;"></p>
                 </div>
                 <button onclick="hideInstructions()"
-                    style="background: rgba(255, 255, 255, 0.05); border: none; color: white; width: 44px; height: 44px; border-radius: 50%; cursor: pointer;"><i
+                    style="background: rgba(255, 255, 255, 0.05); border: none; color: var(--primary); width: 44px; height: 44px; border-radius: 50%; cursor: pointer;"><i
                         class="fas fa-times"></i></button>
             </div>
 
@@ -105,7 +105,7 @@
 
             <div style="display: flex; gap: 16px;">
                 <button onclick="hideInstructions()" class="btn-primary"
-                    style="flex: 1; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-glass); color: white;">Cancel</button>
+                    style="flex: 1; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-glass); color: var(--primary);">Cancel</button>
                 <button id="modal-start-btn" class="btn-primary" style="flex: 2;">I'm Ready to Start</button>
             </div>
         </div>
@@ -127,6 +127,62 @@
             if (!Number.isFinite(numeric)) return '0';
             const fixed = numeric.toFixed(4);
             return fixed.replace(/\.?0+$/, '');
+        }
+
+        function escapeHtml(value) {
+            return String(value || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function sanitizeHttpUrl(value) {
+            const raw = String(value || '').trim();
+            if (!raw) return '';
+            try {
+                const parsed = new URL(raw);
+                return ['http:', 'https:'].includes(parsed.protocol) ? parsed.href : '';
+            } catch (_) {
+                return '';
+            }
+        }
+
+        function normalizeTestRequiredPlan(plan) {
+            return String(plan || 'free').trim().toLowerCase();
+        }
+
+        async function checkTestPlanAccess(requiredPlan) {
+            const normalized = normalizeTestRequiredPlan(requiredPlan);
+            if (typeof verifyPlanAccess === 'function') {
+                try {
+                    return await verifyPlanAccess(normalized);
+                } catch (e) {
+                    console.warn('verifyPlanAccess failed, using fallback:', e);
+                }
+            }
+
+            if (normalized === 'free') return { allowed: true };
+            const user = auth.currentUser;
+            if (!user) {
+                return {
+                    allowed: false,
+                    reason: 'login',
+                    message: `Please sign in to access ${normalized.toUpperCase()} mock tests.`
+                };
+            }
+            if (String(user.email || '').toLowerCase() === String(ADMIN_EMAIL || '').toLowerCase()) {
+                return { allowed: true };
+            }
+            try {
+                const userDoc = await db.collection('students').doc(user.uid).get();
+                const userPlan = normalizeTestRequiredPlan((userDoc.exists ? userDoc.data() : {}).plan || 'free');
+                const rank = { free: 0, pro: 1, ultimate: 2 };
+                return { allowed: (rank[userPlan] || 0) >= (rank[normalized] || 0) };
+            } catch (_) {
+                return { allowed: false, reason: 'plan', message: 'Unable to verify your plan right now.' };
+            }
         }
 
         function showInstructions(id, name, q, time, positiveMark = 1, negativePercent = 25) {
@@ -209,6 +265,11 @@
                 const qCount = t.questions || 0;
                 const duration = t.duration || 0;
                 const examType = t.examType || 'General';
+                const requiredPlan = normalizeTestRequiredPlan(t.requiredPlan || 'free');
+                const requiredPlanLabel = requiredPlan === 'free' ? 'FREE' : `${requiredPlan.toUpperCase()}+`;
+                const requiredPlanStyle = requiredPlan === 'free'
+                    ? 'background: rgba(59, 130, 246, 0.12); color: #3b82f6; border: 1px solid rgba(59,130,246,0.35);'
+                    : 'background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.35);';
                 const positiveMark = Number.isFinite(Number(t.positiveMark)) && Number(t.positiveMark) > 0
                     ? Number(t.positiveMark)
                     : 1;
@@ -218,15 +279,24 @@
                         ? Number(((Number(t.negativeMark) / positiveMark) * 100).toFixed(2))
                         : 25);
 
+                const thumbUrl = sanitizeHttpUrl(t.thumbnail || '');
+                const safeName = escapeHtml(name);
+                const safeType = escapeHtml(typeLabel);
+                const safeExamType = escapeHtml(examType);
                 const card = document.createElement('div');
                 card.className = 'mock-card';
                 card.style.animationDelay = `${0.1 + (index * 0.1)}s`;
                 card.innerHTML = `
-                    <div class="mock-category-tag">${typeLabel}</div>
-                    <div class="mock-icon-wrap"><i class="fas fa-file-invoice"></i></div>
-                    <h3 class="mock-title">${name}</h3>
+                    <div class="mock-tags-container" style="position: absolute; top: 12px; right: 24px; display: flex; flex-direction: column; gap: 6px; align-items: flex-end; z-index: 5;">
+                        <div class="mock-category-tag" style="position: static; margin: 0;">${safeType}</div>
+                        <div class="mock-category-tag" style="position: static; margin: 0; ${requiredPlanStyle}">${requiredPlanLabel}</div>
+                    </div>
+                    <div class="mock-icon-wrap" style="${thumbUrl ? `background: url('${thumbUrl}') center/cover; border: none;` : ''}">
+                        ${thumbUrl ? '' : '<i class="fas fa-file-invoice"></i>'}
+                    </div>
+                    <h3 class="mock-title">${safeName}</h3>
                     <div class="mock-meta">
-                        <div class="meta-item"><i class="fas fa-graduation-cap"></i> <span>${examType}</span></div>
+                        <div class="meta-item"><i class="fas fa-graduation-cap"></i> <span>${safeExamType}</span></div>
                         <div class="meta-item"><i class="fas fa-layer-group"></i> <span>${qCount} Qs</span></div>
                         <div class="meta-item"><i class="fas fa-clock"></i> <span>${duration} Min</span></div>
                     </div>
@@ -237,7 +307,17 @@
                 `;
                 const startBtn = card.querySelector('.mock-start-btn');
                 if (startBtn) {
-                    startBtn.addEventListener('click', () => {
+                    startBtn.addEventListener('click', async () => {
+                        const accessResult = await checkTestPlanAccess(requiredPlan);
+                        if (!accessResult.allowed) {
+                            alert(accessResult.message || `Upgrade required. This mock test requires ${requiredPlan.toUpperCase()} access.`);
+                            if (accessResult.reason === 'login') {
+                                if (typeof toggleModal === 'function') toggleModal('login-modal');
+                            } else {
+                                window.location.href = '../index.html#pricing';
+                            }
+                            return;
+                        }
                         showInstructions(t.id, name, qCount, duration, positiveMark, negativePercent);
                     });
                 }
@@ -258,4 +338,3 @@
 </body>
 
 </html>
-

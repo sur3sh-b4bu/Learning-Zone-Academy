@@ -48,7 +48,7 @@
 
                 const tickerWrap = container.querySelector('.ticker-wrap');
                 if (tickerWrap) {
-                    document.body.insertBefore(tickerWrap, document.body.firstChild);
+                    container.insertAdjacentElement('afterend', tickerWrap);
                 }
 
                 window.dispatchEvent(new CustomEvent('navLoaded'));
@@ -79,5 +79,10 @@
     document.addEventListener('DOMContentLoaded', () => {
         loadComponent('main-nav', 'components/navigation.html');
         loadComponent('main-footer', 'components/footer.html');
+
+        // Load 3D Background
+        const vantaScript = document.createElement('script');
+        vantaScript.src = base + 'js/vanta-bg.js';
+        document.head.appendChild(vantaScript);
     });
 })();

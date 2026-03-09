@@ -31,9 +31,54 @@ const MOCK_DATA = {
 
     // Free mock tests shown on home page
     freeMockTests: [
-        { title: 'Group 4 General Tamil Mock', category: 'TNPSC', questions: 100, duration: 90, shortCode: 'TN', color: '#3b82f6', bg: '#eff6ff' },
-        { title: 'SSC CGL Tier 1 Full Mock', category: 'SSC', questions: 100, duration: 60, shortCode: 'SS', color: '#059669', bg: 'var(--primary-light)' },
-        { title: 'RRB NTPC CBT 1 Stage', category: 'RRB', questions: 100, duration: 90, shortCode: 'RR', color: '#16a34a', bg: '#f0fdf4' }
+        {
+            title: 'Group 4 General Tamil Mock',
+            category: 'TNPSC',
+            questions: 10,
+            duration: 90,
+            shortCode: 'TN',
+            color: '#3b82f6',
+            bg: '#eff6ff',
+            questions_data: [
+                { text: 'Which of the following is the first Sangam literature?', options: { A: 'Agattiyam', B: 'Tolkappiyam', C: 'Purananuru', D: 'Ettuthogai' }, correct: 'A' },
+                { text: 'Who wrote the epic Manimekalai?', options: { A: 'Ilango Adigal', B: 'Seethalai Sathanar', C: 'Kambar', D: 'Ottakkoothar' }, correct: 'B' },
+                { text: 'The concept of "Ainthinai" refers to:', options: { A: 'Five Lands', B: 'Five Elements', C: 'Five Kings', D: 'Five Languages' }, correct: 'A' },
+                { text: 'Thirukkural contains how many chapters?', options: { A: '133', B: '1330', C: '100', D: '150' }, correct: 'A' },
+                { text: 'Who is known as the "Father of Tamil Prose"?', options: { A: 'Arumuka Navalar', B: 'U.V. Swaminatha Iyer', C: 'Bharathiyar', D: 'Veeramamunivar' }, correct: 'D' }
+            ]
+        },
+        {
+            title: 'SSC CGL Tier 1 Full Mock',
+            category: 'SSC',
+            questions: 10,
+            duration: 60,
+            shortCode: 'SS',
+            color: '#059669',
+            bg: 'var(--primary-light)',
+            questions_data: [
+                { text: 'Who was the first Governor-General of Bengal?', options: { A: 'Robert Clive', B: 'Warren Hastings', C: 'Lord Cornwallis', D: 'Lord Wellesley' }, correct: 'B' },
+                { text: 'Which planet is known as the Red Planet?', options: { A: 'Venus', B: 'Mars', C: 'Jupiter', D: 'Saturn' }, correct: 'B' },
+                { text: 'What is the sum of angles in a triangle?', options: { A: '90', B: '180', C: '270', D: '360' }, correct: 'B' },
+                { text: 'The Fundamental Rights in India are inspired by which country?', options: { A: 'UK', B: 'USA', C: 'Canada', D: 'Ireland' }, correct: 'B' },
+                { text: 'What is the unit of power?', options: { A: 'Joule', B: 'Watt', C: 'Newton', D: 'Pascal' }, correct: 'B' }
+            ]
+        },
+        {
+            title: 'RRB NTPC CBT 1 Stage',
+            category: 'RRB',
+            questions: 10,
+            duration: 90,
+            shortCode: 'RR',
+            color: '#16a34a',
+            bg: '#f0fdf4',
+            questions_data: [
+                { text: 'Where is the headquarters of South Eastern Railway?', options: { A: 'Kolkata', B: 'Chennai', C: 'Mumbai', D: 'Delhi' }, correct: 'A' },
+                { text: 'What is the full form of IRCTC?', options: { A: 'Indian Railway Catering and Tourism Corporation', B: 'Indian Railway Core Transport Center', C: 'International Railway Catering Tech Center', D: 'Indian Regional Center for Tourism' }, correct: 'A' },
+                { text: 'Which is the longest railway platform in India?', options: { A: 'Gorakhpur', B: 'Kollam', C: 'Kharagpur', D: 'Hubballi' }, correct: 'D' },
+                { text: 'The first train in India ran between:', options: { A: 'Bombay to Thane', B: 'Howrah to Hooghly', C: 'Madras to Arkonam', D: 'Delhi to Agra' }, correct: 'A' },
+                { text: 'What is the chemical symbol for Gold?', options: { A: 'Ag', B: 'Au', C: 'Fe', D: 'Hg' }, correct: 'B' }
+            ]
+        }
     ],
 
     // Popular courses on home page
@@ -121,7 +166,7 @@ const MOCK_DATA = {
         {
             id: 'pro',
             name: 'Pro Plan',
-            price: '1,499',
+            price: '1499',
             period: '/life',
             features: ['Full Mock Test Access', '300+ Expert Videos', 'Personalized Analytics'],
             buttonText: 'Get Pro',
@@ -131,7 +176,7 @@ const MOCK_DATA = {
         {
             id: 'ultimate',
             name: 'Ultimate',
-            price: '4,999',
+            price: '4999',
             period: '/life',
             features: ['1-on-1 Mentorship', 'Printable Resource Kit', 'Interview Prep'],
             buttonText: 'Unlock All',

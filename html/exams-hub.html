@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Exams Hub | Gov Learn - Detailed Preparation</title>
+    <title>Exams Hub | NellaiLearningAcademy - Detailed Preparation</title>
     <link rel="stylesheet" href="../css/common.css">
     <link rel="stylesheet" href="../css/navigation.css">
     <link rel="stylesheet" href="../css/footer.css">
@@ -416,17 +416,7 @@
             });
         }
 
-        function switchExam(exam, evt) {
-            currentExam = exam;
-            currentTab = 'notifications';
 
-            // Update active button
-            document.querySelectorAll('.exam-btn').forEach(btn => btn.classList.remove('active'));
-            if (evt && evt.target) evt.target.classList.add('active');
-
-            // Render content for first tab
-            renderExamContent(exam, 'notifications');
-        }
 
         function switchTab(tab, evt) {
             currentTab = tab;
@@ -514,7 +504,28 @@
         document.addEventListener('DOMContentLoaded', async () => {
             const urlParams = new URLSearchParams(window.location.search);
             const requestedCat = cleanText(urlParams.get('cat'));
-            const staticExamKey = Object.keys(examData).find(key => normalizeExamKey(key) === normalizeExamKey(requestedCat));
+            const requestedSubjectId = cleanText(urlParams.get('subject'));
+
+            // 1. Fetch all subjects from Firestore to build dynamic selector
+            try {
+                const snap = await db.collection('subjects').orderBy('name').get();
+                const selector = document.getElementById('exam-selector');
+                if (selector && snap.docs.length > 0) {
+                    selector.innerHTML = ''; // Clear static buttons
+                    snap.docs.forEach(doc => {
+                        const s = doc.data();
+                        const name = cleanText(s.name);
+                        const btn = document.createElement('button');
+                        btn.className = 'exam-btn';
+                        btn.textContent = name;
+                        btn.onclick = (e) => switchExam(name, e, doc.id);
+                        selector.appendChild(btn);
+                    });
+                }
+            } catch (e) {
+                console.warn('Failed to load dynamic exam categories:', e);
+            }
+
             const subjectFromAdmin = await getSubjectFromQuery(urlParams);
 
             if (subjectFromAdmin) {
@@ -523,18 +534,45 @@
                 currentTab = 'notifications';
                 renderExamContent(currentExam, currentTab);
 
-                const selector = document.getElementById('exam-selector');
-                if (selector) selector.style.display = 'none';
+                // Highlight corresponding button if exists
+                setActiveExamButton(subjectFromAdmin.name);
                 return;
             }
 
+            const staticExamKey = Object.keys(examData).find(key => normalizeExamKey(key) === normalizeExamKey(requestedCat));
             currentExam = staticExamKey || 'TNPSC';
             currentTab = 'notifications';
             renderExamContent(currentExam, currentTab);
             setActiveExamButton(currentExam);
         });
+
+        // Update switchExam to support Firestore subjects
+        async function switchExam(examName, evt, subjectId = null) {
+            currentExam = examName;
+            currentTab = 'notifications';
+
+            // Check if it's a known static exam or needs fetching from Firestore
+            const staticKey = Object.keys(examData).find(k => normalizeExamKey(k) === normalizeExamKey(examName));
+            if (staticKey) {
+                currentExam = staticKey;
+            } else if (subjectId) {
+                try {
+                    const doc = await db.collection('subjects').doc(subjectId).get();
+                    if (doc.exists) {
+                        examData[CUSTOM_EXAM_KEY] = buildDynamicExamData({ id: doc.id, ...doc.data() });
+                        currentExam = CUSTOM_EXAM_KEY;
+                    }
+                } catch (e) { console.error('Error switching to dynamic exam:', e); }
+            }
+
+            // Update active button
+            document.querySelectorAll('.exam-btn').forEach(btn => btn.classList.remove('active'));
+            if (evt && evt.target) evt.target.classList.add('active');
+
+            // Render content for first tab
+            renderExamContent(currentExam, 'notifications');
+        }
     </script>
 </body>
 
 </html>
-

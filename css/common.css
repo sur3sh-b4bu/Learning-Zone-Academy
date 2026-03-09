@@ -58,6 +58,21 @@
     --footer-text: #94a3b8;
 }
 
+/* Premium Image Styling */
+.premium-img-large {
+    border-radius: 32px;
+    box-shadow: 0 40px 80px -15px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.1);
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.6s ease;
+    width: 100%;
+    display: block;
+    object-fit: cover;
+}
+
+.premium-img-large:hover {
+    transform: translateY(-12px) scale(1.02);
+    box-shadow: 0 50px 100px -20px rgba(0, 0, 0, 0.8), 0 0 0 2px var(--primary);
+}
+
 /* Spectrum Sync: High-Fidelity Light Mode Overrides */
 .light-mode {
     --bg-main: #f0f9f6;
@@ -124,8 +139,8 @@
 
 .light-mode .btn-secondary {
     background: #ffffff !important;
-    color: #059669 !important;
-    border: 1px solid rgba(16, 185, 129, 0.1) !important;
+    color: #1e293b !important;
+    border: 1px solid rgba(16, 185, 129, 0.2) !important;
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05) !important;
 }
 
@@ -642,7 +657,8 @@ p {
     filter: none !important;
 }
 
-@media (hover: none), (pointer: coarse) {
+@media (hover: none),
+(pointer: coarse) {
     .btn-primary:hover {
         transform: none !important;
         box-shadow: 0 10px 20px -5px rgba(5, 150, 105, 0.3) !important;
@@ -765,18 +781,23 @@ p {
     -webkit-backdrop-filter: blur(16px) saturate(180%);
     display: none;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;
+    /* Fix for top cut-off on small screens */
     z-index: 10000;
-    padding: 20px;
+    padding: 60px 20px;
+    /* Increased vertical padding for breathing room */
     overflow-y: auto;
 }
 
 .modal {
     background: var(--bg-white);
     width: 100%;
-    max-width: 460px;
-    padding: 48px 40px;
+    max-width: 480px;
+    padding: 40px;
+    /* Slightly reduced for better mobile fit */
     border-radius: 32px;
+    margin: auto;
+    /* This centers it when it fits, and respects padding when it doesn't */
     border: 1px solid var(--border-glass);
     box-shadow: var(--shadow-premium);
     position: relative;
@@ -828,6 +849,18 @@ p {
     margin-bottom: 20px;
 }
 
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+@media (max-width: 500px) {
+    .form-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
+
 .form-group label {
     display: block;
     font-size: 0.95rem;
@@ -837,7 +870,9 @@ p {
     letter-spacing: -0.2px;
 }
 
-.form-group input {
+.form-group input,
+.form-group textarea,
+.form-group select {
     width: 100%;
     padding: 14px 16px;
     border-radius: 12px;
@@ -847,13 +882,23 @@ p {
     font-size: 1rem;
     font-family: 'Outfit', sans-serif;
     transition: all 0.3s ease;
+    display: block;
 }
 
-.form-group input::placeholder {
+.form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+    line-height: 1.5;
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
     color: rgba(255, 255, 255, 0.3);
 }
 
-.form-group input:focus {
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
     outline: none;
     border-color: var(--primary);
     background: rgba(16, 185, 129, 0.05);
@@ -890,31 +935,56 @@ p {
     padding: 14px 16px;
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid var(--border-glass);
-    border-radius: 12px;
+    border-radius: 16px;
     color: var(--secondary);
     font-size: 1rem;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 12px;
+    letter-spacing: -0.2px;
+    position: relative;
+    overflow: hidden;
 }
 
 .google-btn::before {
-    content: '\f1a0';
-    /* FontAwesome Google Icon */
-    font-family: 'Font Awesome 6 Free', 'Font Awesome 5 Free', 'FontAwesome';
-    font-weight: 400;
-    color: #ea4335;
-    font-size: 1.2rem;
+    content: '';
+    width: 20px;
+    height: 20px;
+    background: url('https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg') no-repeat center;
+    background-size: contain;
+    transition: transform 0.4s ease;
 }
 
 .google-btn:hover {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 255, 255, 0.3);
-    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(16, 185, 129, 0.4);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.5), 0 0 10px rgba(16, 185, 129, 0.1);
+}
+
+.google-btn:hover::before {
+    transform: scale(1.1) rotate(5deg);
+}
+
+.google-btn:active {
+    transform: translateY(0) scale(0.98);
+}
+
+.light-mode .google-btn {
+    background: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    color: #1e293b !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03) !important;
+}
+
+.light-mode .google-btn:hover {
+    background: #f8fafc !important;
+    border-color: #10b981 !important;
+    box-shadow: 0 8px 20px -5px rgba(16, 185, 129, 0.15) !important;
 }
 
 /* ===== SECTION HEADERS ===== */
@@ -1030,7 +1100,7 @@ p {
     backdrop-filter: blur(24px);
     border-radius: 28px;
     border: 1px solid rgba(255, 255, 255, 0.08);
-    padding: 28px;
+    padding: 42px 28px 28px;
     display: flex;
     flex-direction: column;
     gap: 20px;
@@ -1080,11 +1150,11 @@ p {
 
 .mock-category-tag {
     position: absolute;
-    top: 24px;
+    top: 10px;
     right: 28px;
-    padding: 6px 14px;
-    border-radius: 10px;
-    font-size: 0.65rem;
+    padding: 4px 12px;
+    border-radius: 8px;
+    font-size: 0.6rem;
     font-weight: 700;
     letter-spacing: 1.2px;
     text-transform: uppercase;
@@ -1105,7 +1175,7 @@ p {
     font-size: 1.6rem;
     color: white;
     box-shadow: 0 10px 20px -5px rgba(16, 185, 129, 0.3);
-    margin-bottom: 8px;
+    margin: 4px 0 12px 0;
 }
 
 .mock-title {
@@ -1276,5 +1346,62 @@ p {
         border-color: transparent !important;
         color: white !important;
         box-shadow: 0 8px 20px -5px rgba(16, 185, 129, 0.4) !important;
+    }
+}
+
+/* ===== OTP VERIFICATION UI ===== */
+.otp-input-wrapper {
+    display: flex !important;
+    gap: 12px !important;
+    justify-content: center !important;
+    margin: 32px 0 !important;
+    width: 100% !important;
+}
+
+.otp-digit {
+    width: 50px !important;
+    height: 60px !important;
+    border-radius: 12px !important;
+    border: 2px solid rgba(255, 255, 255, 0.1) !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: white !important;
+    font-size: 1.5rem !important;
+    font-weight: 800 !important;
+    text-align: center !important;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    padding: 0 !important;
+    line-height: 60px !important;
+    display: inline-block !important;
+}
+
+.otp-digit:focus {
+    border-color: var(--primary) !important;
+    background: rgba(16, 185, 129, 0.1) !important;
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.2) !important;
+    outline: none !important;
+    transform: scale(1.1);
+}
+
+.light-mode .otp-digit {
+    background: #f1f5f9 !important;
+    border-color: #e2e8f0 !important;
+    color: #0f172a !important;
+}
+
+.light-mode .otp-digit:focus {
+    background: #ffffff !important;
+    border-color: var(--primary) !important;
+}
+
+@media (max-width: 480px) {
+    .otp-input-wrapper {
+        gap: 8px !important;
+    }
+
+    .otp-digit {
+        width: 42px !important;
+        height: 52px !important;
+        font-size: 1.3rem !important;
+        line-height: 52px !important;
     }
 }

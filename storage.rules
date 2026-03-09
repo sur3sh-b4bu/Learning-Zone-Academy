@@ -1,0 +1,123 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function authEmail() {
+      return signedIn() && request.auth.token.email is string
+        ? request.auth.token.email.lower()
+        : '';
+    }
+
+    function studentPath(uid) {
+      return /databases/(default)/documents/students/$(uid);
+    }
+
+    function studentExists(uid) {
+      return signedIn() && firestore.exists(studentPath(uid));
+    }
+
+    function studentData(uid) {
+      return firestore.get(studentPath(uid)).data;
+    }
+
+    function studentHasTruthyAdminFlag(flag) {
+      return flag == true
+        || (flag is string && (
+          flag.lower() == 'true'
+          || flag.lower() == '1'
+          || flag.lower() == 'yes'
+        ))
+        || (flag is int && flag == 1)
+        || (flag is float && flag == 1);
+    }
+
+    function adminFromStudentDoc() {
+      return signedIn()
+        && studentExists(request.auth.uid)
+        && (
+          studentHasTruthyAdminFlag(studentData(request.auth.uid).isAdmin)
+          || (
+            studentData(request.auth.uid).role is string
+            && (
+              studentData(request.auth.uid).role.lower() == 'admin'
+              || studentData(request.auth.uid).role.lower() == 'super admin'
+              || studentData(request.auth.uid).role.lower() == 'superadmin'
+            )
+          )
+        );
+    }
+
+    function isAdmin() {
+      return signedIn()
+        && (
+          request.auth.token.admin == true
+          || authEmail() == 'admin@gmail.com'
+          || adminFromStudentDoc()
+        );
+    }
+
+    function validPdfUpload() {
+      return request.resource != null
+        && request.resource.size < 30 * 1024 * 1024;
+    }
+
+    function validVideoUpload() {
+      return request.resource != null
+        && request.resource.size < 600 * 1024 * 1024;
+    }
+
+    function validImageUpload() {
+      return request.resource != null
+        && request.resource.size < 10 * 1024 * 1024;
+    }
+
+    function canWriteUpload() {
+      return signedIn();
+    }
+
+    match /pdfs/{fileName} {
+      allow read: if true;
+      allow create, update: if canWriteUpload() && validPdfUpload();
+      allow delete: if isAdmin();
+    }
+
+    match /pyqs/{fileName} {
+      allow read: if true;
+      allow create, update: if canWriteUpload() && validPdfUpload();
+      allow delete: if isAdmin();
+    }
+
+    match /course_syllabuses/{fileName} {
+      allow read: if true;
+      allow create, update: if canWriteUpload() && validPdfUpload();
+      allow delete: if isAdmin();
+    }
+
+    match /videos/{courseId}/lessons/{fileName} {
+      allow read: if true;
+      allow create, update: if canWriteUpload() && validVideoUpload();
+      allow delete: if isAdmin();
+    }
+
+    match /videos/{courseId}/lessons_resources/{fileName} {
+      allow read: if true;
+      allow create, update: if canWriteUpload() && validPdfUpload();
+      allow delete: if isAdmin();
+    }
+
+    match /thumbnails/{fileName} {
+      allow read: if true;
+      allow create, update: if canWriteUpload() && validImageUpload();
+      allow delete: if isAdmin();
+    }
+
+    match /{allPaths=**} {
+      allow read: if true;
+      allow create, update: if isAdmin() && request.resource != null && request.resource.size < 600 * 1024 * 1024;
+      allow delete: if isAdmin();
+    }
+  }
+}

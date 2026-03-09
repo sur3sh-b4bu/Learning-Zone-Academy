@@ -8,8 +8,13 @@
     <div class="nav-content">
         <!-- Logo Left -->
         <a href="/" class="logo" id="nav-logo">
-            <div class="logo-icon"><i class="fas fa-graduation-cap"></i></div>
-            <div class="logo-text">Gov<span>Learn</span></div>
+            <div class="logo-img-wrapper">
+                <img src="/logo1.png" alt="Nellai Learning Academy Logo" class="logo-img">
+            </div>
+            <div class="logo-content" style="display: flex; flex-direction: column; line-height: 1.1; gap: 1px;">
+                <div class="logo-main" id="logo-text-nellai">Nellai</div>
+                <div class="logo-sub">Learning Academy</div>
+            </div>
         </a>
 
         <!-- Links Center -->
@@ -31,6 +36,19 @@
                             class="fas fa-globe-asia"></i> Current Affairs</a>
                     <a href="/html/videos.html" data-link="videos" class="dropdown-item"><i
                             class="fas fa-play-circle"></i> Videos</a>
+                </div>
+            </li>
+            <li class="dropdown">
+                <a href="#" class="nav-item">
+                    <i class="fas fa-building"></i> Company <i class="fas fa-chevron-down"
+                        style="font-size: 0.8rem; margin-left: 4px;"></i>
+                </a>
+                <div class="dropdown-menu">
+                    <a href="/html/about.html" class="dropdown-item"><i class="fas fa-info-circle"></i> About Us</a>
+                    <a href="/html/contact.html" class="dropdown-item"><i class="fas fa-envelope"></i> Contact Us</a>
+                    <a href="/html/success-stories.html" class="dropdown-item"><i class="fas fa-award"></i> Success
+                        Stories</a>
+                    <a href="/html/vision.html" class="dropdown-item"><i class="fas fa-eye"></i> Our Vision</a>
                 </div>
             </li>
         </ul>
@@ -78,12 +96,18 @@
         <a href="/html/videos.html" data-link="videos" onclick="toggleNav()"><i class="fas fa-play-circle"></i> Video
             Lectures</a>
 
+        <div style="height: 1px; background: rgba(255,255,255,0.05); margin: 15px 0;"></div>
+        <a href="/html/about.html" onclick="toggleNav()"><i class="fas fa-info-circle"></i> About Us</a>
+        <a href="/html/contact.html" onclick="toggleNav()"><i class="fas fa-envelope"></i> Contact Us</a>
+        <a href="/html/success-stories.html" onclick="toggleNav()"><i class="fas fa-award"></i> Success Stories</a>
+        <a href="/html/vision.html" onclick="toggleNav()"><i class="fas fa-eye"></i> Our Vision</a>
+
         <div class="mobile-nav-footer" style="display: flex; gap: 12px; align-items: center;">
             <button type="button" class="theme-toggle" onclick="toggleTheme()"
                 style="width: 56px; height: 56px; border-radius: 20px; flex-shrink: 0;">
                 <i class="fas fa-moon"></i>
             </button>
-            <button type="button" class="btn-premium login-toggle-btn w-full"
+            <button type="button" class="btn-primary login-toggle-btn w-full"
                 onclick="toggleModal('login-modal'); toggleNav()">
                 <i class="fas fa-user"></i> Log In
             </button>
@@ -105,6 +129,11 @@
                 <label>Password</label>
                 <input type="password" id="login-password" placeholder="••••••••" required>
             </div>
+            <div style="text-align: right; margin-bottom: 20px;">
+                <a href="#" style="color: var(--primary); font-size: 0.85rem; font-weight: 600;"
+                    onclick="toggleModal('login-modal'); toggleModal('forgot-password-modal'); return false;">Forgot
+                    Password?</a>
+            </div>
             <button type="submit" class="btn-primary" style="width: 100%; margin-top: 10px;">Sign In</button>
         </form>
         <div class="social-divider">or</div>
@@ -117,29 +146,125 @@
 </div>
 
 <div id="signup-modal" class="modal-overlay">
-    <div class="modal">
+    <div class="modal" style="max-width: 500px; padding: 40px 32px;">
         <button type="button" class="modal-close" onclick="toggleModal('signup-modal')">&times;</button>
-        <h2 style="margin-bottom: 10px;">Create Account</h2>
-        <form id="signup-form">
-            <div class="form-group">
-                <label>Full Name</label>
-                <input type="text" id="signup-name" placeholder="John Doe" required>
+
+        <!-- Step 1: Registration Details -->
+        <div id="signup-step-1">
+            <h2 style="margin-bottom: 24px; font-size: 1.8rem;">Create Account</h2>
+            <form id="signup-form" onsubmit="event.preventDefault(); startSignupFlow();">
+                <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label>Full Name</label>
+                        <input type="text" id="signup-name" placeholder="John Doe" required>
+                    </div>
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label>Email Address</label>
+                        <input type="email" id="signup-email" placeholder="name@example.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="signup-password" placeholder="••••••••" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Phone Number</label>
+                        <input type="tel" id="signup-phone" placeholder="9876543210" required>
+                    </div>
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label>Educational Qualification</label>
+                        <input type="text" id="signup-qualification" placeholder="B.E Computer Science" required>
+                    </div>
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label>Detailed Address</label>
+                        <textarea id="signup-address" placeholder="Door No, Street, City, State, PIN"
+                            required></textarea>
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary" style="width: 100%; margin-top: 20px; height: 50px;">
+                    Send Verification OTP <i class="fas fa-paper-plane" style="margin-left: 8px;"></i>
+                </button>
+            </form>
+            <div class="social-divider">or</div>
+            <button type="button" class="google-btn" onclick="googleSignIn()">Sign up with Google</button>
+            <p style="margin-top: 24px; text-align: center; font-size: 0.9rem;">
+                Already have an account? <a href="#" style="color: var(--primary-green); font-weight: 600;"
+                    onclick="toggleModal('signup-modal'); toggleModal('login-modal'); return false;">Sign In</a>
+            </p>
+        </div>
+
+        <!-- Step 2: OTP Verification -->
+        <div id="signup-step-otp" style="display: none; text-align: center; padding: 20px 0;">
+            <div
+                style="width: 70px; height: 70px; background: var(--primary-light); color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 0 auto 24px;">
+                <i class="fas fa-shield-alt"></i>
             </div>
+            <h2 style="margin-bottom: 10px;">Verify Your Email</h2>
+            <p style="color: var(--text-muted); margin-bottom: 30px;">We've sent a 6-digit verification code to
+                <br><strong id="display-signup-email" style="color: var(--secondary);">email@example.com</strong>
+            </p>
+            <p id="signup-otp-validity-note" style="color: var(--text-muted); margin: -14px 0 20px; font-size: 0.9rem;">
+                OTP is valid up to 1 minute.
+            </p>
+            <p id="signup-otp-timer" style="color: var(--primary); margin: -10px 0 24px; font-weight: 700; font-size: 0.95rem;">
+                Time left: 01:00
+            </p>
+
+            <form id="otp-form" onsubmit="event.preventDefault(); verifySignupOTP();">
+                <div class="otp-input-wrapper"
+                    style="display: flex; gap: 10px; justify-content: center; margin-bottom: 30px;">
+                    <input type="text" class="otp-digit" maxlength="1" oninput="moveOTPFocus(this, 'next', 'signup')"
+                        onkeydown="moveOTPFocus(this, 'prev', 'signup')">
+                    <input type="text" class="otp-digit" maxlength="1" oninput="moveOTPFocus(this, 'next', 'signup')"
+                        onkeydown="moveOTPFocus(this, 'prev', 'signup')">
+                    <input type="text" class="otp-digit" maxlength="1" oninput="moveOTPFocus(this, 'next', 'signup')"
+                        onkeydown="moveOTPFocus(this, 'prev', 'signup')">
+                    <input type="text" class="otp-digit" maxlength="1" oninput="moveOTPFocus(this, 'next', 'signup')"
+                        onkeydown="moveOTPFocus(this, 'prev', 'signup')">
+                    <input type="text" class="otp-digit" maxlength="1" oninput="moveOTPFocus(this, 'next', 'signup')"
+                        onkeydown="moveOTPFocus(this, 'prev', 'signup')">
+                    <input type="text" class="otp-digit" maxlength="1" oninput="moveOTPFocus(this, 'next', 'signup')"
+                        onkeydown="moveOTPFocus(this, 'prev', 'signup')">
+                </div>
+                <input type="hidden" id="signup-otp" value="">
+                <button type="submit" class="btn-primary" style="width: 100%; height: 50px;">Verify & Complete
+                    Registration</button>
+                <p style="margin-top: 20px; font-size: 0.85rem; color: var(--text-muted);">
+                    Didn't get the code? <a href="#" onclick="resendSignupOTP(); return false;"
+                        style="color: var(--primary); font-weight: 600;">Resend Code</a>
+                </p>
+                <button type="button" onclick="goToSignupStep(1)"
+                    style="margin-top: 15px; background: none; border: none; color: var(--text-muted); cursor: pointer; text-decoration: underline;">Change
+                    Registration Details</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Forgot Password Modal -->
+<div id="forgot-password-modal" class="modal-overlay">
+    <div class="modal" style="max-width: 450px;">
+        <button type="button" class="modal-close" onclick="toggleModal('forgot-password-modal')">&times;</button>
+        <div style="text-align: center; margin-bottom: 30px;">
+            <div
+                style="width: 70px; height: 70px; background: rgba(16, 185, 129, 0.1); color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 0 auto 20px;">
+                <i class="fas fa-key"></i>
+            </div>
+            <h2 style="margin-bottom: 10px;">Reset Password</h2>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">Enter your email to receive a secure reset link.</p>
+        </div>
+        <form id="forgot-password-form" onsubmit="event.preventDefault(); window.sendResetLink();">
             <div class="form-group">
                 <label>Email Address</label>
-                <input type="email" id="signup-email" placeholder="name@example.com" required>
+                <input type="email" id="forgot-email" placeholder="name@example.com" required>
             </div>
-            <div class="form-group">
-                <label>Password</label>
-                <input type="password" id="signup-password" placeholder="••••••••" required>
-            </div>
-            <button type="submit" class="btn-primary" style="width: 100%; margin-top: 10px;">Create Account</button>
+            <button type="submit" class="btn-primary" style="width: 100%; margin-top: 20px; height: 50px;">
+                Send Reset Link <i class="fas fa-paper-plane" style="margin-left: 8px;"></i>
+            </button>
         </form>
-        <div class="social-divider">or</div>
-        <button type="button" class="google-btn" onclick="googleSignIn()">Sign up with Google</button>
         <p style="margin-top: 24px; text-align: center; font-size: 0.9rem;">
-            Already have an account? <a href="#" style="color: var(--primary-green); font-weight: 600;"
-                onclick="toggleModal('signup-modal'); toggleModal('login-modal'); return false;">Sign In</a>
+            Remembered? <a href="#" style="color: var(--primary); font-weight: 600;"
+                onclick="toggleModal('forgot-password-modal'); toggleModal('login-modal'); return false;">Back to Sign
+                In</a>
         </p>
     </div>
 </div>

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Current Affairs | Gov Learn - Prep Hub</title>
+    <title>Current Affairs | NellaiLearningAcademy - Prep Hub</title>
     <link rel="stylesheet" href="../css/common.css">
     <link rel="stylesheet" href="../css/navigation.css">
     <link rel="stylesheet" href="../css/footer.css">
@@ -37,20 +37,15 @@
             <!-- QUIZ MODE -->
             <div id="catab-quiz" class="quiz-container glass" style="display: none;">
                 <div id="quiz-screen">
-                    <div class="badge badge-pro" style="margin-bottom: 20px;">QUESTION 1/5</div>
-                    <div class="quiz-q" id="q-text">Which Indian state has recently launched the Education for All
-                        scheme to improve rural literacy?</div>
-                    <div id="q-options">
-                        <div class="quiz-opt" onclick="checkAns(this, false)">Tamil Nadu</div>
-                        <div class="quiz-opt" onclick="checkAns(this, true)">Madhya Pradesh</div>
-                        <div class="quiz-opt" onclick="checkAns(this, false)">Kerala</div>
-                        <div class="quiz-opt" onclick="checkAns(this, false)">Maharashtra</div>
-                    </div>
+                    <div id="quiz-progress-badge" class="badge badge-pro" style="margin-bottom: 20px;">Loading...</div>
+                    <div class="quiz-q" id="q-text">Loading daily quiz...</div>
+                    <div id="q-options"></div>
                     <div
                         style="margin-top: 32px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;">
-                        <span style="color: rgba(255, 255, 255, 0.8); font-weight: 600;"><i class="fas fa-clock"></i>
-                            Time: 24s</span>
-                        <button class="btn-primary" onclick="nextQ()" style="flex: 1; min-width: 150px;">Next
+                        <span id="quiz-meta" style="color: rgba(255, 255, 255, 0.8); font-weight: 600;"><i
+                                class="fas fa-clock"></i> Time: --s</span>
+                        <button id="quiz-next-btn" class="btn-primary" onclick="nextQ()"
+                            style="flex: 1; min-width: 150px;" disabled>Next
                             Question <i class="fas fa-arrow-right"></i></button>
                     </div>
                 </div>
@@ -71,6 +66,235 @@
     <script>
         const params = new URLSearchParams(window.location.search);
         const startMode = params.get('mode');
+        const DAILY_QUIZ_DOC_ID = 'daily_quiz';
+        const DAILY_QUIZ_OPTION_KEYS = ['A', 'B', 'C', 'D'];
+
+        const fallbackDailyQuiz = [
+            {
+                text: 'Which Indian state has recently launched the Education for All scheme to improve rural literacy?',
+                options: ['Tamil Nadu', 'Madhya Pradesh', 'Kerala', 'Maharashtra'],
+                correctIndex: 1
+            },
+            {
+                text: 'Which organization launched Chandrayaan-3?',
+                options: ['DRDO', 'ISRO', 'BARC', 'HAL'],
+                correctIndex: 1
+            },
+            {
+                text: 'The PM-KISAN scheme directly benefits which group?',
+                options: ['Industrial workers', 'Small and marginal farmers', 'College students', 'Retired employees'],
+                correctIndex: 1
+            },
+            {
+                text: 'Where is the headquarters of the Reserve Bank of India?',
+                options: ['Mumbai', 'Delhi', 'Chennai', 'Kolkata'],
+                correctIndex: 0
+            },
+            {
+                text: 'How many members are there in the Rajya Sabha (maximum strength)?',
+                options: ['230', '238', '245', '250'],
+                correctIndex: 3
+            }
+        ];
+
+        const quizState = {
+            questions: [],
+            currentIndex: 0,
+            score: 0,
+            answered: false,
+            completed: false,
+            timerSeconds: 30,
+            remainingSeconds: 30,
+            timerHandle: null
+        };
+
+        function safeQuizGet(id) {
+            return document.getElementById(id);
+        }
+
+        function clearQuizTimer() {
+            if (quizState.timerHandle) {
+                clearInterval(quizState.timerHandle);
+                quizState.timerHandle = null;
+            }
+        }
+
+        function updateQuizMeta() {
+            const metaEl = safeQuizGet('quiz-meta');
+            if (!metaEl) return;
+            const total = quizState.questions.length || 5;
+            metaEl.innerHTML = `<i class="fas fa-clock"></i> Time: ${Math.max(quizState.remainingSeconds, 0)}s &nbsp; <i class="fas fa-bullseye"></i> Score: ${quizState.score}/${total}`;
+        }
+
+        function normalizeDailyQuizQuestion(rawQuestion) {
+            if (!rawQuestion || typeof rawQuestion !== 'object') return null;
+            const optionsRaw = rawQuestion.options || {};
+            const optionValues = [
+                String(optionsRaw.A || rawQuestion.optionA || '').trim(),
+                String(optionsRaw.B || rawQuestion.optionB || '').trim(),
+                String(optionsRaw.C || rawQuestion.optionC || '').trim(),
+                String(optionsRaw.D || rawQuestion.optionD || '').trim()
+            ];
+            const text = String(rawQuestion.text || rawQuestion.question || '').trim();
+            const answer = String(rawQuestion.correct || rawQuestion.answer || 'A').trim().toUpperCase();
+            const correctIndex = DAILY_QUIZ_OPTION_KEYS.indexOf(answer);
+
+            if (!text) return null;
+            if (optionValues.some(opt => !opt)) return null;
+            if (correctIndex < 0) return null;
+
+            return { text, options: optionValues, correctIndex };
+        }
+
+        function renderQuizResult() {
+            quizState.completed = true;
+            clearQuizTimer();
+
+            const badgeEl = safeQuizGet('quiz-progress-badge');
+            const qTextEl = safeQuizGet('q-text');
+            const optionsEl = safeQuizGet('q-options');
+            const nextBtn = safeQuizGet('quiz-next-btn');
+
+            if (badgeEl) badgeEl.textContent = 'QUIZ COMPLETE';
+            if (qTextEl) qTextEl.textContent = `Great effort. Your score: ${quizState.score}/${quizState.questions.length}`;
+            if (optionsEl) {
+                optionsEl.innerHTML = `
+                    <div class="quiz-opt correct" style="cursor: default;">
+                        You answered ${quizState.score} out of ${quizState.questions.length} questions correctly.
+                    </div>
+                `;
+            }
+            if (nextBtn) {
+                nextBtn.disabled = false;
+                nextBtn.innerHTML = 'Restart Quiz <i class="fas fa-rotate-right"></i>';
+            }
+            quizState.remainingSeconds = 0;
+            updateQuizMeta();
+        }
+
+        function lockCurrentQuestionAsTimedOut() {
+            if (quizState.answered || quizState.completed) return;
+            quizState.answered = true;
+            clearQuizTimer();
+
+            const currentQuestion = quizState.questions[quizState.currentIndex];
+            const optionEls = Array.from(document.querySelectorAll('#q-options .quiz-opt'));
+            optionEls.forEach((optEl, idx) => {
+                optEl.style.pointerEvents = 'none';
+                if (idx === currentQuestion.correctIndex) optEl.classList.add('correct');
+            });
+            const nextBtn = safeQuizGet('quiz-next-btn');
+            if (nextBtn) nextBtn.disabled = false;
+            quizState.remainingSeconds = 0;
+            updateQuizMeta();
+        }
+
+        function startQuestionTimer() {
+            clearQuizTimer();
+            quizState.remainingSeconds = quizState.timerSeconds;
+            updateQuizMeta();
+
+            quizState.timerHandle = setInterval(() => {
+                quizState.remainingSeconds -= 1;
+                if (quizState.remainingSeconds <= 0) {
+                    quizState.remainingSeconds = 0;
+                    clearQuizTimer();
+                    lockCurrentQuestionAsTimedOut();
+                }
+                updateQuizMeta();
+            }, 1000);
+        }
+
+        function renderCurrentQuestion() {
+            if (!quizState.questions.length) return;
+
+            const totalQuestions = quizState.questions.length;
+            const currentQuestion = quizState.questions[quizState.currentIndex];
+            const badgeEl = safeQuizGet('quiz-progress-badge');
+            const qTextEl = safeQuizGet('q-text');
+            const optionsEl = safeQuizGet('q-options');
+            const nextBtn = safeQuizGet('quiz-next-btn');
+
+            quizState.answered = false;
+            quizState.completed = false;
+
+            if (badgeEl) badgeEl.textContent = `QUESTION ${quizState.currentIndex + 1}/${totalQuestions}`;
+            if (qTextEl) qTextEl.textContent = currentQuestion.text;
+            if (optionsEl) {
+                optionsEl.innerHTML = '';
+                currentQuestion.options.forEach((optionText, optionIndex) => {
+                    const optionBtn = document.createElement('div');
+                    optionBtn.className = 'quiz-opt';
+                    optionBtn.textContent = optionText;
+                    optionBtn.setAttribute('role', 'button');
+                    optionBtn.tabIndex = 0;
+                    optionBtn.onclick = () => checkAns(optionBtn, optionIndex === currentQuestion.correctIndex, optionIndex);
+                    optionBtn.onkeydown = (evt) => {
+                        if (evt.key === 'Enter' || evt.key === ' ') {
+                            evt.preventDefault();
+                            checkAns(optionBtn, optionIndex === currentQuestion.correctIndex, optionIndex);
+                        }
+                    };
+                    optionsEl.appendChild(optionBtn);
+                });
+            }
+
+            if (nextBtn) {
+                nextBtn.disabled = true;
+                nextBtn.innerHTML = quizState.currentIndex === totalQuestions - 1
+                    ? 'View Result <i class="fas fa-flag-checkered"></i>'
+                    : 'Next Question <i class="fas fa-arrow-right"></i>';
+            }
+            startQuestionTimer();
+        }
+
+        async function loadDailyQuizFromFirestore() {
+            const badgeEl = safeQuizGet('quiz-progress-badge');
+            const qTextEl = safeQuizGet('q-text');
+            const optionsEl = safeQuizGet('q-options');
+            const nextBtn = safeQuizGet('quiz-next-btn');
+            if (badgeEl) badgeEl.textContent = 'LOADING QUIZ...';
+            if (qTextEl) qTextEl.textContent = 'Fetching today\'s 5 questions...';
+            if (optionsEl) optionsEl.innerHTML = '<div class="quiz-opt" style="cursor: default;">Please wait...</div>';
+            if (nextBtn) nextBtn.disabled = true;
+
+            try {
+                let questions = [];
+                let timerSeconds = 30;
+
+                const doc = await db.collection('settings').doc(DAILY_QUIZ_DOC_ID).get();
+                if (doc.exists) {
+                    const data = doc.data() || {};
+                    if (Array.isArray(data.questions)) {
+                        questions = data.questions
+                            .map(normalizeDailyQuizQuestion)
+                            .filter(Boolean)
+                            .slice(0, 5);
+                    }
+                    const configuredTimer = Number(data.timerSeconds);
+                    if (Number.isFinite(configuredTimer) && configuredTimer >= 10 && configuredTimer <= 180) {
+                        timerSeconds = Math.round(configuredTimer);
+                    }
+                }
+
+                if (questions.length === 0) {
+                    questions = fallbackDailyQuiz;
+                }
+
+                quizState.questions = questions;
+                quizState.currentIndex = 0;
+                quizState.score = 0;
+                quizState.timerSeconds = timerSeconds;
+                renderCurrentQuestion();
+            } catch (error) {
+                console.warn('Failed to load daily quiz from Firestore:', error);
+                quizState.questions = fallbackDailyQuiz;
+                quizState.currentIndex = 0;
+                quizState.score = 0;
+                quizState.timerSeconds = 30;
+                renderCurrentQuestion();
+            }
+        }
 
         function switchCATab(tab, el) {
             document.querySelectorAll('.ca-tab').forEach(t => t.classList.remove('active'));
@@ -82,27 +306,60 @@
             if (tab === 'quiz') {
                 pdfContainer.style.display = 'none';
                 quizContainer.style.display = 'block';
+                loadDailyQuizFromFirestore();
             } else {
                 pdfContainer.style.display = 'grid';
                 quizContainer.style.display = 'none';
+                clearQuizTimer();
                 fetchAndRenderCAPDFs(tab);
             }
         }
 
-        function checkAns(el, isCorrect) {
-            if (isCorrect) el.classList.add('correct');
-            else el.classList.add('wrong');
-            const opts = el.parentElement.children;
-            for (let opt of opts) opt.style.pointerEvents = 'none';
+        function checkAns(el, isCorrect, selectedIndex) {
+            if (quizState.answered || quizState.completed) return;
+            quizState.answered = true;
+            clearQuizTimer();
+
+            const currentQuestion = quizState.questions[quizState.currentIndex];
+            const optionEls = Array.from(document.querySelectorAll('#q-options .quiz-opt'));
+            optionEls.forEach((optEl, idx) => {
+                optEl.style.pointerEvents = 'none';
+                if (idx === currentQuestion.correctIndex) optEl.classList.add('correct');
+            });
+
+            if (!isCorrect && optionEls[selectedIndex]) {
+                optionEls[selectedIndex].classList.add('wrong');
+            }
+            if (isCorrect) quizState.score += 1;
+
+            const nextBtn = safeQuizGet('quiz-next-btn');
+            if (nextBtn) nextBtn.disabled = false;
+            updateQuizMeta();
         }
 
         function nextQ() {
-            alert("This is a demo question. Register for PRO to access 500+ Daily Quizzes!");
+            if (!quizState.questions.length) return;
+            if (quizState.completed) {
+                quizState.currentIndex = 0;
+                quizState.score = 0;
+                renderCurrentQuestion();
+                return;
+            }
+            if (!quizState.answered) {
+                lockCurrentQuestionAsTimedOut();
+                return;
+            }
+            if (quizState.currentIndex < quizState.questions.length - 1) {
+                quizState.currentIndex += 1;
+                renderCurrentQuestion();
+                return;
+            }
+            renderQuizResult();
         }
 
         window.onload = () => {
             if (startMode === 'quiz') {
-                document.querySelectorAll('.ca-tab')[3].click();
+                switchCATab('quiz', document.querySelectorAll('.ca-tab')[3]);
             } else {
                 switchCATab('all', document.querySelector('.ca-tab'));
             }
